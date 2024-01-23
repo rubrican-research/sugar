@@ -1,4 +1,4 @@
-unit sugar.http;
+unit sugar.httphelper;
 
 {$mode ObjFPC}{$H+}
 {$modeswitch typehelpers}

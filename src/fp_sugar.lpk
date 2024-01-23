@@ -14,8 +14,8 @@
     </CompilerOptions>
     <Files>
       <Item>
-        <Filename Value="mod\sugar.http.pas"/>
-        <UnitName Value="sugar.http"/>
+        <Filename Value="mod\sugar.httphelper.pas"/>
+        <UnitName Value="sugar.httphelper"/>
       </Item>
       <Item>
         <Filename Value="mod\sugar.utils.pas"/>
