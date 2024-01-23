@@ -1,0 +1,79 @@
+object DBModule: TDBModule
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  Height = 378
+  HorizontalOffset = 963
+  VerticalOffset = 207
+  Width = 353
+  object libloader: TSQLDBLibraryLoader
+    Enabled = False
+    ConnectionType = 'SQLite3'
+    LibraryName = 'libsqlite3.so'
+    Left = 16
+    Top = 16
+  end
+  object myDB: TSQLite3Connection
+    Connected = False
+    LoginPrompt = False
+    DatabaseName = 'nrcc.db'
+    KeepConnection = False
+    Params.Strings = (
+      'AlwaysUseBigint=1'
+    )
+    Transaction = transaction
+    AlwaysUseBigint = True
+    Left = 16
+    Top = 80
+  end
+  object transaction: TSQLTransaction
+    Active = False
+    Database = myDB
+    Left = 88
+    Top = 80
+  end
+  object qUpdateID: TSQLQuery
+    FieldDefs = <>
+    Database = myDB
+    Transaction = transaction
+    SQL.Strings = (
+      'INSERT INTO sequences'
+      '(name, curr_id)'
+      'VALUES'
+      '(:name, :start_id)'
+      'ON CONFLICT (name) do'
+      'UPDATE set curr_id = curr_id + 1;'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'name'
+        ParamType = ptInput
+      end    
+      item
+        DataType = ftUnknown
+        Name = 'start_id'
+        ParamType = ptInput
+      end>
+    Macros = <>
+    Left = 208
+    Top = 80
+  end
+  object qGetNewID: TSQLQuery
+    FieldDefs = <>
+    Database = myDB
+    Transaction = transaction
+    SQL.Strings = (
+      'SELECT curr_id from sequences'
+      'WHERE name = :name'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'name'
+        ParamType = ptInput
+      end>
+    Macros = <>
+    Left = 208
+    Top = 152
+  end
+end

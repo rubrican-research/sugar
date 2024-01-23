@@ -10,7 +10,8 @@ interface
 uses
      sugar.http, sugar.utils, sugar.uihelper, sugar.collections, sugar.logger, 
      sugar.profiler, sugar.htmlbuilder, sugar.csshelper, sugar.htmlfactory, 
-     sugar.textfiler, sugar.threadwriter, LazarusPackageIntf;
+     sugar.textfiler, sugar.threadwriter, sugar.sqlitehelper, 
+     LazarusPackageIntf;
 
 implementation
 

@@ -57,6 +57,10 @@
         <Filename Value="mod\sugar.threadwriter.pas"/>
         <UnitName Value="sugar.threadwriter"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.sqlitehelper.pas"/>
+        <UnitName Value="sugar.sqlitehelper"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
