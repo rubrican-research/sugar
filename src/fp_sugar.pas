@@ -11,7 +11,9 @@ uses
      sugar.httphelper, sugar.utils, sugar.uihelper, sugar.collections, 
      sugar.logger, sugar.profiler, sugar.htmlbuilder, sugar.csshelper, 
      sugar.htmlfactory, sugar.textfiler, sugar.threadwriter, 
-     sugar.sqlitehelper, LazarusPackageIntf;
+     sugar.sqlitehelper, sugar.jsonlib, sugar.ddldatatypes, 
+     sugar.pascalcodemodel, sugar.ormgen, sugar.ddlmodel, sugar.querybuilder, 
+     sugar.templater, sugar.modelbase, sugar.jsondb, LazarusPackageIntf;
 
 implementation
 

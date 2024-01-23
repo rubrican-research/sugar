@@ -61,6 +61,42 @@
         <Filename Value="mod\sugar.sqlitehelper.pas"/>
         <UnitName Value="sugar.sqlitehelper"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsonlib.pas"/>
+        <UnitName Value="sugar.jsonlib"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.ddldatatypes.pas"/>
+        <UnitName Value="sugar.ddldatatypes"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.pascalcodemodel.pas"/>
+        <UnitName Value="sugar.pascalcodemodel"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.ormgen.pas"/>
+        <UnitName Value="sugar.ormgen"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.ddlmodel.pas"/>
+        <UnitName Value="sugar.ddlmodel"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.querybuilder.pas"/>
+        <UnitName Value="sugar.querybuilder"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.templater.pas"/>
+        <UnitName Value="sugar.templater"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.modelbase.pas"/>
+        <UnitName Value="sugar.modelbase"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsondb.pas"/>
+        <UnitName Value="sugar.jsondb"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

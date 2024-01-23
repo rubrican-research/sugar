@@ -11,7 +11,7 @@ unit sugar.utils;
 interface
 
 uses
-     Classes, SysUtils, fpjson;
+     Classes, SysUtils, fpjson, sugar.collections;
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;
 function appendURL(_paths: array of string): string;
@@ -67,12 +67,87 @@ function FileToBase64(_fileName: string): string;
 procedure Base64ToFile(_b64String: string; _fileName: string);
 
 
+{Copies the array and returns length}
+function copyStringArray(const _source: array of string;
+    var _dest: TStringArray): integer;
+function copyVariantArray(const _source: array of variant;
+    var _dest: TVariantArray): integer;
+function copyStringToVariantArray(const _str: string; var _dest: TVariantArray): integer;
+function getCommaSeparatedString(const _list: TStringArray): string;
+function getCommaSeparatedString(const _list: TJSONArray): string;
+
+function getDelimitedString(const _list: TStringArray; const _delim: string = ','): string; overload;
+function getDelimitedString(const _list: TJSONArray; const _delim: string = ','): string; overload;
+
+type
+    THtmlTimeMode = (useLocalTime, useUniversalTime);
+
+{Check what Time mode is being used}
+function htmlTimeMode: THtmlTimeMode;
+
+{Forces the htmlDateTime function to use local time}
+procedure htmlUseLocalTime;
+{Forces the htmlDateTime function to use universal time}
+procedure htmlUseUniversalTime;
+
+
+function htmlDateTime: string;
+function htmlDateTime(_tstamp: TDateTime): string;
+function htmlDate: string;
+function htmlDate(_date: TDateTime): string;
+function htmlTime: string;
+function htmlTime(_time: TDateTime): string;
+function isoTime(_time:TDateTime): string;
+
+
+function date(_isoDate: string): TDateTime; overload;
+function time(_isoTime: string): TDateTime; overload;
+
+{somehow autodetect if it is date time, date or time. ...}
+function readHtmlDateTime(_htmlDate: string): TDateTime;
+
+function numToText(const _num: integer): string;
+
+{Data validation functions}
+function isValidEmail(const _email: string): boolean;
+function isValidDate(const _date: string): boolean;
+function isValidDateTime(const _datetime: string): boolean;
+function isDecimal(const _num: string): boolean;
+
+{Checks if the passed jsonData is a valid number and returns it}
+function asNumber(_j: TJSONData; _default: integer = 0) : integer;
+
+{String manipulation}
+{Searches for _word in _source and returns true or false}
+function hasWord(_word: string; _source: string): boolean;
+function paddedNum(const _num: word; const _padCount: word = 3): string;
+function limitWords(_str: string; _limit: word): string;
+
+{immediate if. If condition is true, returns first parameter else returns second}
+function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;
+
+{Data functions}
+
+{Compares _prev and _current to see if the change is within plus or minus _tolerancePercentage
+default tolerance is 10%}
+function hasDataChanged(_prev: real; _current: real; _tolerancePercentage: real = 0.1): boolean;
+
+function number(_s: string): integer;
+function float(_s: string): extended;
+
+{initializes variables}
+function initStr(const _val: string; _default: string): string;
+
+{returns the float value formated as a date without separators}
+function yyyymmdd(const _float: double): string; overload;
+function yyyymmdd(const _dt: TDatetime): string; overload;
+
 
 implementation
 uses
      fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
-     math, base64, LazStringUtils;
+     math, base64, LazStringUtils, DateUtils, sugar.logger;
 	{nsort, MarkdownUtils,}
 
 var
@@ -478,6 +553,508 @@ begin
 	end;
 end;
 
+function copyStringArray(const _source: array of string;
+    var _dest: TStringArray): integer;
+var
+    i: integer;
+begin
+    Result := Length(_source); {return length of array}
+    setLength(_dest, Result);
+    for i := 0 to Result - 1 do
+        _dest[i] := Trim(_source[i]);
+end;
+
+function copyVariantArray(const _source: array of variant;
+    var _dest: TVariantArray): integer;
+var
+    i: integer;
+begin
+    Result := Length(_source); {return length of array}
+    setLength(_dest, Result);
+    for i := 0 to Result - 1 do
+        _dest[i] := _source[i];
+
+end;
+
+function copyStringToVariantArray(const _str: string;
+    var _dest: TVariantArray): integer;
+var
+    i: integer;
+    len: integer;
+    _sArray: TStringArray;
+begin
+    _sArray := _str.split(',');
+    len := Length(_sArray);
+    setLength(_dest, len);
+    for i := 0 to len - 1 do
+        _dest[i] := Trim(_sArray[i]);
+
+    Result := len;
+end;
+
+function getCommaSeparatedString(const _list: TStringArray): string;
+begin
+    Result := getDelimitedString(_list, ',');
+end;
+
+function getCommaSeparatedString(const _list: TJSONArray): string;
+begin
+    Result:= getDelimitedString(_list, ',');
+end;
+
+function getDelimitedString(const _list: TStringArray; const _delim: string): string;
+var
+    _addComma: boolean;
+    _item: string;
+begin
+    Result := '';
+    _addComma := False;
+    for _item in _list do
+    begin
+        if _addComma then
+            Result := Result + _delim
+        else
+            _addComma := True;
+
+        Result := Result + _item;
+    end;
+end;
+
+function getDelimitedString(const _list: TJSONArray; const _delim: string
+	): string;
+var
+	member: TJSONEnum;
+    _addDelim: boolean = false;
+begin
+    Result:= '';
+    for member in _list do
+    begin
+        if _addDelim then
+            Result:= Result + _delim
+        else
+            _addDelim:= true;
+
+        case member.Value.JSONType of
+            jtUnknown, jtNull:
+                ; {do nothing}
+
+            jtNumber, jtString, jtBoolean:
+                Result:= Result + member.value.AsString;
+
+            jtArray, jtObject:
+                Result:= Result + member.value.AsJSON;
+        end;
+	end;
+end;
+
+var
+    myHtmlTimeMode: THtmlTimeMode;
+
+function htmlTimeMode: THtmlTimeMode;
+begin
+    Result:= myHtmlTimeMode;
+end;
+
+procedure htmlUseLocalTime;
+begin
+    myHtmlTimeMode:= useLocalTime;
+end;
+
+procedure htmlUseUniversalTime;
+begin
+    myHtmlTimeMode:= useUniversalTime;
+end;
+
+function htmlDateTime: string;
+begin
+    Result := htmlDateTime(now);  // htmlDateTime(now);
+end;
+
+function htmlDateTime(_tstamp: TDateTime): string;
+begin
+    //Result := DateToISO8601(now, (htmlTimeMode = useUniversalTime));
+    Result := htmlDate(_tstamp) + 'T' + htmlTime(_tstamp);
+end;
+
+function htmlDate: string;
+begin
+    Result := htmlDate(Now);
+end;
+
+function htmlDate(_date: TDateTime): string;
+begin
+    Result := FormatDateTime('yyyy-mm-dd', _date);
+end;
+
+function htmlTime: string;
+begin
+    Result := htmlTime(Now);
+end;
+
+function htmlTime(_time: TDateTime): string;
+begin
+    case myHtmlTimeMode of
+        useLocalTime:      Result := FormatDateTime('HH:nn:ss', _time);    {Need to include timezone parsing}
+        useUniversalTime:  Result := FormatDateTime('HH:nn:ss', LocalTimeToUniversal(_time));
+    end;
+end;
+
+function isoTime(_time: TDateTime): string;
+begin
+    Result:= htmlDateTime(_time);
+    Result:= Result.Substring((Pos('T', Result)));
+end;
+
+function date(_isoDate: string): TDateTime;
+var
+    _parts: TStringArray;
+    _dt: TStringArray;
+    _tm: TDateTime;
+
+    y: integer = 1900;
+    m: integer = 1;
+    d: integer = 1;
+    h: integer = 0;
+    n: integer = 0;
+    s: integer = 0;
+    ms: integer= 0;
+begin
+    _parts:= toStringArray(_isoDate, 'T');
+    if length(_parts) >= 1 then
+    begin
+        _dt:= toStringArray(_parts[0], '-');
+        if length(_parts) = 2 then
+        begin
+            {Get the time}
+            _tm:= time(_parts[1]);
+		end;
+
+        if length(_dt) >= 3 then
+        begin
+            y:= number(_dt[0]);
+            m:= number(_dt[1]);
+            d:= number(_dt[2]);
+		end;
+	end;
+
+    if TryEncodeDate(y, m, d, Result) then
+        {Join the date and time together}
+        Result:= ComposeDateTime(Result, _tm)
+    else
+        Result:= EncodeDateTime(1900, 1, 1, 0, 0, 0, 0);
+end;
+
+function time(_isoTime: string): TDateTime;
+var
+  h: integer = 0;
+  n: integer = 0;
+  s: integer = 0;
+  ms: integer= 0;
+  _tm: TStringArray;
+begin
+    _tm := toStringArray(_isoTime, ':');
+    if length(_tm) >= 3 then
+    begin
+        h:= number(_tm[0]);
+        n:= number(_tm[1]);
+        s:= number(_tm[2]);
+        if length(_tm) = 4 then ms := number(_tm[3]);
+	end;
+
+    if not TryEncodeTime(h, n, s, ms, Result) then
+        Result:= EncodeTime(0,0,0,0);
+end;
+
+
+function readHtmlDateTime_not_used(_htmlDate: string): TDateTime;
+begin
+    TryISO8601ToDate(_htmlDate, Result, (htmlTimeMode = useUniversalTime));
+end;
+
+function readHtmlDateTime(_htmlDate: string): TDateTime;
+{ I am keeping this because this I really enjoyed writing this little procedure }
+type
+    DecodeStage = (dcNone, dcYear, dcMonth, dcDay, dcHours, dcMinutes,
+        dcSeconds, dcTimeZone);
+var
+    _stage: DecodeStage = dcNone;
+
+    _endDelims: array[DecodeStage] of string = (
+        {None}      '',
+        {Year}      '-',
+        {Month}     '-',
+        {Date}      'T',
+        {Hours}     ':',
+        {Minutes}   ':',
+        {Seconds}   'Z+-',
+        {TimeZone}  '');
+
+    Y, M, D, H, N, S, T: string;
+    i, len: integer;
+    c: char;
+    proceed: boolean;
+
+    function _isValid(_target: string): boolean;
+    begin
+        case _stage of
+            dcNone:
+            Result:= true;
+
+            dcYear:
+            Result := (Length(_target) < 5); {Year cannot be greater than 4}
+
+            dcMonth, dcDay, dcHours, dcMinutes, dcSeconds:
+            Result := (Length(_target) < 3);
+
+            dcTimeZone:
+            Result:= (Length(_target)<6); {+00:00}
+        end;
+    end;
+
+    function _decodeChar(var _target: string; _c: char): boolean;
+    begin
+        Result:= true;
+        if pos(_c,_endDelims[_stage]) > 0 then
+            Inc(_stage)
+        else
+        begin
+            _target := _target + _c;
+            Result  := _isValid(_target);
+        end;
+    end;
+
+begin
+    Result := TDateTime(Math.MaxDouble); //( = NullDate. Repeating this here to avoid dependency on unit datetimectrls;)
+    len := Length(_htmlDate);
+    _stage := dcYear;
+
+    for i := 1 to len do
+    begin
+        c := _htmlDate[i];
+        case _stage of
+            dcNone: ;
+            dcYear:    proceed:= _decodeChar(Y, c);
+            dcMonth:   proceed:= _decodeChar(M, c);
+            dcDay:     proceed:= _decodeChar(D, c);
+            dcHours:   proceed:= _decodeChar(H, c);
+            dcMinutes: proceed:= _decodeChar(N, c);
+            dcSeconds: proceed:= _decodeChar(S, c);
+            dcTimeZone:proceed:= _decodeChar(T, c);
+        end;
+
+        if not proceed then break;
+    end;
+
+    if proceed then
+    begin
+        // writeln('Y=',Y, ' M=',M,' D=',D,' H=',H,' N=',N,' S=',S);
+        if H.isEmpty then
+            H := '00';
+        if N.isEmpty then
+            N := '00';
+        if S.isEmpty then
+            S := '00';
+        if T.isEmpty then
+           T:='+0:00';
+        try
+            Result:= EncodeDateTime(Y.toInteger, M.ToInteger, D.ToInteger, H.ToInteger, N.ToInteger, S.ToInteger, 0);
+            if myHtmlTimeMode = useUniversalTime then
+                Result := UniversalTimeToLocal(Result);
+        except
+            on E: Exception do Log('readHtmlDateTime():: ' + e.Message);
+        end;
+    end
+    else
+        Log('readHtmlDateTime():: Could not parse _htmlDate: ' + _htmlDate);
+end;
+
+
+function numToText(const _num: integer): string;
+begin
+    Result := '';
+    case _num of
+        0: Result := 'zero';
+        1: Result := 'one';
+        2: Result := 'two';
+        3: Result := 'three';
+        4: Result := 'four';
+        5: Result := 'five';
+        6: Result := 'six';
+        7: Result := 'seven';
+        8: Result := 'eight';
+        9: Result := 'nine';
+        10: Result := 'ten';
+        11: Result := 'eleven';
+        12: Result := 'twelve';
+        13: Result := 'thirteen';
+        14: Result := 'fourteen';
+        15: Result := 'fifteen';
+        16: Result := 'sixteen';
+        17: Result := 'seventeen';
+        18: Result := 'eighteen';
+        19: Result := 'nineteen';
+        20: Result := 'twenty';
+    end;
+end;
+
+function isValidEmail(const _email: string): boolean;
+begin
+    with TRegExpr.Create('^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$') do
+    begin
+        Result := Exec(_email);
+        Free;
+    end;
+end;
+
+function isValidDate(const _date: string): boolean;
+begin
+    Result := True;
+    try
+        StrToDate(_date);
+    except
+        Result := False;
+    end;
+end;
+
+function isValidDateTime(const _datetime: string): boolean;
+begin
+    Result := True;
+    try
+        StrToDateTime(_datetime);
+    except
+        Result := False;
+    end;
+end;
+
+function isDecimal(const _num: string): boolean;
+begin
+    if _num.isEmpty then
+        Result:= false
+    else
+    begin
+        _num.Replace(DefaultFormatSettings.DecimalSeparator, '');
+        Result:= isNumber(_num.Replace('.', '').Replace(DefaultFormatSettings.DecimalSeparator, ''));
+	end;
+end;
+
+function asNumber(_j: TJSONData; _default: integer): integer;
+begin
+  if _j.JSONType = jtNumber then
+  begin
+      //Log('_j is a number');
+      Result:= _j.asInteger
+  end
+  else
+  begin
+      if isDecimal(_j.asString) then
+      begin
+        //Log('_j is a string but is a number');
+        Result:= strToInt(_j.asString);
+	  end
+	  else
+      begin
+          //Log('_j is is not a number so applying default');
+          Result:=_default;
+	  end;
+  end;
+end;
+
+function hasWord(_word: string; _source: string): boolean;
+begin
+    with TRegExpr.Create('\b' + _word + '\b') do
+    begin
+        Result := Exec(_source);
+        Free;
+    end;
+end;
+
+function paddedNum(const _num: word; const _padCount: word = 3): string;
+var
+  _fmtStr: string;
+begin
+    Result:= AddChar('0',_num.ToString, _padCount);
+end;
+
+function limitWords(_str: string; _limit: word): string;
+var
+    wPos: DWord;
+begin
+    wPos:= Pred(WordPosition(_limit, _str,StdWordDelims));
+    Result:= LeftStr(_str, wPos);
+    if wPos<_str.Length then
+        Result:= Result + '...';
+end;
+
+function iif(_condition: boolean; _trueString: string; _falseString: string): string;
+begin
+    if _condition then
+        Result := _trueString
+    else
+        Result := _falseString;
+end;
+
+function hasDataChanged(_prev: real; _current: real;
+	_tolerancePercentage: real): boolean;
+var
+    _diff: real;
+    _tolerance: real;
+    _changePercentage: real;
+begin
+    {Check if the percentage of change is within +/- tolerance}
+    _diff:= _prev - _current;
+    if isZero(_diff) then
+        Result:= False
+    else
+    begin
+        {Diff and _previous are not zero}
+        _tolerance:= _prev * _tolerancePercentage;
+        Result:= not InRange(_current, (_prev - _tolerance), (_prev + _tolerance));
+	end;
+end;
+
+function number(_s: string): integer;
+begin
+    try
+        Result:= strToInt(_s);
+	except
+        Result:= 0;
+	end;
+end;
+
+function float(_s: string): extended;
+begin
+    try
+        Result:= StrToFloat(_s);
+	except
+        Result:= 0;
+	end;
+
+end;
+
+function initStr(const _val: string; _default: string): string;
+begin
+    if _val.isEmpty then
+        Result:= _default
+    else
+        Result:= _val;
+end;
+
+function yyyymmdd(const _float: double): string;
+begin
+    Result:= yyyymmdd(FloatToDateTime(_float));
+end;
+
+function yyyymmdd(const _dt: TDatetime): string;
+var
+    y, m, d : word;
+begin
+    try
+        DecodeDate(_dt, y, m, d);
+        Result := format('%4d%2d%2d',[y,m,d]);
+	except
+        Result:= '00000000';
+	end;
+end;
 
 
 
