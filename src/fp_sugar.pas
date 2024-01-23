@@ -13,7 +13,8 @@ uses
      sugar.htmlfactory, sugar.textfiler, sugar.threadwriter, 
      sugar.sqlitehelper, sugar.jsonlib, sugar.ddldatatypes, 
      sugar.pascalcodemodel, sugar.ormgen, sugar.ddlmodel, sugar.querybuilder, 
-     sugar.templater, sugar.modelbase, sugar.jsondb, LazarusPackageIntf;
+     sugar.templater, sugar.modelbase, sugar.jsondb, sugar.webpage, 
+     sugar.vuejs, sugar.jshelpers, sugar.jsonbuilder, LazarusPackageIntf;
 
 implementation
 

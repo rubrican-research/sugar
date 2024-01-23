@@ -9,7 +9,7 @@
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="mod"/>
-        <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
     <Files>
@@ -96,6 +96,22 @@
       <Item>
         <Filename Value="mod\sugar.jsondb.pas"/>
         <UnitName Value="sugar.jsondb"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.webpage.pas"/>
+        <UnitName Value="sugar.webpage"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.vuejs.pas"/>
+        <UnitName Value="sugar.vuejs"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jshelpers.pas"/>
+        <UnitName Value="sugar.jshelpers"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsonbuilder.pas"/>
+        <UnitName Value="sugar.jsonbuilder"/>
       </Item>
     </Files>
     <RequiredPkgs>

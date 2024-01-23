@@ -11,7 +11,7 @@ unit sugar.utils;
 interface
 
 uses
-     Classes, SysUtils, fpjson, sugar.collections;
+     Classes, SysUtils, fpjson, sugar.collections, sugar.profiler;
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;
 function appendURL(_paths: array of string): string;
@@ -142,12 +142,18 @@ function initStr(const _val: string; _default: string): string;
 function yyyymmdd(const _float: double): string; overload;
 function yyyymmdd(const _dt: TDatetime): string; overload;
 
+{increment a local variable -used for dynamic arrays}
+function plus1(var i: integer): integer;
+
+function profiler(const _name: string): TCodeProfiler;
+
 
 implementation
 uses
      fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
      math, base64, LazStringUtils, DateUtils, sugar.logger;
+
 	{nsort, MarkdownUtils,}
 
 var
@@ -1054,6 +1060,18 @@ begin
 	except
         Result:= '00000000';
 	end;
+end;
+
+function plus1(var i: integer): integer;
+begin
+    // i := i + 1;
+    Inc(i);
+    Result := i;
+end;
+
+function profiler(const _name: string): TCodeProfiler;
+begin
+    Result := TCodeProfiler.Create(_name);
 end;
 
 
