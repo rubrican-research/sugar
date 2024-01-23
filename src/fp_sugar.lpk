@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <PathDelim Value="\"/>
+    <Name Value="fp_sugar"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="mod"/>
+        <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)\"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files>
+      <Item>
+        <Filename Value="mod\sugar.http.pas"/>
+        <UnitName Value="sugar.http"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.utils.pas"/>
+        <UnitName Value="sugar.utils"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.uihelper.pas"/>
+        <UnitName Value="sugar.uihelper"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.collections.pas"/>
+        <UnitName Value="sugar.collections"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.logger.pas"/>
+        <UnitName Value="sugar.logger"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.profiler.pas"/>
+        <UnitName Value="sugar.profiler"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.pas"/>
+        <UnitName Value="sugar.htmlbuilder"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.csshelper.pas"/>
+        <UnitName Value="sugar.csshelper"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlfactory.pas"/>
+        <UnitName Value="sugar.htmlfactory"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.textfiler.pas"/>
+        <UnitName Value="sugar.textfiler"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.threadwriter.pas"/>
+        <UnitName Value="sugar.threadwriter"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="rhl606"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCLBase"/>
+      </Item>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
