@@ -200,17 +200,19 @@ function NewDBModule(_dbFile: string; _dbFolder: string;
 	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TDBModule;
 
 
-	 {
-    function DBModule():
-    Use this function to access dbModule because it instantiates it if not already done.
-    Whenever you call dbModule it will use the _dbFile and _dbFolder values that was
-    last used to create the dbModule. Because both parameters are optional,
-    subsequent calls will return the myDbModule that was first initialized.
+{ function DBModule(): V2
+    This function instantiates a TDBModule object with the parameters supplied, ready for use.
+    Internally, this unit maintains a hash list of the instantiated TDBModules and returns the object
+    referred to by _dbFile (name). This way you can connect to multiple SQLite DB files by just calling
+    DbModule(_file).
 
-    If you need to change or connect to a different myDB, you can always call
-    dbModule.openDB(). subsquent calls will still return the last opened myDB}
-function DBModule(_dbFile: string = DEFAULT_DB_FILE; _dbFolder: string = '';
-	 _initScriptFunc: TScriptFunc = nil; _upgradeScriptFunc: TScriptFunc = nil): TDBModule;
+    NOTE: _dbFile parameter has a default value. So calling the function without any parameters
+    returns an object that is instantiated to use a efault DB file in the folder where the exe is stored.
+}
+function DBModule(  _dbFile: string = DEFAULT_DB_FILE;
+                    _dbFolder: string = '';
+                    _initScriptFunc: TScriptFunc = nil;
+                    _upgradeScriptFunc: TScriptFunc = nil): TDBModule;
 
 
 
@@ -928,7 +930,7 @@ end;
 function TDBModule.newQuery: TSQLQuery;
 begin
 	 Result := TSQLQuery.Create(myDB);
-	 Result.DataBase := myDB;
+     Result.DataBase := TSQLConnection(myDB);
 	 Result.Transaction := transaction;
 end;
 
