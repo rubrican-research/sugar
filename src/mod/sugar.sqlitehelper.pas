@@ -159,27 +159,71 @@ type
 		function execSQL(var _qry: TSQLQuery; out _err: string): integer; overload; // Does not free _qry
 		function execSQL(var _qry: TSQLQuery): integer; overload; // Does not free _qry
 
-	 public
-	 type
-			{ TDBKeyValueStore }
-		TDBKeyValueStore = class
-		private
+	 public type
+
+		{ TDBStore }
+
+      	TDBStore = class
+        protected
 			tbl: string;
 			dm:	TDBModule;
-			function getKVTableCreateScript(_kvTable: string): string;
-			function noInitException: Exception;
+			function getTableCreateScript(_kvTable: string): string; virtual;
+			function noInitException: Exception; virtual;
+        public
+            // Returns the exception message that is raised when the DBStore is not initialized;
+            function noInitExceptionMsg: string; virtual;
+        	constructor Create(_tbl: string; _dm: TDBModule); virtual;
+			function makeTable(_tbl: string): integer; virtual;
+
+			function exists(_key: string): boolean;
+			function findKeysFor(_val: string): TStringArray; virtual;
+			function findFirstKeyFor(_val: string): string; virtual;
+			function renKey(_oldKey: string; _newKey: string): integer; virtual;
+			function del(_key: string): integer; virtual;
+			function deleteStore: integer; virtual;
+			function Clear: integer; virtual;
+
+	  	end;
+
+		{ TDBKeyValueStore }
+		{ FIELDS
+        	k char(256)
+			v text
+        }
+		TDBKeyValueStore = class(TDBStore)
+        protected
+			function getTableCreateScript(_kvTable: string): string; override;
 		public
-			constructor Create(_tbl: string; _dm: TDBModule);
-			function addKVTable(_tbl: string): integer;
+			constructor Create(_tbl: string; _dm: TDBModule); override;
 			function get(_key: string): string;
 			function put(_key: string; _val: string): integer; // Return -2 if tbl is empty
-			function exists(_key: string): boolean;
-			function findKeysFor(_val: string): TStringArray;
-			function findFirstKeyFor(_val: string): string;
-			function renKey(_oldKey: string; _newKey: string): integer;
-			function del(_key: string): integer;
-			function deleteStore: integer;
-			function Clear: integer;
+
+			function findKeysFor(_val: string): TStringArray; override;
+			function findFirstKeyFor(_val: string): string; override;
+		end;
+
+
+		{ TDBKJSONStore }
+		{ FIELDS
+        	k char(256)
+			v text
+        }
+        TDBKJSONStore = class(TDBStore)
+        protected
+			function getTableCreateScript(_kvTable: string): string; override;
+		public
+			constructor Create(_tbl: string; _dm: TDBModule); override;
+			function get(_key: string): string;
+			function put(_key: string; _val: string): integer; // Return -2 if tbl is empty
+
+			{Find for complete JSON Doc}
+            function findKeysFor(_val: TJSONData): TStringArray; reintroduce;
+            function findFirstKeyFor(_val: TJSONData): string; reintroduce;
+
+            { Find for path/value }
+			function findKeysFor(_path: string; _val: TJSONData): TStringArray; overload;
+			function findFirstKeyFor(_path: string; _val: TJSONData): string; overload;
+
 		end;
 
 	 public
@@ -208,10 +252,15 @@ function NewDBModule(_dbFile: string; _dbFolder: string;
     subsequent calls will return the myDbModule that was first initialized.
 
     If you need to change or connect to a different myDB, you can always call
-    dbModule.openDB(). subsquent calls will still return the last opened myDB}
+    dbModule.openDB(). subsquent calls will still return the last opened myDB.
+
+    IMPORTANT:
+    =========
+    NEVER FREE THE DBModule OBJECT DIRECTLY BECAUSE IT IS STORED IN AN INTERNAL LIST}
 function DBModule(_dbFile: string = DEFAULT_DB_FILE; _dbFolder: string = '';
 	 _initScriptFunc: TScriptFunc = nil; _upgradeScriptFunc: TScriptFunc = nil): TDBModule;
 
+function dbModuleFree(_dbFile: string): boolean;
 
 
 implementation
@@ -258,38 +307,221 @@ begin
 
 end;
 
-{ TDBModule.TDBKeyValueStore }
-
-function TDBModule.TDBKeyValueStore.addKVTable(_tbl: string): integer;
+function dbModuleFree(_dbFile: string): boolean;
 begin
-	Result := dm.execSQL(getKVTableCreateScript(_tbl));
+    Result:= myDBModules.delete(_dbFile);
+end;
+
+{ TDBModule.TDBKJSONStore }
+
+function TDBModule.TDBKJSONStore.getTableCreateScript(_kvTable: string): string;
+begin
+
+end;
+
+constructor TDBModule.TDBKJSONStore.Create(_tbl: string; _dm: TDBModule);
+begin
+	 inherited Create(_tbl, _dm);
+end;
+
+function TDBModule.TDBKJSONStore.get(_key: string): string;
+begin
+
+end;
+
+function TDBModule.TDBKJSONStore.put(_key: string; _val: string): integer;
+begin
+
+end;
+
+function TDBModule.TDBKJSONStore.findKeysFor(_val: TJSONData): TStringArray;
+begin
+
+end;
+
+function TDBModule.TDBKJSONStore.findFirstKeyFor(_val: TJSONData): string;
+begin
+
+end;
+
+function TDBModule.TDBKJSONStore.findKeysFor(_path: string; _val: TJSONData
+	 ): TStringArray;
+begin
+
+end;
+
+function TDBModule.TDBKJSONStore.findFirstKeyFor(_path: string; _val: TJSONData
+	 ): string;
+begin
+
+end;
+
+{ TDBModule.TDBStore }
+
+function TDBModule.TDBStore.getTableCreateScript(_kvTable: string): string;
+begin
+     Result:= '';
+end;
+
+function TDBModule.TDBStore.noInitException: Exception;
+begin
+	Result := Exception.Create(noInitExceptionMsg());
+end;
+
+function TDBModule.TDBStore.noInitExceptionMsg: string;
+begin
+	Result:= ClassName + ' is not initialized';
+end;
+
+constructor TDBModule.TDBStore.Create(_tbl: string; _dm: TDBModule);
+begin
+    inherited Create;
+   dm := _dm;
+   if not _tbl.IsEmpty then makeTable(_tbl);
+end;
+
+function TDBModule.TDBStore.makeTable(_tbl: string): integer;
+begin
+	Result := dm.execSQL(getTableCreateScript(_tbl));
 	case Result of
 		-1, 0: tbl := '';
 		1: tbl		 := _tbl;
 	 end;
 end;
 
-function TDBModule.TDBKeyValueStore.getKVTableCreateScript(_kvTable: string): string;
+function TDBModule.TDBStore.exists(_key: string): boolean;
+begin
+	 if tbl.isEmpty then
+	begin
+		Result := False;
+		raise noInitException;
+	end;
+	 Result := dm.Exists(tbl, format('k = "%s"', [_key]));
+end;
+
+function TDBModule.TDBStore.findKeysFor(_val: string): TStringArray;
+begin
+     Result := [];
+end;
+
+function TDBModule.TDBStore.findFirstKeyFor(_val: string): string;
+begin
+     Result:= '';
+end;
+
+function TDBModule.TDBStore.renKey(_oldKey: string; _newKey: string): integer;
 const
-	 Q = 'CREATE TABLE IF NOT EXISTS %0:s ( ' + sLinebreak +
-			'	 k char(256) primary key,' + sLinebreak + '	 v text ' + sLinebreak +
-		');' + sLinebreak + ' ' + sLinebreak +
-			'CREATE INDEX IF NOT EXISTS %0:s_v ON %0:s (v);' + sLinebreak;
+	 Q = 'UPDATE %0:s SET k = :newkey WHERE k= :oldkey; ';
+var
+	 _qry: TSQLQuery;
+begin
+	if tbl.isEmpty then
+	begin
+			Result := -2;
+		raise noInitException;
+	end;
+
+	Result := 0;
+	 _qry := dm.newQuery();
+	 try
+		_qry.SQL.Text := Format(Q, [tbl]);
+		_qry.params[0].AsString := _newKey;
+		_qry.params[1].AsString := _oldKey;
+		Result := dm.execSQL(_qry);
+	 finally
+			 _qry.Free;
+	 end;
+end;
+
+function TDBModule.TDBStore.del(_key: string): integer;
+const
+	 Q = 'DELETE FROM %0:s WHERE k= :key;';
+var
+	 _qry: TSQLQuery;
+begin
+	if tbl.isEmpty then
+	begin
+			Result := -2;
+		raise noInitException;
+	end;
+
+	Result := 0;
+	 _qry	 := dm.newQuery();
+	 try
+	 	 _qry.SQL.Text := Format(Q, [tbl]);
+		_qry.Params[0].AsString := _key;
+		Result := dm.execSQL(_qry);
+	 finally
+			 _qry.Free;
+	 end;
+end;
+
+function TDBModule.TDBStore.deleteStore: integer;
+const
+	 Q = 'DROP TABLE IF EXISTS %0:s;';
+var
+	 _qry: TSQLQuery;
+begin
+	if tbl.isEmpty then
+	begin
+			Result := -2;
+		raise noInitException;
+	end;
+
+	Result := 0;
+	 _qry	 := dm.newQuery();
+	 try
+	 	 _qry.SQL.Text := Format(Q, [tbl]);
+		Result := dm.execSQL(_qry);
+		tbl		:= '';
+	 finally
+	 	 _qry.Free;
+	 end;
+end;
+
+function TDBModule.TDBStore.Clear: integer;
+const
+	 Q = 'DELETE FROM %0:s;';
+var
+	 _qry: TSQLQuery;
+begin
+	if tbl.isEmpty then
+	begin
+			Result := -2;
+		raise noInitException;
+	end;
+
+	Result := 0;
+	 _qry	 := dm.newQuery();
+	 try
+	 	 _qry.SQL.Text := Format(Q, [tbl]);
+		Result := dm.execSQL(_qry);
+		tbl		:= '';
+	 finally
+	 	 _qry.Free;
+	 end;
+end;
+
+{ TDBModule.TDBKeyValueStore }
+
+
+
+function TDBModule.TDBKeyValueStore.getTableCreateScript(_kvTable: string): string;
+const
+	 Q = 'CREATE TABLE IF NOT EXISTS %0:s ( ' + sLinebreak
+        	+ '	 k char(256) primary key,' + sLinebreak
+            + '	 v text ' + sLinebreak
+     		+ ');' + sLinebreak + ' ' + sLinebreak
+
+            + 'CREATE INDEX IF NOT EXISTS %0:s_v ON %0:s (v);' + sLinebreak;
 begin
 	 Result := Format(Q, [_kvTable]);
 end;
 
-function TDBModule.TDBKeyValueStore.noInitException: Exception;
-begin
-	 Result := Exception.Create('TDBKeyValueStore is not initialized');
-end;
 
 constructor TDBModule.TDBKeyValueStore.Create(_tbl: string; _dm: TDBModule);
 begin
-	 inherited Create;
-	dm := _dm;
-	if not _tbl.IsEmpty then
-		addKVTable(_tbl);
+    inherited Create(_tbl, _dm);
 end;
 
 function TDBModule.TDBKeyValueStore.get(_key: string): string;
@@ -342,15 +574,7 @@ begin
 	 end;
 end;
 
-function TDBModule.TDBKeyValueStore.exists(_key: string): boolean;
-begin
-	 if tbl.isEmpty then
-	begin
-			Result := False;
-		raise noInitException;
-	end;
-	 Result := dm.Exists(tbl, format('k = "%s"', [_key]));
-end;
+
 
 function TDBModule.TDBKeyValueStore.findKeysFor(_val: string): TStringArray;
 const
@@ -411,98 +635,8 @@ begin
 	if Length(_keys) > 0 then Result := _keys[0];
 end;
 
-function TDBModule.TDBKeyValueStore.renKey(_oldKey: string; _newKey: string): integer;
-const
-	 Q = 'UPDATE %0:s SET k = :newkey WHERE k= :oldkey; ';
-var
-	 _qry: TSQLQuery;
-begin
-	if tbl.isEmpty then
-	begin
-			Result := -2;
-		raise noInitException;
-	end;
 
-	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-			 _qry.SQL.Text := Format(Q, [tbl]);
-		_qry.params[0].AsString := _newKey;
-		_qry.params[1].AsString := _oldKey;
-		Result := dm.execSQL(_qry);
-	 finally
-			 _qry.Free;
-	 end;
-end;
 
-function TDBModule.TDBKeyValueStore.del(_key: string): integer;
-const
-	 Q = 'DELETE FROM %0:s WHERE k= :key;';
-var
-	 _qry: TSQLQuery;
-begin
-	if tbl.isEmpty then
-	begin
-			Result := -2;
-		raise noInitException;
-	end;
-
-	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
-		_qry.Params[0].AsString := _key;
-		Result := dm.execSQL(_qry);
-	 finally
-			 _qry.Free;
-	 end;
-end;
-
-function TDBModule.TDBKeyValueStore.deleteStore: integer;
-const
-	 Q = 'DROP TABLE IF EXISTS %0:s;';
-var
-	 _qry: TSQLQuery;
-begin
-	if tbl.isEmpty then
-	begin
-			Result := -2;
-		raise noInitException;
-	end;
-
-	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
-		Result := dm.execSQL(_qry);
-		tbl		:= '';
-	 finally
-	 	 _qry.Free;
-	 end;
-end;
-
-function TDBModule.TDBKeyValueStore.Clear: integer;
-const
-	 Q = 'DELETE FROM %0:s;';
-var
-	 _qry: TSQLQuery;
-begin
-	if tbl.isEmpty then
-	begin
-			Result := -2;
-		raise noInitException;
-	end;
-
-	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
-		Result := dm.execSQL(_qry);
-		tbl		:= '';
-	 finally
-	 	 _qry.Free;
-	 end;
-end;
 
 { TDBModule }
 
