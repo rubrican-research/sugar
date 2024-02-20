@@ -113,6 +113,10 @@
         <Filename Value="mod\sugar.jsonbuilder.pas"/>
         <UnitName Value="sugar.jsonbuilder"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.consoleapp.pas"/>
+        <UnitName Value="sugar.consoleapp"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
