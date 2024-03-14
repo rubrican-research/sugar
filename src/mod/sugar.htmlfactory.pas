@@ -57,8 +57,8 @@ function basePath: string;
 begin
     Result:= myBasePath;
     if myBasePath.isEmpty then
-        // Result:= ExpandFileName(''); {get current directory}
-        trip('RbHtmlPackage.objectFactory.basePath(): Path is not defined. You have to set the path before using any file-write functions');
+        Result:= ExpandFileName(''); {get current directory}
+        //trip('RbHtmlPackage.objectFactory.basePath(): Path is not defined. You have to set the path before using any file-write functions');
 
 end;
 

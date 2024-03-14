@@ -8,14 +8,15 @@ unit fp_sugar;
 interface
 
 uses
-    sugar.httphelper, sugar.utils, sugar.uihelper, sugar.collections, 
-    sugar.logger, sugar.profiler, sugar.htmlbuilder, sugar.csshelper, 
-    sugar.htmlfactory, sugar.textfiler, sugar.threadwriter, 
-    sugar.sqlitehelper, sugar.jsonlib, sugar.ddldatatypes, 
+    sugar.utils, sugar.uihelper, sugar.collections, sugar.logger, 
+    sugar.profiler, sugar.csshelper, sugar.textfiler, sugar.threadwriter, 
+    sugar.sqlitehelper, sugar.modelbase, sugar.ddldatatypes, 
     sugar.pascalcodemodel, sugar.ormgen, sugar.ddlmodel, sugar.querybuilder, 
-    sugar.templater, sugar.modelbase, sugar.jsondb, sugar.webpage, 
-    sugar.vuejs, sugar.jshelpers, sugar.jsonbuilder, sugar.consoleapp, 
-    LazarusPackageIntf;
+    sugar.jsondb, sugar.httphelper, sugar.htmlbuilder, sugar.htmlbuilder.vue, 
+    sugar.htmlbuilder.alpinejs, sugar.templater, sugar.htmlfactory, 
+    sugar.jshelpers, sugar.jsonlib, sugar.webpage, sugar.vuejs, 
+    sugar.jsonbuilder, sugar.consoleapp, sugar.sort, nsort, sugar.markdown, 
+    sugar.htmlbuilder.htmx, LazarusPackageIntf;
 
 implementation
 

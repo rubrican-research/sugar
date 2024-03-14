@@ -14,10 +14,6 @@
     </CompilerOptions>
     <Files>
       <Item>
-        <Filename Value="mod\sugar.httphelper.pas"/>
-        <UnitName Value="sugar.httphelper"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.utils.pas"/>
         <UnitName Value="sugar.utils"/>
       </Item>
@@ -38,16 +34,8 @@
         <UnitName Value="sugar.profiler"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.htmlbuilder.pas"/>
-        <UnitName Value="sugar.htmlbuilder"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.csshelper.pas"/>
         <UnitName Value="sugar.csshelper"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.htmlfactory.pas"/>
-        <UnitName Value="sugar.htmlfactory"/>
       </Item>
       <Item>
         <Filename Value="mod\sugar.textfiler.pas"/>
@@ -62,8 +50,8 @@
         <UnitName Value="sugar.sqlitehelper"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.jsonlib.pas"/>
-        <UnitName Value="sugar.jsonlib"/>
+        <Filename Value="mod\sugar.modelbase.pas"/>
+        <UnitName Value="sugar.modelbase"/>
       </Item>
       <Item>
         <Filename Value="mod\sugar.ddldatatypes.pas"/>
@@ -86,16 +74,40 @@
         <UnitName Value="sugar.querybuilder"/>
       </Item>
       <Item>
+        <Filename Value="mod\sugar.jsondb.pas"/>
+        <UnitName Value="sugar.jsondb"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.httphelper.pas"/>
+        <UnitName Value="sugar.httphelper"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.pas"/>
+        <UnitName Value="sugar.htmlbuilder"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.vue.pas"/>
+        <UnitName Value="sugar.htmlbuilder.vue"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.alpinejs.pas"/>
+        <UnitName Value="sugar.htmlbuilder.alpinejs"/>
+      </Item>
+      <Item>
         <Filename Value="mod\sugar.templater.pas"/>
         <UnitName Value="sugar.templater"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.modelbase.pas"/>
-        <UnitName Value="sugar.modelbase"/>
+        <Filename Value="mod\sugar.htmlfactory.pas"/>
+        <UnitName Value="sugar.htmlfactory"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.jsondb.pas"/>
-        <UnitName Value="sugar.jsondb"/>
+        <Filename Value="mod\sugar.jshelpers.pas"/>
+        <UnitName Value="sugar.jshelpers"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsonlib.pas"/>
+        <UnitName Value="sugar.jsonlib"/>
       </Item>
       <Item>
         <Filename Value="mod\sugar.webpage.pas"/>
@@ -106,10 +118,6 @@
         <UnitName Value="sugar.vuejs"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.jshelpers.pas"/>
-        <UnitName Value="sugar.jshelpers"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.jsonbuilder.pas"/>
         <UnitName Value="sugar.jsonbuilder"/>
       </Item>
@@ -117,8 +125,27 @@
         <Filename Value="mod\sugar.consoleapp.pas"/>
         <UnitName Value="sugar.consoleapp"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.sort.pas"/>
+        <UnitName Value="sugar.sort"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\nsort.pas"/>
+        <UnitName Value="nsort"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.markdown.pas"/>
+        <UnitName Value="sugar.markdown"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.htmx.pas"/>
+        <UnitName Value="sugar.htmlbuilder.htmx"/>
+      </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="fpc_markdown"/>
+      </Item>
       <Item>
         <PackageName Value="rhl606"/>
       </Item>

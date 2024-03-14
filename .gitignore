@@ -71,3 +71,6 @@ lib/
 original/
 src/backup/
 src/mod/backup/
+src/tests/backup/
+src/tests/bin
+src/tests/lib

@@ -24,6 +24,336 @@ const
     JSProp = '%s: %s';
 
 type
+    THtmlGlobalAttributes = (
+        attr_accesskey,
+        attr_autocapitalize,
+        attr_autofocus,
+        attr_class,
+        attr_contenteditable,
+        attr_contextmenu,       // Non-standardDeprecated,
+        attr_data,              // data-xxx
+        attr_dir,
+        attr_draggable,
+        attr_enterkeyhint,
+        attr_exportparts,
+        attr_hidden,
+        attr_id,
+        attr_inert,
+        attr_inputmode,
+        attr_is,
+        attr_itemid,
+        attr_itemprop,
+        attr_itemref,
+        attr_itemscope,
+        attr_itemtype,
+        attr_lang,
+        attr_nonce,
+        attr_part,
+        attr_popover,
+        attr_slot,
+        attr_spellcheck,
+        attr_style,
+        attr_tabindex,
+        attr_title,
+        attr_translate,
+        attr_virtualkeyboardpolicy
+    );
+
+    THtmlDOMEvent = (
+      // Document Events
+        dom_afterscriptexecute,  //    Non-standard
+        dom_beforescriptexecute, //    Non-standard
+        dom_copy,
+        dom_cut,
+        dom_DOMContentLoaded,
+        dom_fullscreenchange,
+        dom_fullscreenerror,
+        dom_paste,
+        dom_pointerlockchange,
+        dom_pointerlockerror,
+        dom_prerenderingchange,  // Experimental
+        dom_readystatechange,
+        dom_scroll,
+        dom_scrollend,
+        dom_securitypolicyviolation,
+        dom_selectionchange,
+        dom_visibilitychange,
+
+        // Window Events
+        dom_afterprint,
+        dom_appinstalled,
+        dom_beforeinstallprompt,
+        dom_beforeprint,
+        dom_beforeunload,
+        dom_blur,
+        //copy,
+        //cut,
+        dom_devicemotion,
+        dom_deviceorientation,
+        dom_deviceorientationabsolute,
+        dom_error,
+        dom_focus,
+        dom_gamepadconnected,
+        dom_gamepaddisconnected,
+        dom_hashchange,
+        dom_languagechange,
+        dom_load,
+        dom_message,
+        dom_messageerror,
+        dom_offline,
+        dom_online,
+        dom_orientationchange, // Deprecated
+        dom_pagehide,
+        dom_pageshow,
+        // paste,
+        dom_popstate,
+        dom_rejectionhandled,
+        dom_resize,
+        dom_storage,
+        dom_unhandledrejection,
+        dom_unload, // Deprecated
+        dom_vrdisplayactivate,      // Non-standardDeprecated
+        dom_vrdisplayconnect,       // Non-standardDeprecated
+        dom_vrdisplaydeactivate,    // Non-standardDeprecated
+        dom_vrdisplaydisconnect,    // Non-standardDeprecated
+        dom_vrdisplaypresentchange, // Non-standardDeprecated
+
+        // Element Events
+        //afterscriptexecute, //    Non-standard
+        dom_animationcancel,
+        dom_animationend,
+        dom_animationiteration,
+        dom_animationstart,
+        dom_auxclick,
+        dom_beforeinput,
+        dom_beforematch, //    Experimental
+        //beforescriptexecute, //    Non-standard
+        dom_beforexrselect, //    Experimental
+        //blur,
+        dom_click,
+        dom_compositionend,
+        dom_compositionstart,
+        dom_compositionupdate,
+        dom_contentvisibilityautostatechange, // Experimental
+        dom_contextmenu,
+        //copy,
+        //cut,
+        dom_dblclick,
+        dom_DOMActivate, // Deprecated
+        dom_DOMMouseScroll, // Non-standardDeprecated
+        //focus,
+        dom_focusin,
+        dom_focusout,
+        //fullscreenchange,
+        //fullscreenerror,
+        dom_gesturechange,  // Non-standard
+        dom_gestureend, // Non-standard
+        dom_gesturestart, //    Non-standard
+        dom_gotpointercapture,
+        dom_input,
+        dom_keydown,
+        dom_keypress, // Deprecated
+        dom_keyup, //
+        dom_lostpointercapture,
+        dom_mousedown,
+        dom_mouseenter,
+        dom_mouseleave,
+        dom_mousemove,
+        dom_mouseout,
+        dom_mouseover,
+        dom_mouseup,
+        dom_mousewheel, // Non-standardDeprecated
+        dom_MozMousePixelScroll, // Non-standardDeprecated
+        //paste,
+        dom_pointercancel,
+        dom_pointerdown,
+        dom_pointerenter,
+        dom_pointerleave,
+        dom_pointermove,
+        dom_pointerout,
+        dom_pointerover,
+        dom_pointerrawupdate, // Experimental
+        dom_pointerup,
+        //scroll,
+        //scrollend,
+        //securitypolicyviolation,
+        dom_touchcancel,
+        dom_touchend,
+        dom_touchmove,
+        dom_touchstart,
+        dom_transitioncancel,
+        dom_transitionend,
+        dom_transitionrun,
+        dom_transitionstart,
+        dom_webkitmouseforcechanged, //   Non-standard
+        dom_webkitmouseforcedown, // Non-standard
+        dom_webkitmouseforceup, // Non-standard
+        dom_webkitmouseforcewillbegin, // Non-standard
+        dom_wheel,
+
+        // Form Events
+        dom_formdata,
+        dom_reset,
+        dom_submit,
+
+        // Details Element
+        dom_toggle
+    );
+const
+    __DOMEvents: array[THtmlDOMEvent] of string = (
+    // Document Events
+      'afterscriptexecute',   //    Non-standard
+      'beforescriptexecute',  //    Non-standard
+      'copy',
+      'cut',
+      'DOMContentLoaded',
+      'fullscreenchange',
+      'fullscreenerror',
+      'paste',
+      'pointerlockchange',
+      'pointerlockerror',
+      'prerenderingchange',   // Experimental
+      'readystatechange',
+      'scroll',
+      'scrollend',
+      'securitypolicyviolation',
+      'selectionchange',
+      'visibilitychange',
+
+      // Window Events
+      'afterprint',
+      'appinstalled',
+      'beforeinstallprompt',
+      'beforeprint',
+      'beforeunload',
+      'blur',
+      //copy',
+      //cut',
+      'devicemotion',
+      'deviceorientation',
+      'deviceorientationabsolute',
+      'error',
+      'focus',
+      'gamepadconnected',
+      'gamepaddisconnected',
+      'hashchange',
+      'languagechange',
+      'load',
+      'message',
+      'messageerror',
+      'offline',
+      'online',
+      'orientationchange',  // Deprecated
+      'pagehide',
+      'pageshow',
+      // paste',
+      'popstate',
+      'rejectionhandled',
+      'resize',
+      'storage',
+      'unhandledrejection',
+      'unload',  // Deprecated
+      'vrdisplayactivate',       // Non-standardDeprecated
+      'vrdisplayconnect',        // Non-standardDeprecated
+      'vrdisplaydeactivate',     // Non-standardDeprecated
+      'vrdisplaydisconnect',     // Non-standardDeprecated
+      'vrdisplaypresentchange',  // Non-standardDeprecated
+
+      // Element Events
+      //afterscriptexecute',  //    Non-standard
+      'animationcancel',
+      'animationend',
+      'animationiteration',
+      'animationstart',
+      'auxclick',
+      'beforeinput',
+      'beforematch',  //    Experimental
+      //beforescriptexecute',  //    Non-standard
+      'beforexrselect',  //    Experimental
+      //blur',
+      'click',
+      'compositionend',
+      'compositionstart',
+      'compositionupdate',
+      'contentvisibilityautostatechange',  // Experimental
+      'contextmenu',
+      //copy',
+      //cut',
+      'dblclick',
+      'DOMActivate',  // Deprecated
+      'DOMMouseScroll',  // Non-standardDeprecated
+      //focus',
+      'focusin',
+      'focusout',
+      //fullscreenchange',
+      //fullscreenerror',
+      'gesturechange',   // Non-standard
+      'gestureend',  // Non-standard
+      'gesturestart',  //    Non-standard
+      'gotpointercapture',
+      'input',
+      'keydown',
+      'keypress',  // Deprecated
+      'keyup',  //
+      'lostpointercapture',
+      'mousedown',
+      'mouseenter',
+      'mouseleave',
+      'mousemove',
+      'mouseout',
+      'mouseover',
+      'mouseup',
+      'mousewheel',  // Non-standardDeprecated
+      'MozMousePixelScroll',  // Non-standardDeprecated
+      //paste',
+      'pointercancel',
+      'pointerdown',
+      'pointerenter',
+      'pointerleave',
+      'pointermove',
+      'pointerout',
+      'pointerover',
+      'pointerrawupdate',  // Experimental
+      'pointerup',
+      //scroll',
+      //scrollend',
+      //securitypolicyviolation',
+      'touchcancel',
+      'touchend',
+      'touchmove',
+      'touchstart',
+      'transitioncancel',
+      'transitionend',
+      'transitionrun',
+      'transitionstart',
+      'webkitmouseforcechanged',  //   Non-standard
+      'webkitmouseforcedown',  // Non-standard
+      'webkitmouseforceup',  // Non-standard
+      'webkitmouseforcewillbegin',  // Non-standard
+      'wheel',
+
+      // Form Events
+      'formdata',
+      'reset',
+      'submit',
+      'toggle'
+    );
+
+type
+
+    THtmlMediaEvents = (
+        mevUnknown
+    );
+
+	{ THtmlGlobalAttributesHelper }
+
+    THtmlGlobalAttributesHelper = type helper for THtmlGlobalAttributes
+        function asString: string;
+        function asString(_v: string): string; // appends this text to the attribute (needed for _data)
+    end;
+
+
+
     THtmlInputType = (inputButton, inputCheckbox, inputColor, inputDate,
         inputDatetime_local, inputEmail, inputFile, inputHidden, inputImage,
         inputMonth, inputNumber, inputPassword, inputRadio, inputRange,
@@ -1158,6 +1488,7 @@ type
 		function getAnchor: string;
 
     protected
+        suppressID: boolean;
         myIndex: integer; {reference to index in the containing collection}
         function setStyle(_s: string): THtmlElement;
         function tag_start: string; override;
@@ -1227,24 +1558,6 @@ type
         function copyFrom(_source: THtmlElement): THtmlElement; reintroduce;
         function clone: THtmlElement; virtual;
 
-
-        {VueJS bindings - refactor out to new Library}
-        function vbind(_name: string; _value: string): THtmlElement;
-        function vmodel(_field: string): THtmlElement;
-        function vmodelNumber(_field: string): THtmlElement;
-        public
-            type vOnModifier = (vOnNone, vOnPrevent, vOnStop, vOnCapture, vOnSelf, vOnOnce, vOnPassive);
-        public
-        function vOn(_event: string; _params: string; _modifier: vOnModifier = vOnNone): THtmlElement;
-        function vText(_text: string): THtmlElement;
-        function vHtml(_html: string): THtmlElement;
-        function vfor(_loop: string): THtmlElement;
-        function vIf(_ifCondition: string): THtmlElement;
-        function vShow(_condition: string): THtmlElement;
-        function vCloak(_active: boolean = true): THtmlElement;
-        function vRef(_refName: string): THtmlElement;
-        function vKey(_keyField: string): THtmlElement;
-
         {event mapping}
         function events: TStringMap;
         function event(_name: string; _code: string): THtmlElement; overload;
@@ -1264,6 +1577,7 @@ type
     THtmlElementClass = class of THtmlElement;
 
     THtmlElementArray = array of THtmlElement;
+
     THtmlCollection = class;
     THeading = class;
     THeading1 = class;
@@ -1303,6 +1617,11 @@ type
     THtmlSelect = class;
     THtmlTagless = class;
     THtmlInterestingText = class;
+    THtmlDialog = class;
+    THtmlDetails = class;
+    THtmlSummary = class;
+    THtmlTemplate = class;
+    THtmlFragment = class;
 
     { THtmlCollection }
     {TODO: Rewrite this class to use GenericHashObjectList}
@@ -1366,6 +1685,8 @@ type
         { TODO : file uploads }
 
         {Collections}
+        function template: THtmlTemplate;
+        function fragment: THtmlFragment;
         function div_(t: string = ''): THtmlDiv;
         function span_(t: string = ''): THtmlSpan;
         function section_(t: string = ''): THtmlSection;
@@ -1387,19 +1708,26 @@ type
         function selection: THtmlSelect;
         function navbar: THtmlNavbar;
         function menu: THtmlMenu;
+
+        {REFACTOR THESE OUT}
         function contextmenu: THtmlMenu;
         function alert: THtmlAlert;
         function login: THtmlForm;
         function confirm: THtmlForm;
+        {/REFACTOR}
+
         function a(_text: string; _url: string): THtmlAnchor;
 
         function require(_file: string): THtmlTagless;
         function tagLess: THtmlTagless;
         function interesting(_text: string): THtmlInterestingText;
 
+        function dialog: THtmlDialog;
+        function details: THtmlDetails;
+
         procedure Clear; virtual;
 
-        procedure renameElement(_el: THtmlElement);
+        procedure reIndex(_el: THtmlElement);
 
         function setClass(_c: array of string): THtmlCollection; overload; reintroduce;
         function setClass(_c: string): THtmlCollection; overload; reintroduce;
@@ -1618,6 +1946,26 @@ type
 
         constructor Create; override;
     end;
+
+	{ THtmlDialog }
+
+    THtmlDialog = class(THtmlCollection)
+        constructor Create; override;
+    end;
+
+	{ THtmlDetails }
+
+    THtmlDetails = class(THtmlCollection)
+        constructor Create; override;
+        function summary: THtmlSummary;
+    end;
+
+	{ THtmlSummary }
+
+    THtmlSummary = class(THtmlCollection)
+        constructor Create; override;
+    end;
+
 
     { THtmlHead }
 
@@ -2301,6 +2649,12 @@ type
 
     end;
 
+	{ THtmlFragment }
+    // Generates a fragment  <> </>
+    THtmlFragment = class(THtmlCollection)
+        constructor Create; override;
+        function getFormatTemplate: string; override;
+    end;
 
 procedure applyStyleClass(_element: THtmlElement; _style: THtmlStyle);
 procedure applyStyleInline(_element: THtmlElement; _style: THtmlStyle);
@@ -2661,6 +3015,36 @@ begin
     tag := 'div';
 end;
 
+{ THtmlDialog }
+
+constructor THtmlDialog.Create;
+begin
+	inherited Create;
+    tag := 'dialog'
+end;
+
+{ THtmlDetails }
+
+constructor THtmlDetails.Create;
+begin
+	inherited Create;
+    tag := 'details';
+end;
+
+function THtmlDetails.summary: THtmlSummary;
+begin
+    Result:= THtmlSummary.Create;
+    Add(Result);
+end;
+
+{ THtmlSummary }
+
+constructor THtmlSummary.Create;
+begin
+	inherited Create;
+    tag := 'summary';
+end;
+
 { THtmlTemplate }
 
 constructor THtmlTemplate.Create;
@@ -2668,6 +3052,28 @@ begin
     inherited Create;
     tag := 'template';
 end;
+
+{ THtmlFragment }
+
+constructor THtmlFragment.Create;
+begin
+	inherited Create;
+    tag := '';
+end;
+
+function THtmlFragment.getFormatTemplate: string;
+begin
+    Result := '<>%s</>'; // Fragment does not have id or any other attribute
+    //if (tag <> '') then
+    //begin
+    //    if hasEndTag then
+    //        Result := tag_start + '%s' + tag_end
+    //    else
+    //        Result := tag_start;
+    //end;
+
+end;
+
 
 { THtmlTableBody }
 
@@ -3686,6 +4092,52 @@ begin
         'origin-when-cross-origin': self := origin_when_cross_origin;
         'unsafe-url': self := unsafe_url;
     end;
+end;
+
+{ THtmlGlobalAttributesHelper }
+
+function THtmlGlobalAttributesHelper.asString: string;
+begin
+    Result := asString('');
+end;
+
+function THtmlGlobalAttributesHelper.asString(_v: string): string;
+begin
+    case self of
+    	attr_accesskey:         Result := 'accesskey';
+        attr_autocapitalize:    Result := 'autocapitalize';
+        attr_autofocus:         Result := 'autofocums';
+        attr_class:             Result := 'class';
+        attr_contenteditable:   Result := 'contenteditable';
+        attr_contextmenu:       Result := 'contextmenu';
+        attr_data:              Result := 'data-' + _v;   // append the value
+        attr_dir:               Result := 'dir';
+        attr_draggable:         Result := 'draggable';
+        attr_enterkeyhint:      Result := 'enterkeyhint';
+        attr_exportparts:       Result := 'exportparts';
+        attr_hidden:            Result := 'hidden';
+        attr_id:                Result := 'id';
+        attr_inert:             Result := 'inert';
+        attr_inputmode:         Result := 'inputmode';
+        attr_is:                Result := 'is';
+        attr_itemid:            Result := 'itemid';
+        attr_itemprop:          Result := 'itemprop';
+        attr_itemref:           Result := 'itemref';
+        attr_itemscope:         Result := 'itemscope';
+        attr_itemtype:          Result := 'itemtype';
+        attr_lang:              Result := 'lang';
+        attr_nonce:             Result := 'nonce';
+        attr_part:              Result := 'part';
+        attr_popover:           Result := 'popover';
+        attr_slot:              Result := 'slot';
+        attr_spellcheck:        Result := 'spellcheck';
+        attr_style:             Result := 'style';
+        attr_tabindex:          Result := 'tabindex';
+        attr_title:             Result := 'title';
+        attr_translate:         Result := 'translate';
+        attr_virtualkeyboardpolicy: Result := 'virutalkeyboardpolicy';
+    end;
+
 end;
 
 { THtmlInputTypeHelper }
@@ -7447,6 +7899,7 @@ end;
 constructor THtmlLink.Create;
 begin
     inherited Create;
+    suppressID:= true;
     tag := 'link';
     hasEndTag := False;
 end;
@@ -8033,6 +8486,7 @@ end;
 constructor THTMLMetaTag.Create;
 begin
     inherited Create;
+    suppressID:= true;
     tag := 'meta';
     hasEndTag := False;
 end;
@@ -8409,6 +8863,7 @@ end;
 constructor THtmlDoc.Create;
 begin
     inherited Create;
+    suppressID:= true;
 
     {When you override Head_ and Body_  you will be able to assign this on create}
     FHtmlHead := Head_;
@@ -8603,6 +9058,7 @@ end;
 constructor THtmlBody.Create;
 begin
     inherited Create;
+    suppressID:= true;
     tag:= 'body';
     myHeader := THtmlCollection.Create('header');
     myFooter := THtmlCollection.Create('footer');
@@ -8670,6 +9126,7 @@ end;
 constructor THtmlHead.Create;
 begin
     inherited Create;
+    suppressID:= true;
     tag := 'head';
     charset('utf-8');
 end;
@@ -9109,21 +9566,31 @@ begin
     add(Result);
 end;
 
+function THtmlCollection.dialog: THtmlDialog;
+begin
+    Result:= THtmlDialog(add(THtmlDialog.Create));
+end;
+
+function THtmlCollection.details: THtmlDetails;
+begin
+    Result := THtmlDetails(add(THtmlDetails.Create));
+end;
+
 procedure THtmlCollection.Clear;
 begin
     myElementList.Clear;
 end;
 
-procedure THtmlCollection.renameElement(_el: THtmlElement);
+procedure THtmlCollection.reIndex(_el: THtmlElement);
 var
-    _prevName: string;
+    _prevIndex: string;
     _index: integer;
 begin
     _index:= myElementList.IndexOf(_el);
     if _index > -1 then
     begin
-        _prevName:= myElementList.NameOfIndex(_index);
-        myElementList.Rename(_prevName, _el.tagID);
+        _prevIndex:= myElementList.NameOfIndex(_index);
+        myElementList.Rename(_prevIndex, _el.tagID);
 	end;
 end;
 
@@ -9228,6 +9695,16 @@ function THtmlCollection.emphasis(_text: string): TEmphasis;
 begin
     Result:= TEmphasis(add(TEmphasis.Create));
     Result.Text:= _text;
+end;
+
+function THtmlCollection.template: THtmlTemplate;
+begin
+    Result:= THtmlTemplate(add(THtmlTemplate.Create));
+end;
+
+function THtmlCollection.fragment: THtmlFragment;
+begin
+    Result:= THtmlFragment(add(THtmlFragment.Create));
 end;
 
 function THtmlCollection.input_(_type: THtmlInputType = THtmlInputType.inputText;
@@ -9367,7 +9844,7 @@ begin
     FAttributes.Values['id'] := __ID;
 
     if FParent is THtmlCollection then
-        THtmlCollection(FParent).renameElement(self);
+        THtmlCollection(FParent).reIndex(self);
 end;
 
 function THtmlElement.getTitleAttr: string;
@@ -9416,6 +9893,11 @@ begin
             Result := Result + ' ' + _value
         else
         begin
+            // Skip ID Render
+            if _attr = 'id' then begin
+                if suppressID then continue;
+            end;
+
             if _value.StartsWith(ATTR_NUMBER_PREFIX) then
             begin
                 {decodifying the number stored}
@@ -9480,9 +9962,9 @@ function THTMLElementBase.render: string;
 	end;
 
 begin
-    if tag.IsEmpty then
-        Result := Text
-    else
+    //if tag.IsEmpty then
+    //    Result := Text
+    //else
         Result := Format(getFormatTemplate, [sanitize(Text)]) + sLineBreak;
 end;
 
@@ -9837,6 +10319,7 @@ end;
 constructor THtmlElement.Create;
 begin
     inherited Create;
+    suppressID := false;
     myIndex := NO_INDEX;
     FAttributes := TStringList.Create;
     myStyle := THtmlStyle.Create;
@@ -9887,95 +10370,6 @@ begin
     that after you have cloned                                                 }
     Result := NewHtmlBuilderObject(Self) as THtmlElement;
     Result.copyFrom(self);
-end;
-
-function THtmlElement.vbind(_name: string; _value: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-bind:' + _name, _value);
-end;
-
-function THtmlElement.vfor(_loop: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-for', _loop);
-end;
-
-function THtmlElement.vIf(_ifCondition: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-if', _ifCondition);
-end;
-
-function THtmlElement.vShow(_condition: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-show', _condition);
-end;
-
-function THtmlElement.vCloak(_active: boolean): THtmlElement;
-begin
-    Result := Self;
-    case _active of
-        True:  setAttrFlag('v-cloak');
-        False: rmAttrFlag('v-cloak');
-    end;
-end;
-
-function THtmlElement.vRef(_refName: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('ref', _refName);
-end;
-
-function THtmlElement.vKey(_keyField: string): THtmlElement;
-begin
-    Result := Self;
-    vbind('key', _keyField);
-end;
-
-function THtmlElement.vmodel(_field: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-model', _field);
-end;
-
-function THtmlElement.vmodelNumber(_field: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-model.number', _field);
-
-end;
-
-function THtmlElement.vOn(_event: string; _params: string;
-	_modifier: vOnModifier): THtmlElement;
-var
-    _attr: string = 'v-on:%s';
-begin
-    Result := Self;
-    case _modifier of
-        vOnNone: ;
-        vOnPrevent: _attr += '.prevent';
-        vOnStop:    _attr += '.stop';
-        vOnCapture: _attr += '.capture';
-        vOnSelf:    _attr += '.self';
-        vOnOnce:    _attr += '.once';
-        vOnPassive: _attr += '.passive';
-    end;
-
-    setAttr(Format(_attr, [_event]), _params);
-end;
-
-function THtmlElement.vText(_text: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-text', _text);
-end;
-
-function THtmlElement.vHtml(_html: string): THtmlElement;
-begin
-    Result := Self;
-    setAttr('v-html', _html);
 end;
 
 function THtmlElement.events: TStringMap;
