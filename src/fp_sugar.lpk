@@ -8,7 +8,8 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="mod"/>
+        <IncludeFiles Value="mod"/>
+        <OtherUnitFiles Value="mod;mod\webui"/>
         <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
@@ -140,6 +141,42 @@
       <Item>
         <Filename Value="mod\sugar.htmlbuilder.htmx.pas"/>
         <UnitName Value="sugar.htmlbuilder.htmx"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.threadloader.pas"/>
+        <UnitName Value="sugar.threadloader"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsgooglechart.pas"/>
+        <UnitName Value="sugar.jsGoogleChart"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jscharts.pas"/>
+        <UnitName Value="sugar.jscharts"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlpage.pas"/>
+        <UnitName Value="sugar.htmlpage"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.sqlitehelper.lfm"/>
+        <Type Value="LFM"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\webui\assets.pas"/>
+        <UnitName Value="assets"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\webui\bulma.pas"/>
+        <UnitName Value="bulma"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\webui\semanticui.pas"/>
+        <UnitName Value="semanticui"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\webui\webui.pas"/>
+        <UnitName Value="webui"/>
       </Item>
     </Files>
     <RequiredPkgs>

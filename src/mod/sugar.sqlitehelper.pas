@@ -46,13 +46,17 @@ type
 		dbopenExclusive // Open the DB in exclusive mode. Do not allow reads
 		);
 
-	 TDBModule = class(TDataModule)
-			 libloader: TSQLDBLibraryLoader;
-			 myDB:			TSQLite3Connection;
-			 transaction: TSQLTransaction;
-			 qUpdateID: TSQLQuery;
-			 qGetNewID: TSQLQuery;
+    TDBStoreType = (
+        dstFile,
+        dtsMemory
+    );
 
+	 TDBModule = class(TDataModule)
+			 libloader  : TSQLDBLibraryLoader;
+			 myDB       : TSQLite3Connection;
+			 transaction: TSQLTransaction;
+			 qUpdateID  : TSQLQuery;
+			 qGetNewID  : TSQLQuery;
 			 procedure DataModuleCreate(Sender: TObject);
 	 private
 			 FDbFile:	 string;
@@ -60,7 +64,8 @@ type
 			 myinitScriptFunc: TScriptFunc;
 			 myupgradeScript: TScriptFunc;
 			 myuseSequences: boolean;
-		myDbOpenState: TDBOpenState;
+		     myDbOpenState: TDBOpenState;
+             myDBStoreType: TDbStoreType;
 			 procedure SetDbFile(const _DbFile: string);
 			 procedure SetDbFolder(const _DbFolder: string);
 			 procedure SetinitScriptFunc(const _value: TScriptFunc);
@@ -73,79 +78,85 @@ type
 		function getSQLite3LibraryPath(): string;
 		function getDBFileName(): string;
 
+        // FileDB
 		function openDB(_dbFile: string; _dbFolder: string = '';
-			_openState: TDBOpenState = dbopenExclusive): boolean;
+			    _openState: TDBOpenState = dbopenExclusive): boolean;
+
 		// Uses the current database confifguration values to initialize the db file.
 		// call OpenDB() to use custom values;
 		function initDB(_openState: TDBOpenState = dbopenExclusive): boolean;
 
+        //Memory only DB
+        function openMemDB(_dbFile: string; _openState: TDBOpenState = dbopenExclusive): boolean;
+        function initMemDB(_openState: TDBOpenState = dbopenExclusive): boolean;
+
 		procedure doUpgradeDB;
-			 function dropDB: boolean;
-			 procedure makeDatabase;
+		 function dropDB: boolean;
+		 procedure makeDatabase;
 
-			 function runScript(_script: string): boolean;
+		 function runScript(_script: string): boolean;
 
-			 function DB: TSQLConnection;
-			 function isTransactionActive: boolean;
+		 function DB: TSQLConnection;
+		 function isTransactionActive: boolean;
 
-			 {starts a transaction. If a previous transaction is active, it sleeps and tries again.}
-			 function startTransaction: boolean;
-			 {starts a transaction only when no transaction is active}
-			 function safeStartTransaction: boolean;
-			 function commit: boolean;
-			 {Commits but does not close the transaction. You can do more commits to the same transaction}
-			 function commitRetaining: boolean;
-			 function rollback: boolean;
-			 function rollbackRetaining: boolean;
-			 function endTransaction: boolean;
-			 function newQuery: TSQLQuery;
+		 {starts a transaction. If a previous transaction is active, it sleeps and tries again.}
+		 function startTransaction: boolean;
+		 {starts a transaction only when no transaction is active}
+		 function safeStartTransaction: boolean;
+		 function commit: boolean;
+		 {Commits but does not close the transaction. You can do more commits to the same transaction}
+		 function commitRetaining: boolean;
+		 function rollback: boolean;
+		 function rollbackRetaining: boolean;
+		 function endTransaction: boolean;
+		 function newQuery: TSQLQuery;
 
-			 {Returns pointer to DB, sets it to active if not already}
-			 function DbActive: TSQLConnection;
-			 function newIDFor(_tableName: string): int64;
+		 {Returns pointer to DB, sets it to active if not already}
+		 function DbActive: TSQLConnection;
+		 function newIDFor(_tableName: string): int64;
 
-			 function getSequenceTableCreateScript: string; virtual;
-			 function getSequenceUpsertScript: string; virtual;
-			 function getSequenceSelectScript: string; virtual;
+		 function getSequenceTableCreateScript: string; virtual;
+		 function getSequenceUpsertScript: string; virtual;
+		 function getSequenceSelectScript: string; virtual;
 
-			 function getDBInitScript: string; virtual;
-			 function getDBUpgradeScript: string; virtual;
+		 function getDBInitScript: string; virtual;
+		 function getDBUpgradeScript: string; virtual;
 
-			 {These set of functions check if records exist where a column has a particular value}
-			 function qExists(_tbl: string; _key: string): TSQLQuery;
-			 function exists(_tbl: string; _key: string; _value: string): boolean; overload;
-			 function exists(_tbl: string; _key: string; _value: int64): boolean; overload;
-			 function exists(_tbl: string; _key: string; _value: boolean): boolean; overload;
-			 function exists(_tbl: string; _key: string; _value: double): boolean; overload;
-			 function exists(_tbl: string; _where: string): boolean;
+		 {These set of functions check if records exist where a column has a particular value}
+		 function qExists(_tbl: string; _key: string): TSQLQuery;
+		 function exists(_tbl: string; _key: string; _value: string): boolean; overload;
+		 function exists(_tbl: string; _key: string; _value: int64): boolean; overload;
+		 function exists(_tbl: string; _key: string; _value: boolean): boolean; overload;
+		 function exists(_tbl: string; _key: string; _value: double): boolean; overload;
+		 function exists(_tbl: string; _where: string): boolean;
 
-			 {Update a value in a table}
-			 function qPut(_tbl: string; _id: int64; _fld: string;
-					 _idFieldName: string = 'rid'): TSQLQuery;
-			 function put(_tbl: string; _id: int64; _fld: string; _value: string): boolean;
-			overload;
-			 function put(_tbl: string; _id: int64; _fld: string; _value: int64): boolean;
-			overload;
-			 function put(_tbl: string; _id: int64; _fld: string; _value: boolean): boolean;
-			overload;
-			 function put(_tbl: string; _id: int64; _fld: string; _value: double): boolean;
-			overload;
-			 {Send multiple values as a json object. Parses the object, updates the table}
-			 function put(_tbl: string; _id: int64; _json: TJSONObject): boolean; overload;
+		 {Update a value in a table}
+		 function qPut(_tbl: string; _id: int64; _fld: string;
+				 _idFieldName: string = 'rid'): TSQLQuery;
+		 function put(_tbl: string; _id: int64; _fld: string; _value: string): boolean;
+		overload;
+		 function put(_tbl: string; _id: int64; _fld: string; _value: int64): boolean;
+		overload;
+		 function put(_tbl: string; _id: int64; _fld: string; _value: boolean): boolean;
+		overload;
+		 function put(_tbl: string; _id: int64; _fld: string; _value: double): boolean;
+		overload;
+		 {Send multiple values as a json object. Parses the object, updates the table}
+		 function put(_tbl: string; _id: int64; _json: TJSONObject): boolean; overload;
 
-			 function qDelete(_tbl: string; _id: int64; _idFieldName: string = 'rid'): TSQLQuery;
-			 function Delete(_tbl: string; _id: int64): boolean;
+		 function qDelete(_tbl: string; _id: int64; _idFieldName: string = 'rid'): TSQLQuery;
+		 function Delete(_tbl: string; _id: int64): boolean;
 
-			 {Reads a value from a table}
-			 function qselect(_tbl: string; _id: int64; _fld: string;
-					 _idFieldName: string = 'rid'): TSQLQuery;
-			 function select_str(_tbl: string; _id: int64; _fld: string): string;
-			 function select_int(_tbl: string; _id: int64; _fld: string): int64;
-			 function select_bool(_tbl: string; _id: int64; _fld: string): boolean;
-			 function select_real(_tbl: string; _id: int64; _fld: string): double;
+		 {Reads a value from a table}
+		 function qselect(_tbl: string; _id: int64; _fld: string;
+				 _idFieldName: string = 'rid'): TSQLQuery;
+		 function select_str(_tbl: string; _id: int64; _fld: string): string;
+		 function select_int(_tbl: string; _id: int64; _fld: string): int64;
+		 function select_bool(_tbl: string; _id: int64; _fld: string): boolean;
+		 function select_real(_tbl: string; _id: int64; _fld: string): double;
 
-			 {Returns the last inserted id by calling select last_insert_rowid();}
-			 function getSQLiteLastID(): int64;
+		 {Returns the last inserted id by calling select last_insert_rowid();}
+		 function getSQLiteLastID(): int64;
 
 			 // function execSQL(_sql: string): integer; //
 		// Executes a fully formed SQL statement (not select)
@@ -228,7 +239,7 @@ type
 
 	 public
 			//KV Tables
-			function kv(_tbl: string): TDBModule.TDBKeyValueStore;
+	    function kv(_tbl: string): TDBModule.TDBKeyValueStore;
 
 	 public
 		property DbFile: string read FDbFile write SetDbFile;
@@ -649,7 +660,7 @@ begin
 	 useSequences	:= True;
 	 qUpdateID.SQL.Text := getSequenceUpsertScript();
 	 qGetNewID.SQL.Text := getSequenceSelectScript();
-	myDbOpenState := dbopenExclusive;
+	 myDbOpenState := dbopenExclusive;
 end;
 
 procedure TDBModule.SetDbFile(const _DbFile: string);
@@ -835,10 +846,10 @@ var
 
 begin
 
-	 Result := True;
+	Result := True;
 	myDbOpenState := _openState;
 
-	 if myDB.Connected then myDB.Connected := False;
+    if myDB.Connected then myDB.Connected := False;
 
 	 myDB.DatabaseName := getDBFileName();		{Gets the file name that was set}
 
@@ -860,19 +871,50 @@ begin
 			except
 			if isExclusive(myDB) then
 				myDbOpenState := dbopenLocked // The database is locked so we cannot open it
-			else
-				myDbOpenState := dbopenForbidden;
+			//else
+			//	myDbOpenState := dbopenForbidden;
 			end;
 
 		case myDbOpenState of
 				 dbopenForbidden: ;
 				 dbopenLocked: ;
-			dbopenReadOnly: openReadOnly;
-				 dbopenShared: openShared;
-				 dbopenExclusive: openExclusive;
-			end;
+			     dbopenReadOnly:    openReadOnly;
+				 dbopenShared:      openShared;
+				 dbopenExclusive:   openExclusive;
+		end;
 
 	 end;
+end;
+
+function TDBModule.openMemDB(_dbFile: string; _openState: TDBOpenState
+	): boolean;
+begin
+    {This section is duplicated in OpenDB()}
+  	 DbFile	 := _dbFile;
+	 DbFolder := '';
+
+	 if isTransactionActive then
+	 begin
+	 	 DB.EndTransaction;
+		 DB.CloseDataSets;
+	 end;
+     {duplicate end}
+
+    result:= initMemDB(_openState);
+end;
+
+function TDBModule.initMemDB(_openState: TDBOpenState): boolean;
+begin
+    myDbOpenState:= _openState;
+
+    if myDB.Connected then myDB.Connected := False;
+
+    with myDB do
+    begin
+      OpenFlags := [sofReadWrite, sofCreate, sofURI];
+      DatabaseName := format('file:%s?mode=memory',[DbFile]);
+    end;
+
 end;
 
 procedure TDBModule.doUpgradeDB;
@@ -918,13 +960,12 @@ end;
 function TDBModule.openDB(_dbFile: string; _dbFolder: string;
 	 _openState: TDBOpenState): boolean;
 begin
-	 DbFile	 := _dbFile;
+	 DbFile	  := _dbFile;
 	 DbFolder := _dbFolder;
-
 	 if isTransactionActive then
 	 begin
 	 	 DB.EndTransaction;
-			DB.CloseDataSets;
+		 DB.CloseDataSets;
 	 end;
 
 	 Result := initDB(_openState);
@@ -945,12 +986,12 @@ begin
 	 try
 			myDB.Open;
 			if startTransaction then
-		begin
+		    begin
 				 scripts.Script.add(_script);
 			end;
 			try
 				 try
-						scripts.Execute;
+					 scripts.Execute;
 				 	 commit;
 				 	 Result := True;
 				 except

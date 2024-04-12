@@ -16,7 +16,9 @@ uses
     sugar.htmlbuilder.alpinejs, sugar.templater, sugar.htmlfactory, 
     sugar.jshelpers, sugar.jsonlib, sugar.webpage, sugar.vuejs, 
     sugar.jsonbuilder, sugar.consoleapp, sugar.sort, nsort, sugar.markdown, 
-    sugar.htmlbuilder.htmx, LazarusPackageIntf;
+    sugar.htmlbuilder.htmx, sugar.threadloader, sugar.jsGoogleChart, 
+    sugar.jscharts, sugar.htmlpage, assets, bulma, semanticui, webui, 
+    LazarusPackageIntf;
 
 implementation
 

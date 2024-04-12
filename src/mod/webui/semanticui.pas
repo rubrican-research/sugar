@@ -1,0 +1,1183 @@
+unit semanticui;
+
+{returns pre-built html element as supported by the UI library being used}
+
+{$mode objfpc}{$H+}
+
+
+interface
+
+uses
+    Classes, SysUtils, sugar.htmlbuilder, webui, fpjson, sugar.utils, sugar.collections;
+
+type
+
+    { TSemanticUI }
+
+    TSemanticUI = class(TInterfacedObject, IWebUI)
+    protected
+        myUIBase: TWebUIBase;
+    public
+        function CDNLinks: THtmlElementArray;
+		function table: THtmlTable;
+		function uiContainerFluid: string;
+		function containerFluid: THtmlDiv;
+    public
+
+        {instance}
+        function uiBase: TWebUIBase;
+
+        {style classes}
+        function uiMenuItemLink: string;
+        function uiMenuItemDisabled: string;
+        function uiMenuItemActive: string;
+        function uiMenuItem: string;
+        function uiMenuContainer: string;
+        function uiMenu: string;
+        function uiFlex: string;
+        function uiContainer: string;
+
+        {span blocks}
+        function uiContent: string;
+        function uiExtraContent: string;
+        function uiHeaderText: string;
+        function uiSubHeaderText: string;
+        function uiMetaText: string;
+        function uiDescriptionText: string;
+
+        {Colours}
+        function uiPrimaryColour: string;
+        function uiSecondaryColour: string;
+        function uiForeColour1: string;
+        function uiForeColour2: string;
+        function uiForeColour3: string;
+        function uiForeColour4: string;
+        function uiForeColour5: string;
+        function uiForeColour6: string;
+        function uiBackColour1: string;
+        function uiBackColour2: string;
+        function uiBackColour3: string;
+        function uiBackColour4: string;
+        function uiBackColour5: string;
+        function uiBackColour6: string;
+
+        {Controls - edit}
+        function htmlLabel(_text: string): THtmlLabel;
+        function selection(const _name: string; _choices: TStringArray): THtmlSelect;
+        function timeInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function textInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlEditBox;
+        function phoneInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function passwordInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = '';
+            _value: string = ''): THtmlInput;
+        function monthInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function numberInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function textbox(const _name: string; _placeholder: string = ''): THtmlTextArea;
+        function fileInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function emailInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function datetimeInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = '';
+            _value: string = ''): THtmlInput;
+        function dateInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function weekInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+
+        {Controls - Buttons}
+        function button(const _name: string; _caption: string): THtmlButton;
+        function primaryButton(const _name: string; _caption: string): THtmlButton;
+        function submitButton(const _name: string; _caption: string): THtmlButton;
+        function secondaryButton(const _name: string; _caption: string): THtmlButton;
+        function resetButton(const _name: string; _caption: string): THtmlButton;
+
+        {Controls - Choices}
+        function radioButton(const _name: string; const _caption: string;
+            const _value: string = ''): THtmlRadioButton;
+
+        function checkBox(const _name: string; const _caption: string): THtmlCheckBox;
+
+        {Containers}
+        function container: THtmlDiv;
+        function segmentGroup: THtmlDiv;
+        function segment: THtmlDiv;
+		function cardGroup: THtmlDiv;
+        function card: THtmlDiv;
+        function itemGroup: THtmlDiv;
+        function item: THtmlDiv;
+
+        {Multimedia}
+        function imageContainer: THtmlDiv;
+        function image: THtmlImg;
+
+        {Form}
+        function newForm(const _id: string; const _name: string = '';
+            const _action: string = ''): THtmlForm;
+
+        function newFieldContainer(const _numElements: byte = 1;
+            const _id: string = ''): THtmlDiv;
+        function newField(_width: byte=0; const _id: string=''): THtmlDiv;
+        function inlineFields: THtmlDiv;
+
+        function menuToggleDropDown: THtmlCollection;
+        function menuItem(_caption: string; _url: string; _name: string;
+            _id: string): THtmlAnchor;
+        function menuDropDown: THtmlCollection;
+        function menu: THtmlCollection;
+
+        constructor Create;
+        destructor Destroy; override;
+
+        function uiFieldContainer: string;
+        function uiField: string;
+        function uiFields(const _numFields: byte): string;
+
+        function newInput(_id: string; _name: string; _placeholder: string;
+            _caption: string; _value: string): THtmlInput;
+        function icon(_name: string; _attr: string = ''): string;
+        function emoji(_name: string; _attr: string = ''): string;
+        function AssetLinks: THtmlElementArray;
+
+        function uiDividerHidden: string;
+        function uiDivider: string;
+
+        function uiGrid(const _numColumns: byte = 1): string;
+        function uiRow: string;
+        function uiColumns(const _numColumns: byte = 1): string;
+        function uiDropdown: string;
+		function urlLink(const _url: string; _caption: string): THtmlAnchor;
+
+        {Sizes}
+        function uiVeryLarge: string;
+        function uiLarge: string;
+        function uiMedium: string;
+        function uiSmall:string;
+        function uiVerySmall: string;
+
+        {States}
+        function uiEnabled(_yes: boolean = true): string;
+        function uiVisible(_yes: boolean = true): string;
+        function uiReadOnly(_yes: boolean = true): string;
+		function span(_text: string; _class: string=''): THtmlSpan;
+		function text(_text: string; _class: string=''): string;
+		function uiSegment(_segmentType: UISegmentType): string;
+		function uiRequired(_yes: boolean=true): string;
+		function uiFloated(_float: UIFloatType=uiFloatedNone): string;
+		function textButton(const _name: string; _caption: string): THtmlButton;
+		function segment(_segmentType: UISegmentType=uiSegmentBasicBox
+			): THtmlDiv;
+		function outlineButton(const _name: string; _caption: string
+			): THtmlButton;
+		function gridRow(_colWidths: array of word): THtmlDiv;
+		function gridColumn(_width: word=0; _float: UIFloatType=uiFloatedNone
+			): THtmlDiv;
+		function grid: THtmlDiv;
+		function uiVerticalAlign(_valign: UIVerticalAlignment): string;
+		function uiHorizontalAlign(_halign: UIHorizontalAlignment): string;
+		function grid(_cols: word; _gridType: string;
+			_valign: UIVerticalAlignment): THtmlDiv; overload;
+    end;
+
+   	{ TSemanticUIFormValidator }
+    { Implements the SUI Form Validator functionality.
+      Generates the appropriate JS Code}
+    TSemanticUIFormValidator = class(TJavaScript)
+    private
+        myRules: TJSONObject;
+		myForm: THtmlForm;
+		function getForm: THtmlForm;
+		procedure setForm(const _form: THtmlForm);
+	public
+        property form: THtmlForm read getForm write setForm;
+        constructor Create(_form: THtmlForm);
+        destructor Destroy; override;
+        function rule(_name: string; _type: string; _prompt: string): TSemanticUIFormValidator;
+        function code: string; override;
+
+        {validator helpers}
+        function  suiIsEmpty: string;
+        function  suiIsChecked: string;
+        function  suiIsEmail: string;
+        function  suiIsUrl: string;
+        function  suiIsInteger(_range: string): string;
+        function  suiIsDecimal: string;
+        function  suiIsNumber: string;
+        function  suiRegExpression(_regex: string): string;
+        function  suiIsCreditCard: string;
+        function  suiIsCreditCardType(_type: string): string;
+        function  suiContains(_value: string): string;
+        function  suiContainsExactly(_value: string): string;
+        function  suiDoesntContain(_value: string): string;
+        function  suiDoesntContainExactly(_value: string): string;
+        function  suiIs(_value: string): string;
+        function  suiIisExactly(_value: string): string;
+        function  suiNot(_value: string): string;
+        function  suiNotExactly(_value: string): string;
+        function  suiMinLength(_len: word): string;
+        function  suiExactLength(_len: word): string;
+        function  suiMaxLength(_len: word): string;
+        function  suiShouldMatch(_fieldName: string): string;
+        function  suiShouldBeDifferent(_fieldName: string): string;
+        function  suiMinCount(_count: word): string;
+        function  suiExactCount(_count: word): string;
+        function  suiMaxCount(_count: word): string;
+
+	end;
+
+	{ TSemanticUIFormValues }
+
+    //TSemanticUIFormValues = class(TJavaScript)
+    //protected
+    //    myData: TJSONObject;
+    //public
+    //    constructor Create(_fields: string; _delim: string = ',');
+    //    constructor Create(_field: TStringArray);
+    //    constructor Create(_form: THtmlForm);
+    //    constructor Create(_json: TJSONObject);
+    //    {renders javascript code that reads values from the form }
+    //    function jsGetValues: string;
+    //    {renders javascript code that sets values in the form }
+    //    function jsSetValues: string;
+    //end;
+
+
+
+implementation
+
+uses
+    assets;
+
+{ TSemanticUIFormValidator }
+
+function TSemanticUIFormValidator.getForm: THtmlForm;
+begin
+    Result:= myForm;
+    if not Assigned(Result) then
+        trip('TSemanticUIFormValidator.getForm(): myForm is not assigned');
+end;
+
+procedure TSemanticUIFormValidator.setForm(const _form: THtmlForm);
+begin
+    if _form = myForm then exit;
+    if Assigned(myForm) then
+        myForm.Free;
+    myForm := _form;
+end;
+
+constructor TSemanticUIFormValidator.Create(_form: THtmlForm);
+begin
+    inherited Create;
+    myForm := _form;
+    myRules:= TJSONObject.Create;
+    myRules.UnquotedMemberNames:=True;
+    myRules.add('fields', TJSONObject.Create);
+    codeDefinition:= '%s';
+end;
+
+destructor TSemanticUIFormValidator.Destroy;
+begin
+    myRules.Free;
+	inherited Destroy;
+end;
+
+function TSemanticUIFormValidator.rule(_name: string; _type: string;
+	_prompt: string): TSemanticUIFormValidator;
+var
+  _field: TJSONObject;
+  _rule: TJSONObject;
+begin
+    Result:= self;
+    _field:= myRules.Objects['fields'].Find(_name) as TJSONObject;
+    if not assigned(_field) then
+    begin
+        _field:= TJSONObject.Create([
+            'identifier', _name,
+            'rules',        TJSONArray.Create]);
+        myRules.Objects['fields'].add(_name, _field)
+	end;
+
+    _rule:= TJSONObject.Create;
+    _rule.Add('type', _type);
+    _rule.Add('prompt',_prompt);
+    {TODO: Check if the rule already exists}
+    _field.Arrays['rules'].add(_rule);
+end;
+
+function TSemanticUIFormValidator.code: string;
+begin
+    Result:= Format(codeDefinition,[Format('$("#%s").form(%s);',[form.tagID,myRules.AsJSON])]);;
+end;
+
+function TSemanticUIFormValidator.suiIsEmpty: string;
+begin
+    Result:= 'empty';
+end;
+
+function TSemanticUIFormValidator.suiIsChecked: string;
+begin
+    Result:= 'checked';
+end;
+
+function TSemanticUIFormValidator.suiIsEmail: string;
+begin
+    Result:= 'email';
+end;
+
+function TSemanticUIFormValidator.suiIsUrl: string;
+begin
+    Result:= 'url';
+end;
+
+function TSemanticUIFormValidator.suiIsInteger(_range: string): string;
+begin
+    Result:= 'integer';
+    if not _range.IsEmpty then
+        Result += '[' + _range + ']';
+end;
+
+function TSemanticUIFormValidator.suiIsDecimal: string;
+begin
+    Result:= 'decimal';
+end;
+
+function TSemanticUIFormValidator.suiIsNumber: string;
+begin
+    Result:= 'number';
+end;
+
+function TSemanticUIFormValidator.suiRegExpression(_regex: string): string;
+begin
+    Result:= 'regExp[' + _regex + ']'; ;
+end;
+
+function TSemanticUIFormValidator.suiIsCreditCard: string;
+begin
+    Result:= 'creditCard';
+end;
+
+function TSemanticUIFormValidator.suiIsCreditCardType(_type: string): string;
+begin
+    Result:= suiIsCreditCard + '[' + _type + ']';
+end;
+
+function TSemanticUIFormValidator.suiContains(_value: string): string;
+begin
+    Result:= 'contains[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiContainsExactly(_value: string): string;
+begin
+    Result:= 'containsExactly[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiDoesntContain(_value: string): string;
+begin
+    Result:= 'doesntContain[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiDoesntContainExactly(_value: string
+	): string;
+begin
+    Result:= 'doesntContainExactly[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiIs(_value: string): string;
+begin
+    Result:= 'is[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiIisExactly(_value: string): string;
+begin
+    Result:= 'isExactly[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiNot(_value: string): string;
+begin
+    Result:= 'not[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiNotExactly(_value: string): string;
+begin
+    Result:= 'notExactly[' + _value + ']';
+end;
+
+function TSemanticUIFormValidator.suiMinLength(_len: word): string;
+begin
+    Result:= Format('minLength[%d]',[_len]);
+end;
+
+function TSemanticUIFormValidator.suiExactLength(_len: word): string;
+begin
+    Result:= Format('exactLength[%d]',[_len]);
+end;
+
+function TSemanticUIFormValidator.suiMaxLength(_len: word): string;
+begin
+    Result:= Format('maxLength[%d]',[_len]);
+end;
+
+function TSemanticUIFormValidator.suiShouldMatch(_fieldName: string): string;
+begin
+    Result:= Format('match[%s]',[_fieldName]);
+end;
+
+function TSemanticUIFormValidator.suiShouldBeDifferent(_fieldName: string
+	): string;
+begin
+    Result:= Format('different[%s]',[_fieldName]);
+end;
+
+function TSemanticUIFormValidator.suiMinCount(_count: word): string;
+begin
+    Result:= Format('minCount[%d]',[_count]);
+end;
+
+function TSemanticUIFormValidator.suiExactCount(_count: word): string;
+begin
+    Result:= Format('exactCount[%d]',[_count]);
+end;
+
+function TSemanticUIFormValidator.suiMaxCount(_count: word): string;
+begin
+    Result:= Format('maxCount[%d]',[_count]);
+end;
+
+
+function TSemanticUI.newField(_width: byte; const _id: string): THtmlDiv;
+begin
+    Result := uiBase.newField(_width, _id);
+
+    if _width>16 then
+        _width:= 16;
+
+    if _width > 0 then
+        Result.addClass(numToText(_width) + ' wide');
+
+    Result.addClass(uiField);
+end;
+
+function TSemanticUI.inlineFields: THtmlDiv;
+begin
+    Result := uiBase.inlineFields;
+    Result.setClass('inline fields');
+end;
+
+function TSemanticUI.grid(
+    _cols: word; _gridType: string;
+	_valign: UIVerticalAlignment): THtmlDiv;
+
+begin
+    Result:= self.grid;
+    Result.addClass(uiColumns(_cols));
+    Result.addClass(_gridType);
+    Result.addClass(uiVerticalAlign(_valign));
+end;
+
+function TSemanticUI.uiHorizontalAlign(_halign: UIHorizontalAlignment): string;
+begin
+    Result:= '';
+    case _halign of
+        uiDefaultHorizontal: ;
+        uiAlignLeft:   Result:= 'left aligned';
+        uiAlignCenter: Result:= 'center aligned';
+        uiAlignRight:  Result:= 'right aligned';
+        uiAlignJustified: ;
+    end;
+end;
+
+function TSemanticUI.uiVerticalAlign(_valign: UIVerticalAlignment): string;
+begin
+    Result:= '';
+    case _valign of
+        uiDefaultVertical: ;
+        uiAlignTop:    Result:= 'top aligned';
+        uiAlignMiddle: Result:= 'middle aligned';
+        uiAlignBottom: Result:= 'bottom aligned';
+    end;
+end;
+
+function TSemanticUI.grid: THtmlDiv;
+begin
+    Result:= uiBase.grid;
+    Result.setClass('ui grid');
+end;
+
+function TSemanticUI.gridColumn(_width: word; _float: UIFloatType): THtmlDiv;
+var
+  _colwidth: string = '';
+  _floatType: string = '';
+begin
+    Result:= THtmlDiv.Create;
+
+    if _width > 16 then
+        _width := 16;
+    if _width>0 then
+        _colWidth := numToText(_width) + ' wide';
+
+    _floatType:= uiFloated(_float);
+
+    Result.setClass('ui ' + _colWidth + ' ' + _floatType + ' column');
+end;
+
+function TSemanticUI.gridRow(_colWidths: array of word): THtmlDiv;
+var
+  _colCount: word;
+  _width: word;
+  _totalWidth: word = 0;
+  _numWide: string;
+  _currWidth: word;
+begin
+    Result:= THtmlDiv.Create;
+    _colCount:= Length(_colWidths);
+
+    if _colCount = 0 then
+    begin
+        Result.setClass('row');
+        exit;
+    end;
+
+    Result.setClass(numToText(_colCount) + ' column row');
+    _colCount:= 0;{reusing this variable in the loop}
+
+    for _width in _colWidths do
+    begin
+
+        if (_totalWidth + _width) > 16 then
+            _currWidth:= 16 - _totalWidth
+        else
+            _currWidth:= _width;
+
+        _totalWidth += _currWidth;
+        _numWide:= '';
+
+        if _width >= 1 then
+        begin
+	        with Result.div_ do {<-- add a colum here}
+	        begin
+	            _numWide:= numToText(_width) + ' wide ';
+	            setClass(_numWide + 'column');
+	            setID(gridColumnID(_colCount, Result));
+	            inc(_colCount); {<--here}
+			end;
+		end;
+
+        if _totalWidth = 16 then break;
+	end;
+end;
+
+function TSemanticUI.outlineButton(const _name: string; _caption: string
+	): THtmlButton;
+begin
+    Result:= button(_name, _caption);
+    Result.AddClass('basic');
+end;
+
+function TSemanticUI.segment(_segmentType: UISegmentType): THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    Result.setClass(uiSegment(_segmentType))
+end;
+
+function TSemanticUI.textButton(const _name: string; _caption: string
+	): THtmlButton;
+begin
+    Result:= button(_name, _caption);
+    Result.AddClass('tertiary');
+end;
+
+function TSemanticUI.uiFloated(_float: UIFloatType): string;
+begin
+    Result:= '';
+    case _float of
+        uiFloatedNone: ;
+        uiFloatedLeft:   Result:= 'left floated';
+        uiFloatedCenter: Result:= 'center floated';
+        uiFloatedRight:  Result:= 'right floated';
+    end;
+end;
+
+function TSemanticUI.uiRequired(_yes: boolean): string;
+begin
+    Result:= 'required';
+end;
+
+function TSemanticUI.uiSegment(_segmentType: UISegmentType): string;
+var
+  _type: string = '';
+begin
+    case _segmentType of
+        uiSegmentBasicBox:    Result := 'ui segment';
+        uiSegmentPlaceholder: Result := 'ui placeholder segment';
+        uiSegmentRaised:      Result := 'ui raised segment';
+        uiSegmentStacked:     Result := 'ui stacked segment';
+        uiSegmentPiled:       Result := 'ui piled segment';
+        uiSegmentVertical:    Result := 'ui vertical segment';
+        uiSegmentNoBorder:    Result := 'ui stacked segment';
+    end;
+end;
+
+function TSemanticUI.newFieldContainer(const _numElements: byte = 1;
+    const _id: string = ''): THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+    Result.addClass(numToText(_numElements));
+    Result.addClass(uiFieldContainer);
+end;
+
+function TSemanticUI.container: THtmlDiv;
+begin
+    Result := uiBase.container;
+    Result.setClass(uiContainer);
+end;
+
+function TSemanticUI.segmentGroup: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('ui segments');
+	end;
+end;
+
+function TSemanticUI.segment: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('ui segment');
+	end;
+end;
+
+function TSemanticUI.card: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('ui card');
+	end;
+end;
+
+function TSemanticUI.itemGroup: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('ui items');
+	end;
+end;
+
+function TSemanticUI.item: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('item');
+	end;
+end;
+
+function TSemanticUI.imageContainer: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+    with Result do begin
+        setClass('item');
+	end;
+end;
+
+function TSemanticUI.image: THtmlImg;
+begin
+
+end;
+
+function TSemanticUI.menu: THtmlCollection;
+begin
+    Result := nil;
+end;
+
+constructor TSemanticUI.Create;
+begin
+    inherited;
+    myUIBase := TWebUIBase.Create;
+    ;
+end;
+
+destructor TSemanticUI.Destroy;
+begin
+    FreeAndNil(myUIBase);
+    inherited Destroy;
+end;
+
+function TSemanticUI.menuDropDown: THtmlCollection;
+begin
+
+end;
+
+function TSemanticUI.menuToggleDropDown: THtmlCollection;
+begin
+
+end;
+
+function TSemanticUI.menuItem(_caption: string; _url: string;
+    _name: string; _id: string): THtmlAnchor;
+begin
+    Result := uiBase.menuItem(_caption, _url, _name, _id);
+    Result.setClass('item');
+end;
+
+function TSemanticUI.htmlLabel(_text: string): THtmlLabel;
+begin
+    Result := uiBase.htmlLabel(_text);
+    Result.setClass('ui label');
+end;
+
+function TSemanticUI.textInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlEditBox;
+begin
+    Result := uiBase.textInput(_id, _name, _placeholder, _caption, _value);
+    Result.setClass('ui input');
+end;
+
+function TSemanticUI.newInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.newInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.emoji(_name: string; _attr: string): string;
+const
+    EMOJI_TAG = '<em data-emoji=":%s:" %s></em>';
+begin
+    Result := Format(EMOJI_TAG, [_name, _attr]);
+end;
+
+function TSemanticUI.AssetLinks: THtmlElementArray;
+begin
+    Result := nil;
+end;
+
+function TSemanticUI.uiDivider: string;
+begin
+    Result := 'ui divider';
+end;
+
+
+function TSemanticUI.uiGrid(const _numColumns: byte): string;
+begin
+    Result := numToText(_numColumns);
+    if not Result.isEmpty then
+        Result := Result + ' columns';
+
+    Result := 'ui ' + Result + ' doubling grid';
+end;
+
+function TSemanticUI.uiRow: string;
+begin
+    Result := 'ui row';
+end;
+
+function TSemanticUI.uiColumns(const _numColumns: byte): string;
+begin
+    Result := numToText(_numColumns);
+    if not Result.isEmpty then
+        Result := 'ui ' + Result + ' column';
+end;
+
+function TSemanticUI.uiDropdown: string;
+begin
+    Result := 'ui fluid normal dropdown';
+end;
+
+function TSemanticUI.urlLink(const _url: string; _caption: string): THtmlAnchor;
+begin
+    Result:= uiBase.urlLink(_url, _caption);
+end;
+
+function TSemanticUI.uiVeryLarge: string;
+begin
+    Result:= 'big';
+end;
+
+function TSemanticUI.uiLarge: string;
+begin
+    Result:= 'large';
+end;
+
+function TSemanticUI.uiMedium: string;
+begin
+    Result:= 'medium';
+end;
+
+function TSemanticUI.uiSmall: string;
+begin
+    Result:= 'small';
+end;
+
+function TSemanticUI.uiVerySmall: string;
+begin
+    Result:= 'tiny';
+end;
+
+function TSemanticUI.uiEnabled(_yes: boolean): string;
+begin
+    case _yes of
+        True:  Result:= 'active';
+        False: Result:= 'disabled';
+    end;
+end;
+
+function TSemanticUI.uiVisible(_yes: boolean): string;
+begin
+    case _yes of
+        True: Result:= 'visible';
+        False: Result:= 'hidden';
+    end;
+end;
+
+function TSemanticUI.uiReadOnly(_yes: boolean): string;
+begin
+    Result:= '';
+end;
+
+function TSemanticUI.span(_text: string; _class: string): THtmlSpan;
+begin
+     Result:= uiBase.span(_text, 'ui ' + _class + ' text');
+end;
+
+function TSemanticUI.text(_text: string; _class: string): string;
+begin
+    Result:= uiBase.text(_text,'ui ' + _class + ' text');
+end;
+
+function TSemanticUI.cardGroup: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+    with Result do
+    begin
+        setClass('ui cards')
+	end;
+end;
+
+function TSemanticUI.uiDividerHidden: string;
+begin
+    Result := 'ui hidden divider';
+end;
+
+function TSemanticUI.icon(_name: string; _attr: string): string;
+begin
+    Result := format('<i class="%s icon"></i>', [_name]);
+end;
+
+function TSemanticUI.uiField: string;
+begin
+    Result := 'field';
+end;
+
+function TSemanticUI.uiFields(const _numFields: byte): string;
+begin
+    Result := numToText(_numFields);
+    if not Result.isEmpty then
+    begin
+        Result := Result + ' fields';
+    end;
+end;
+
+function TSemanticUI.uiFieldContainer: string;
+begin
+    Result := 'fields';
+end;
+
+function TSemanticUI.numberInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.numberInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.dateInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.dateInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.passwordInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.passwordInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.emailInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.emailInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.timeInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.timeInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.datetimeInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.datetimeInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.phoneInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.phoneInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.fileInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.fileInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.monthInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.monthInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.weekInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := uiBase.weekInput(_id, _name, _placeholder, _caption, _value);
+end;
+
+function TSemanticUI.radioButton(const _name: string; const _caption: string;
+    const _value: string): THtmlRadioButton;
+begin
+    Result := uiBase.radioButton(_name, _caption, _value);
+    Result.addClass('ui radio checkbox');
+end;
+
+function TSemanticUI.checkBox(const _name: string;
+    const _caption: string): THtmlCheckBox;
+begin
+    Result := uiBase.checkBox(_name, _caption);
+    Result.addClass('ui checkbox');
+end;
+
+function TSemanticUI.selection(const _name: string; _choices: TStringArray): THtmlSelect;
+begin
+    Result := uiBase.selection(_name, _choices);
+    Result.addClass('ui dropdown');
+end;
+
+function TSemanticUI.textbox(const _name: string; _placeholder: string): THtmlTextArea;
+begin
+    Result := uiBase.textbox(_name, _placeholder);
+end;
+
+function TSemanticUI.button(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := uiBase.button(_name, _caption);
+    Result.setClass('ui button');
+end;
+
+function TSemanticUI.submitButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := uiBase.submitButton(_name, _caption);
+    Result.setClass('ui primary submit button');
+end;
+
+function TSemanticUI.primaryButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := uiBase.primaryButton(_name, _caption);
+    Result.setClass('ui primary button');
+end;
+
+function TSemanticUI.secondaryButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := uiBase.secondaryButton(_name, _caption);
+    Result.setClass('ui secondary button');
+end;
+
+function TSemanticUI.resetButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := uiBase.resetButton(_name, _caption);
+    Result.setClass('ui reset button');
+end;
+
+function TSemanticUI.uiContainer: string;
+begin
+    Result := 'ui container';
+end;
+
+function TSemanticUI.uiContent: string;
+begin
+    Result:= 'content';
+end;
+
+function TSemanticUI.uiExtraContent: string;
+begin
+    Result:= 'extra content';
+end;
+
+function TSemanticUI.uiHeaderText: string;
+begin
+    Result:= 'header';
+end;
+
+function TSemanticUI.uiSubHeaderText: string;
+begin
+    Result:= 'ui sub header';
+end;
+
+function TSemanticUI.uiMetaText: string;
+begin
+    Result:= 'meta';
+end;
+
+function TSemanticUI.uiDescriptionText: string;
+begin
+    Result:= 'description';
+end;
+
+function TSemanticUI.uiPrimaryColour: string;
+begin
+    Result:= 'primary';
+end;
+
+function TSemanticUI.uiSecondaryColour: string;
+begin
+    Result:= 'secondary';
+end;
+
+function TSemanticUI.uiForeColour1: string;
+begin
+    Result:= 'black';
+end;
+
+function TSemanticUI.uiForeColour2: string;
+begin
+    Result:= 'blue';
+end;
+
+function TSemanticUI.uiForeColour3: string;
+begin
+    Result:= 'violet';
+end;
+
+function TSemanticUI.uiForeColour4: string;
+begin
+    Result:= 'green';
+end;
+
+function TSemanticUI.uiForeColour5: string;
+begin
+    Result:= 'yellow';
+end;
+
+function TSemanticUI.uiForeColour6: string;
+begin
+    Result:= 'orange';
+end;
+
+function TSemanticUI.uiBackColour1: string;
+begin
+    Result:= 'white';
+end;
+
+function TSemanticUI.uiBackColour2: string;
+begin
+    Result:= 'grey';
+end;
+
+function TSemanticUI.uiBackColour3: string;
+begin
+    Result:= 'blue';
+end;
+
+function TSemanticUI.uiBackColour4: string;
+begin
+    Result:= 'green';
+end;
+
+function TSemanticUI.uiBackColour5: string;
+begin
+    Result:= 'yellow';
+end;
+
+function TSemanticUI.uiBackColour6: string;
+begin
+    Result:= 'orange';
+end;
+
+function TSemanticUI.uiFlex: string;
+begin
+    Result := 'ui flex';
+end;
+
+function TSemanticUI.uiMenuContainer: string;
+begin
+    Result := 'menu';
+end;
+
+function TSemanticUI.uiMenu: string;
+begin
+    Result := 'ui menu';
+end;
+
+function TSemanticUI.uiMenuItem: string;
+begin
+    Result := 'item';
+end;
+
+function TSemanticUI.uiMenuItemLink: string;
+begin
+    Result := 'menu link';
+end;
+
+function TSemanticUI.uiMenuItemActive: string;
+begin
+    Result := 'active';
+end;
+
+function TSemanticUI.uiMenuItemDisabled: string;
+begin
+    Result := 'disabled';
+end;
+
+function TSemanticUI.uiBase: TWebUIBase;
+begin
+    Result := myUIBase;
+end;
+
+function TSemanticUI.CDNLinks: THtmlElementArray;
+begin
+    SetLength(Result, 3);
+    Result[0] := SemanticCSS;
+    Result[1] := JQueryJS;
+    // Result[2] := JQueryMigrateJS;
+    Result[2] := SemanticUIJS;
+end;
+
+function TSemanticUI.table: THtmlTable;
+begin
+    Result:= uiBase.table;
+    Result.setClass('ui celled table');
+end;
+
+function TSemanticUI.containerFluid: THtmlDiv;
+begin
+    Result:= uiBase.containerFluid;
+    Result.setClass(uiContainerFluid);
+end;
+
+function TSemanticUI.uiContainerFluid: string;
+begin
+    Result:= 'ui fluid container';
+end;
+
+function TSemanticUI.newForm(const _id: string; const _name: string;
+    const _action: string): THtmlForm;
+begin
+    Result := uiBase.newForm(_id, _name, _action);
+    Result.setClass('ui form');
+end;
+
+end.

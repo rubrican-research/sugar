@@ -1,0 +1,1329 @@
+unit webui;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+    Classes, SysUtils, sugar.htmlbuilder, sugar.collections;
+
+type
+    UIFramework = (uiUndefined, uiSemantic, uiBulma);
+
+    UIFloatType = (uiFloatedNone, uiFloatedLeft, uiFloatedCenter, uiFloatedRight);
+
+    UISegmentType = (uiSegmentBasicBox, uiSegmentPlaceholder, uiSegmentRaised, uiSegmentStacked,
+                     uiSegmentPiled, uiSegmentVertical, uiSegmentNoBorder);
+
+    UIHorizontalAlignment = (uiDefaultHorizontal, uiAlignLeft, uiAlignCenter, uiAlignRight, uiAlignJustified);
+
+    UIVerticalAlignment = (uiDefaultVertical, uiAlignTop, uiAlignMiddle, uiAlignBottom);
+
+    TWebUIAccordion = class(THtmlCollection)
+
+    end;
+
+    TWebUIBreadCrumb = class(THtmlCollection)
+
+    end;
+
+    TWebUICard = class(THtmlCollection)
+
+    end;
+
+    TWebUIDropdown = class(THtmlCollection)
+
+    end;
+
+    TWebUIMessage = class(THtmlCollection)
+
+    end;
+
+    TWebUIModal = class(THtmlCollection)
+
+    end;
+
+    TWebUINavBar = class(THtmlCollection)
+
+    end;
+
+    TWebUIPagination = class(THtmlCollection)
+
+    end;
+
+    TWebUIPanel = class(THtmlCollection)
+
+    end;
+
+    TWebUITabs = class(THtmlCollection)
+
+    end;
+
+	{ TWebUIGridColumn }
+
+    TWebUIGridColumn = class(THtmlDiv)
+	private
+		mywidth: word;
+		procedure setwidth(const _width: word);
+	published
+        property width: word read mywidth write setwidth;
+
+	end;
+    TWebUIGridColumns = specialize GenericHashObjectList<TWebUIGridColumn>;
+
+    TWebUIGridRow = class(THtmlCollection)
+
+	end;
+
+    TWebUIGrid = class(THtmlCollection)
+
+
+	end;
+
+    { TWebUIChoiceGrid }
+
+    TWebUIChoiceGrid = class(THtmlCollection)
+    private
+        myMultipleChoices: boolean;
+        procedure setMultipleChoices(const _MultipleChoices: boolean);
+    protected
+        myRows: TStringList;
+        myColumns: TStringList;
+    public
+        function rows(const _list: array of string): TWebUIChoiceGrid;
+        function columns(const _list: array of string): TWebUIChoiceGrid;
+
+        {allows the user to select multiple columns per row}
+        property allowMultipleChoices: boolean
+            read myMultipleChoices write setMultipleChoices;
+    end;
+
+    TWebUIBase = class;
+
+    { IWebUI }
+
+    IWebUI = interface
+        function uiBase: TWebUIBase;
+        function CDNLinks: THtmlElementArray;
+        function AssetLinks: THtmlElementArray;
+
+        {Containers}
+        function container: THtmlDiv;
+        function containerFluid: THtmlDiv;
+        function segmentGroup: THtmlDiv;
+        function segment(_segmentType: UISegmentType = uiSegmentBasicBox): THtmlDiv;
+        function cardGroup: THtmlDiv;
+        function card: THtmlDiv;
+        function itemGroup: THtmlDiv;
+        function item: THtmlDiv;
+
+        {span blocks}
+        function span(_text: string; _class: string= ''): THtmlSpan;
+        function uiContent: string;
+        function uiExtraContent: string;
+        function uiHeaderText: string;
+        function uiSubHeaderText: string;
+        function uiMetaText: string;
+        function uiDescriptionText: string;
+
+        {Colours}
+        function uiPrimaryColour: string;
+        function uiSecondaryColour: string;
+        function uiForeColour1: string;
+        function uiForeColour2: string;
+        function uiForeColour3: string;
+        function uiForeColour4: string;
+        function uiForeColour5: string;
+        function uiForeColour6: string;
+        function uiBackColour1: string;
+        function uiBackColour2: string;
+        function uiBackColour3: string;
+        function uiBackColour4: string;
+        function uiBackColour5: string;
+        function uiBackColour6: string;
+
+        {Sizes}
+        function uiVeryLarge: string;
+        function uiLarge: string;
+        function uiMedium: string;
+        function uiSmall:string;
+        function uiVerySmall: string;
+
+        {States}
+        function uiEnabled(_yes: boolean = true): string;
+        function uiVisible(_yes: boolean = true): string;
+        function uiReadOnly(_yes: boolean = true): string;
+        function uiRequired(_yes: boolean = true): string;
+
+        {Float and Alignment}
+        function uiFloated(_float: UIFloatType = uiFloatedNone): string;
+        function uiHorizontalAlign(_halign: UIHorizontalAlignment): string;
+        function uiVerticalAlign(_valign: UIVerticalAlignment): string;
+
+        {Multimedia}
+        function imageContainer: THtmlDiv;
+        function image: THtmlImg;
+
+        {Menu}
+        function menu: THtmlCollection;
+        function menuDropDown: THtmlCollection;
+        function menuToggleDropDown: THtmlCollection;
+        function menuItem(_caption: string; _url: string; _name: string;
+            _id: string): THtmlAnchor;
+
+        {Form}
+        function newForm(const _id: string; const _name: string = '';
+            const _action: string = ''): THtmlForm;
+        {field}
+        function newField(_width: byte = 0; const _id: string = ''): THtmlDiv;
+        function inlineFields: THtmlDiv;
+
+        {field container}
+        function newFieldContainer(const _numElements: byte = 1;
+            const _id: string = ''): THtmlDiv;
+
+        {inputs}
+        function htmlLabel(_text: string): THtmlLabel;
+
+        function newInput(_id: string; _name: string; _placeholder: string;
+            _caption: string; _value: string): THtmlInput;
+
+        function textInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlEditBox;
+
+        function numberInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function dateInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function passwordInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = '';
+            _value: string = ''): THtmlInput;
+
+        function emailInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+
+        function timeInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function datetimeInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = '';
+            _value: string = ''): THtmlInput;
+
+        function phoneInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function fileInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function monthInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function weekInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+        function radioButton(const _name: string; const _caption: string;
+            const _value: string = ''): THtmlRadioButton;
+
+        function checkBox(const _name: string; const _caption: string): THtmlCheckBox;
+        function selection(const _name: string; _choices: TStringArray): THtmlSelect;
+        function textbox(const _name: string; _placeholder: string = ''): THtmlTextArea;
+
+        {Buttons}
+        function button(const _name: string; _caption: string): THtmlButton;
+        function submitButton(const _name: string; _caption: string): THtmlButton;
+        function resetButton(const _name: string; _caption: string): THtmlButton;
+        function primaryButton(const _name: string; _caption: string): THtmlButton;
+        function secondaryButton(const _name: string; _caption: string): THtmlButton;
+        function outlineButton(const _name: string; _caption: string): THtmlButton;
+        function textButton(const _name: string; _caption: string): THtmlButton;
+
+        {Links}
+        function urlLink(const _url: string; _caption: string): THtmlAnchor;
+        {Grids}
+        function grid: THtmlDiv; overload;
+        {Usage:  }
+        function grid(_cols: word; _gridType: string; _valign: UIVerticalAlignment): THtmlDiv; overload;
+
+        {Usage: Specify col Widths as an array of numbers like [3, 5, 8] which means that
+        the first column is 3 wide, the second is 5 and the third is 8 wide.
+        Now this function automatically adds the column divs as children to the row div. So you
+        access each column by calling row.get(gridColumn(0, tagID)  where the tagID is the tag for the
+        row (or you can also call it by passing the row object. This is so that the tagIDs for the columns
+        are unique in the HTML document.}
+        function gridRow(_colWidths: array of word): THtmlDiv;
+
+        function gridColumn(_width: word = 0; _float: UIFloatType = uiFloatedNone): THtmlDiv;
+
+        {tables}
+        function table: THtmlTable;
+
+
+        {class names according to UIFramework.}
+        function uiContainer: string;
+        function uiContainerFluid: string;
+        function uiFlex: string;
+
+        function uiGrid(const _numColumns: byte = 1): string;
+        function uiRow: string;
+        function uiColumns(const _numColumns: byte = 1): string;
+
+        function uiDivider: string;
+        function uiDividerHidden: string;
+
+        function uiMenuContainer: string;
+        function uiMenu: string;
+        function uiMenuItem: string;
+        function uiMenuItemLink: string;
+        function uiMenuItemActive: string;
+        function uiMenuItemDisabled: string;
+
+        function uiFieldContainer: string;
+        function uiField: string;
+        function uiFields(const _numFields: byte): string;
+        function uiSegment(_segmentType: UISegmentType): string;
+        function uiDropdown: string;
+        function icon(_name: string; _attr: string = ''): string;
+        function emoji(_name: string; _attr: string = ''): string;
+        function text(_text: string; _class: string= ''): string;
+    end;
+
+    { TWebUIBase }
+
+    TWebUIBase = class(TInterfacedObject, IWebUI)
+    protected
+        class var myInstance: TWebUIBase;
+        class var myInstanceCount: integer;
+        class function getInstance: TWebUIBase;
+    public
+        {singleton}
+        class function instance: TWebUIBase;
+        {destructor}
+        class procedure relinquish;
+        {instance}
+        function uiBase: TWebUIBase;
+        function CDNLinks: THtmlElementArray;
+
+        {style classes}
+        function uiMenuItemLink: string;
+        function uiMenuItemDisabled: string;
+        function uiMenuItemActive: string;
+        function uiMenuItem: string;
+        function uiMenuContainer: string;
+        function uiMenu: string;
+        function uiFlex: string;
+        function uiContainer: string;
+        function uiFieldContainer: string;
+
+        {span blocks}
+        function uiContent: string;
+        function uiExtraContent: string;
+        function uiHeaderText: string;
+        function uiSubHeaderText: string;
+        function uiMetaText: string;
+        function uiDescriptionText: string;
+
+        {Colours}
+        function uiPrimaryColour: string;
+        function uiSecondaryColour: string;
+        function uiForeColour1: string;
+        function uiForeColour2: string;
+        function uiForeColour3: string;
+        function uiForeColour4: string;
+        function uiForeColour5: string;
+        function uiForeColour6: string;
+        function uiBackColour1: string;
+        function uiBackColour2: string;
+        function uiBackColour3: string;
+        function uiBackColour4: string;
+        function uiBackColour5: string;
+        function uiBackColour6: string;
+
+
+        {Controls - edit}
+        function selection(const _name: string;
+            _choices: TStringArray): THtmlSelect;
+        function timeInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function textInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlEditBox;
+        function phoneInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = ''; _value: string = ''): THtmlInput;
+        function passwordInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = ''; _value: string = ''): THtmlInput;
+        function monthInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = ''; _value: string = ''): THtmlInput;
+        function numberInput(_id: string; _name: string;
+            _placeholder: string = ''; _caption: string = ''; _value: string = ''): THtmlInput;
+        function textbox(const _name: string; _placeholder: string = ''): THtmlTextArea;
+        function htmlLabel(_text: string): THtmlLabel;
+        function fileInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function emailInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function datetimeInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function dateInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+        function weekInput(_id: string; _name: string; _placeholder: string = '';
+            _caption: string = ''; _value: string = ''): THtmlInput;
+
+
+        {Controls - Buttons}
+        function primaryButton(const _name: string; _caption: string): THtmlButton;
+        function submitButton(const _name: string; _caption: string): THtmlButton;
+        function secondaryButton(const _name: string;
+            _caption: string): THtmlButton;
+        function resetButton(const _name: string; _caption: string): THtmlButton;
+
+        {Controls - Choices}
+        function radioButton(const _name: string; const _caption: string;
+            const _value: string = ''): THtmlRadioButton;
+        function checkBox(const _name: string; const _caption: string): THtmlCheckBox;
+        function button(const _name: string; _caption: string): THtmlButton;
+
+        {urlLink}
+        function urlLink(const _url: string; _caption: string): THtmlAnchor;
+
+
+        {Containers}
+        function container: THtmlDiv;
+        function segmentGroup: THtmlDiv;
+        function segment: THtmlDiv;
+        function cardGroup: THtmlDiv;
+        function card: THtmlDiv;
+        function itemGroup: THtmlDiv;
+        function item: THtmlDiv;
+
+        {Multimedia}
+        function imageContainer: THtmlDiv;
+        function image: THtmlImg;
+
+
+        function newForm(const _id: string; const _name: string = '';
+            const _action: string = ''): THtmlForm;
+
+        function menuToggleDropDown: THtmlCollection;
+        function menuItem(_caption: string; _url: string; _name: string;
+            _id: string): THtmlAnchor;
+        function menuDropDown: THtmlCollection;
+        function menu: THtmlCollection;
+        function uiField: string;
+        function newInput(_id: string; _name: string; _placeholder: string;
+            _caption: string; _value: string): THtmlInput;
+        function icon(_name: string; _attr: string = ''): string;
+        function emoji(_name: string; _attr: string = ''): string;
+        function AssetLinks: THtmlElementArray;
+        function uiDividerHidden: string;
+        function uiDivider: string;
+        function uiTwoFields: string;
+        function uiThreeFields: string;
+        function uiSixFields: string;
+        function uiFourFields: string;
+        function uiFiveFields: string;
+        function uiRow: string;
+        function uiGrid(const _numColumns: byte = 1): string;
+        function uiFields(const _numFields: byte): string;
+        function uiColumns(const _numColumns: byte = 1): string;
+
+        function newFieldContainer(const _numElements: byte = 1;
+            const _id: string = ''): THtmlDiv;
+
+        function uiDropdown: string;
+		function uiVisible(_yes: boolean=true): string;
+		function uiVerySmall: string;
+		function uiVeryLarge: string;
+		function uiSmall: string;
+		function uiReadOnly(_yes: boolean=true): string;
+		function uiMedium: string;
+		function uiLarge: string;
+		function uiEnabled(_yes: boolean=true): string;
+		function span(_text: string; _class: string=''): THtmlSpan;
+		function text(_text: string; _class: string=''): string;
+		function uiSegment(_segmentType: UISegmentType): string;
+		function uiRequired(_yes: boolean=true): string;
+		function uiFloated(_float: UIFloatType=uiFloatedNone): string;
+		function textButton(const _name: string; _caption: string): THtmlButton;
+		function segment(_segmentType: UISegmentType=uiSegmentBasicBox
+			): THtmlDiv;
+		function outlineButton(const _name: string; _caption: string
+			): THtmlButton;
+
+		function gridRow(_colWidths: array of word): THtmlDiv;
+		function gridColumn(_width: word=0; _float: UIFloatType=uiFloatedNone
+			): THtmlDiv;
+		function grid: THtmlDiv;
+		function uiVerticalAlign(_valign: UIVerticalAlignment): string;
+		function uiHorizontalAlign(_halign: UIHorizontalAlignment): string;
+		function newField(_width: byte=0; const _id: string=''): THtmlDiv;
+        function inlineFields: THtmlDiv;
+		function grid(_cols: word; _gridType: string;
+			_valign: UIVerticalAlignment): THtmlDiv; overload;
+		function table: THtmlTable;
+		function containerFluid: THtmlDiv;
+		function uiContainerFluid: string;
+    end;
+
+
+procedure setUIFramework(_framework: UIFramework);
+function activeUIFramework: UIFramework;
+
+{Returns the UI object that is being used by the project}
+function ui: IWebUI;
+
+function gridColumnID(_index: word; _row: THtmlCollection): string; overload;
+function gridColumnID(_index: word; _rowID: string): string; overload;
+function newGridCols(constref _grid: THtmlDiv; _colWidths: array of word; out _row: THtmlDiv): THtmlDivArray;
+
+function anchorhtml(const _url: string; const _caption: string): string;
+
+type
+    RbMessageType = (msgInfo, msgWarning, msgError);
+
+{General UI functions}
+function putMessageOnForm(_form: THtmlForm; _message: string; _msgType: RbMessageType): THtmlForm;
+
+implementation
+
+uses
+    rbutils, semanticui, bulma;
+
+var
+    myUIFramework: UIFramework = uiSemantic;
+
+    myUIFrameworkObj: IWebUI = nil; {No need to destroy explictly.
+                                    Interface objects are destroyed automatically.}
+
+procedure setUIFramework(_framework: UIFramework);
+begin
+    myUIFramework := _framework;
+end;
+
+function activeUIFramework: UIFramework;
+begin
+    Result := myUIFramework;
+end;
+
+function ui: IWebUI;
+begin
+    if not assigned(myUIFrameWorkObj) then
+    begin
+        case myUIFramework of
+            uiUndefined: ;
+            uiSemantic: myUIFrameworkObj := TSemanticUI.Create;
+            uiBulma: myUIFrameworkObj := TBulmaCSS.Create;
+        end;
+    end;
+    Result := myUIFrameworkObj;
+end;
+
+function gridColumnID(_index: word; _row: THtmlCollection): string;
+var
+    _rowId: string = '';
+begin
+    if Assigned(_row) then
+        _rowId:= _row.tagID;
+
+    Result:= gridColumnID(_index, _rowID);
+end;
+
+function gridColumnID(_index: word; _rowID: string): string;
+var
+    _prefix: string = 'rbf_grid_col';
+begin
+    if not _rowID.isEmpty then
+        _prefix:= _rowID+'_col';
+
+    Result:= _prefix + _index.toString;
+end;
+
+function newGridCols(constref _grid: THtmlDiv; _colWidths: array of word; out _row: THtmlDiv): THtmlDivArray;
+{This is just a convenience function}
+var
+  i, colCount: integer;
+begin
+    _row:= _grid.add(ui.gridRow(_colWidths)) as THtmlDiv;
+    colCount:= Length(_colWidths);
+    SetLength(Result, colCount);
+    with _row do
+    begin
+        for i:= 0 to pred(colCount) do
+        begin
+            Result[i] := get(gridColumnID(i, tagID)) as THtmlDiv;
+		end;
+	end;
+end;
+
+
+function anchorhtml(const _url: string; const _caption: string): string;
+begin
+    with ui.urlLink(_url, _caption) do
+    begin
+        target:= target_self;
+        Result:= html;
+        Free;
+	end;
+end;
+
+{SUI specific error message function. Adds a DIV to the form
+with message class. Also addes the _message text.}
+function SUI_putMessageOnForm(_form: THtmlForm; _message: string;
+	_msgType: RbMessageType): THtmlForm;
+var
+  _msgClass: string = '';
+begin
+    Result := _form;
+    case _msgType of
+        msgInfo:    _msgClass := 'info';
+        msgWarning: _msgClass := 'warning';
+        msgError:   _msgClass := 'error';
+    end;
+
+    with Result do
+    begin
+        {Put Message on the form}
+        addClass(_msgClass);
+  		with div_ do
+        begin
+            setClass('ui message');
+            addClass(_msgClass);
+            Text:= _message;
+		end;
+    end;
+end;
+
+function putMessageOnForm(_form: THtmlForm; _message: string;
+	_msgType: RbMessageType): THtmlForm;
+begin
+    Result:= _form;
+    case myUIFramework of
+        uiUndefined: ;
+        uiSemantic: Result:=SUI_putMessageOnForm(_form, _message, _msgType);
+        uiBulma: ;
+    end;
+end;
+
+
+
+
+{ TWebUIGridColumn }
+
+procedure TWebUIGridColumn.setwidth(const _width: word);
+var
+    _class: string;
+begin
+	if mywidth=_width then Exit;
+	mywidth:=_width;
+
+    _class:= numToText(_width);
+    if not _class.isEmpty then
+        _class += ' wide column';
+
+    setClass(_class);
+end;
+
+{ TWebUIBase }
+
+class function TWebUIBase.getInstance: TWebUIBase;
+begin
+    if not Assigned(myInstance) then
+        myInstance := TWebUIBase.Create;
+    Result := myInstance;
+end;
+
+
+class function TWebUIBase.instance: TWebUIBase;
+begin
+    {Singleton}
+    Result := getInstance;
+    Inc(myInstanceCount);
+end;
+
+{remove reference. Destroy when no one is using}
+class procedure TWebUIBase.relinquish;
+begin
+    Dec(myInstanceCount);
+    if myInstanceCount = 0 then
+        FreeAndNil(myInstance);
+end;
+
+function TWebUIBase.uiMenuItemLink: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.button(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := THtmlButton.Create;
+    Result.setName(_name);
+    Result.Text := _caption;
+end;
+
+function TWebUIBase.urlLink(const _url: string; _caption: string): THtmlAnchor;
+begin
+    Result:= THtmlAnchor.Create;
+    Result.href:=_url;
+    Result.Text:=_caption;
+end;
+
+function TWebUIBase.checkBox(const _name: string;
+    const _caption: string): THtmlCheckBox;
+begin
+    Result := THtmlCheckBox.Create;
+    Result.setName(_name);
+    Result._label := _caption;
+end;
+
+function TWebUIBase.container: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.segmentGroup: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.segment: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.cardGroup: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.card: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.itemGroup: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.item: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.imageContainer: THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+end;
+
+function TWebUIBase.image: THtmlImg;
+begin
+    Result:= THtmlImg.Create;
+end;
+
+function TWebUIBase.dateInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputDate;
+end;
+
+function TWebUIBase.datetimeInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputDatetime_local;
+end;
+
+function TWebUIBase.emailInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputEmail;
+end;
+
+function TWebUIBase.fileInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputFile;
+end;
+
+function TWebUIBase.htmlLabel(_text: string): THtmlLabel;
+begin
+    Result := THtmlLabel.Create;
+    Result.Text := _text;
+end;
+
+function TWebUIBase.menu: THtmlCollection;
+begin
+    Result := nil;
+end;
+
+function TWebUIBase.uiField: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.newInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := THtmlInput.Create;
+    Result.setId(_id);
+    Result.setName(_name);
+    Result.Value := _value;
+    Result.placeholder := _placeholder;
+    if not _caption.IsEmpty then
+        Result.label_(htmlLabel(_caption));
+end;
+
+function TWebUIBase.emoji(_name: string; _attr: string): string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.AssetLinks: THtmlElementArray;
+begin
+    Result := nil;
+end;
+
+function TWebUIBase.uiDivider: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiFiveFields: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.newFieldContainer(const _numElements: byte;
+    const _id: string): THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+    Result.setId(_id);
+end;
+
+function TWebUIBase.uiDropdown: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiEnabled(_yes: boolean): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.span(_text: string; _class: string): THtmlSpan;
+begin
+    Result:= THtmlSpan.Create;
+    Result.Text:=_text;
+    Result.setClass(_class);
+end;
+
+function TWebUIBase.text(_text: string; _class: string): string;
+begin
+    with span(_text,_class) do
+    begin
+        Result:= html;
+        Free;
+    end;
+end;
+
+function TWebUIBase.uiLarge: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiMedium: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiReadOnly(_yes: boolean): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiSmall: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiVeryLarge: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiVerySmall: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiVisible(_yes: boolean): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiColumns(const _numColumns: byte): string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiFields(const _numFields: byte): string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiGrid(const _numColumns: byte): string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiRow: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiFourFields: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiSixFields: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiThreeFields: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiTwoFields: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiDividerHidden: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.icon(_name: string; _attr: string): string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiFieldContainer: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiContent: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiExtraContent: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiHeaderText: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiSubHeaderText: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiMetaText: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiDescriptionText: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiPrimaryColour: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiSecondaryColour: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour1: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour2: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour3: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour4: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour5: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiForeColour6: string;
+begin
+
+end;
+
+function TWebUIBase.uiBackColour1: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiBackColour2: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiBackColour3: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiBackColour4: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiBackColour5: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiBackColour6: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.menuDropDown: THtmlCollection;
+begin
+    Result := nil;
+end;
+
+function TWebUIBase.menuItem(_caption: string; _url: string; _name: string;
+    _id: string): THtmlAnchor;
+begin
+    Result := THtmlAnchor.Create;
+    with Result do
+    begin
+        href := _url;
+        setName(_name);
+        setID(_id);
+        Text := _caption;
+        target := target_self;
+    end;
+end;
+
+function TWebUIBase.menuToggleDropDown: THtmlCollection;
+begin
+    Result := nil;
+end;
+
+function TWebUIBase.monthInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputMonth;
+end;
+
+function TWebUIBase.newField(_width: byte; const _id: string): THtmlDiv;
+begin
+    Result := THtmlDiv.Create;
+    if not _id.IsEmpty then
+        Result.setID(_id);
+end;
+
+function TWebUIBase.inlineFields: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.grid(_cols: word; _gridType: string;
+	_valign: UIVerticalAlignment): THtmlDiv;
+begin
+    Result:= grid;
+end;
+
+function TWebUIBase.table: THtmlTable;
+begin
+    Result:= THtmlTable.Create;
+end;
+
+function TWebUIBase.containerFluid: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.uiContainerFluid: string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiHorizontalAlign(_halign: UIHorizontalAlignment): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiVerticalAlign(_valign: UIVerticalAlignment): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.grid: THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.gridColumn(_width: word; _float: UIFloatType): THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.gridRow(_colWidths: array of word): THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.outlineButton(const _name: string; _caption: string
+	): THtmlButton;
+begin
+    Result:= THtmlButton.Create;
+    Result.Name(_name);
+    Result.Text:=_caption;
+end;
+
+function TWebUIBase.segment(_segmentType: UISegmentType): THtmlDiv;
+begin
+    Result:= THtmlDiv.Create;
+end;
+
+function TWebUIBase.textButton(const _name: string; _caption: string
+	): THtmlButton;
+begin
+    Result:= THtmlButton.Create;
+    Result.Name(_name);
+    Result.Text:=_caption;
+end;
+
+function TWebUIBase.uiFloated(_float: UIFloatType): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiRequired(_yes: boolean): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.uiSegment(_segmentType: UISegmentType): string;
+begin
+    Result:= '';
+end;
+
+function TWebUIBase.newForm(const _id: string; const _name: string;
+    const _action: string): THtmlForm;
+begin
+    Result := THtmlForm.Create;
+    Result.method('POST')
+        .action(_action)
+        .setAttr('target', target_self.toString)
+        .setAttr('enctype', form_urlencoded.toString)
+        .setName(_name)
+        .setID(_id);
+    {Add a default field that gives you the form id}
+    Result.hidden('form_id', _id);
+end;
+
+function TWebUIBase.numberInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputNumber;
+end;
+
+function TWebUIBase.passwordInput(_id: string; _name: string;
+    _placeholder: string; _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputPassword;
+end;
+
+function TWebUIBase.phoneInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputTel;
+end;
+
+function TWebUIBase.primaryButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := button(_name, _caption);
+end;
+
+function TWebUIBase.radioButton(const _name: string; const _caption: string;
+    const _value: string): THtmlRadioButton;
+begin
+    Result := THtmlRadioButton.Create;
+    Result.setName(_name);
+    Result._label := _caption;
+    if _value.isEmpty then
+        Result.Value := _caption
+    else
+        Result.Value := _value;
+end;
+
+function TWebUIBase.resetButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := button(_name, _caption);
+    Result.buttonType(btnReset);
+end;
+
+function TWebUIBase.secondaryButton(const _name: string;
+    _caption: string): THtmlButton;
+begin
+    Result := button(_name, _caption);
+end;
+
+function TWebUIBase.selection(const _name: string;
+    _choices: TStringArray): THtmlSelect;
+begin
+    Result := THtmlSelect.Create;
+    Result.setName(_name);
+    Result.addOptions(_choices);
+end;
+
+function TWebUIBase.submitButton(const _name: string; _caption: string): THtmlButton;
+begin
+    Result := button(_name, _caption);
+    Result.buttonType(btnSubmit);
+end;
+
+function TWebUIBase.textbox(const _name: string; _placeholder: string): THtmlTextArea;
+begin
+    Result := THtmlTextArea.Create;
+    Result.setName(_name);
+    Result.title := _placeholder;
+end;
+
+function TWebUIBase.textInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlEditBox;
+begin
+    Result := THtmlEditBox.Create;
+    Result.setId(_id);
+    Result.setName(_name);
+    Result.Value := _value;
+    Result.placeholder := _placeholder;
+    if not _caption.IsEmpty then
+        Result.label_(htmlLabel(_caption));
+end;
+
+function TWebUIBase.timeInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputTime;
+
+end;
+
+function TWebUIBase.uiBase: TWebUIBase;
+begin
+    Result := instance;
+end;
+
+function TWebUIBase.CDNLinks: THtmlElementArray;
+begin
+    SetLength(Result, 0);
+end;
+
+function TWebUIBase.uiContainer: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiFlex: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiMenu: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiMenuContainer: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiMenuItem: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiMenuItemActive: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.uiMenuItemDisabled: string;
+begin
+    Result := '';
+end;
+
+function TWebUIBase.weekInput(_id: string; _name: string; _placeholder: string;
+    _caption: string; _value: string): THtmlInput;
+begin
+    Result := newInput(_id, _name, _placeholder, _caption, _value);
+    Result.input_type := inputWeek;
+end;
+
+
+{ TWebUIChoiceGrid }
+
+procedure TWebUIChoiceGrid.setMultipleChoices(const _MultipleChoices: boolean);
+begin
+    if myMultipleChoices = _MultipleChoices then
+        Exit;
+    myMultipleChoices := _MultipleChoices;
+end;
+
+function TWebUIChoiceGrid.rows(const _list: array of string): TWebUIChoiceGrid;
+begin
+
+end;
+
+function TWebUIChoiceGrid.columns(const _list: array of string): TWebUIChoiceGrid;
+begin
+
+end;
+
+initialization;
+
+finalization;
+
+end.

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <PathDelim Value="\"/>
+    <Name Value="fp_sugar2_12"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="mod"/>
+        <OtherUnitFiles Value="mod;mod\webui"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files Count="41">
+      <Item1>
+        <Filename Value="mod\nsort.pas"/>
+        <UnitName Value="nsort"/>
+      </Item1>
+      <Item2>
+        <Filename Value="mod\sugar.collections.pas"/>
+        <UnitName Value="sugar.collections"/>
+      </Item2>
+      <Item3>
+        <Filename Value="mod\sugar.consoleapp.pas"/>
+        <UnitName Value="sugar.consoleapp"/>
+      </Item3>
+      <Item4>
+        <Filename Value="mod\sugar.csshelper.pas"/>
+        <UnitName Value="sugar.csshelper"/>
+      </Item4>
+      <Item5>
+        <Filename Value="mod\sugar.ddldatatypes.pas"/>
+        <UnitName Value="sugar.ddldatatypes"/>
+      </Item5>
+      <Item6>
+        <Filename Value="mod\sugar.ddlmodel.pas"/>
+        <UnitName Value="sugar.ddlmodel"/>
+      </Item6>
+      <Item7>
+        <Filename Value="mod\sugar.htmlbuilder.alpinejs.pas"/>
+        <UnitName Value="sugar.htmlbuilder.alpinejs"/>
+      </Item7>
+      <Item8>
+        <Filename Value="mod\sugar.htmlbuilder.htmx.pas"/>
+        <UnitName Value="sugar.htmlbuilder.htmx"/>
+      </Item8>
+      <Item9>
+        <Filename Value="mod\sugar.htmlbuilder.pas"/>
+        <UnitName Value="sugar.htmlbuilder"/>
+      </Item9>
+      <Item10>
+        <Filename Value="mod\sugar.htmlbuilder.vue.pas"/>
+        <UnitName Value="sugar.htmlbuilder.vue"/>
+      </Item10>
+      <Item11>
+        <Filename Value="mod\sugar.htmlfactory.pas"/>
+        <UnitName Value="sugar.htmlfactory"/>
+      </Item11>
+      <Item12>
+        <Filename Value="mod\sugar.httphelper.pas"/>
+        <UnitName Value="sugar.httphelper"/>
+      </Item12>
+      <Item13>
+        <Filename Value="mod\sugar.jshelpers.pas"/>
+        <UnitName Value="sugar.jshelpers"/>
+      </Item13>
+      <Item14>
+        <Filename Value="mod\sugar.jsonbuilder.pas"/>
+        <UnitName Value="sugar.jsonbuilder"/>
+      </Item14>
+      <Item15>
+        <Filename Value="mod\sugar.jsondb.pas"/>
+        <UnitName Value="sugar.jsondb"/>
+      </Item15>
+      <Item16>
+        <Filename Value="mod\sugar.jsonlib.pas"/>
+        <UnitName Value="sugar.jsonlib"/>
+      </Item16>
+      <Item17>
+        <Filename Value="mod\sugar.logger.pas"/>
+        <UnitName Value="sugar.logger"/>
+      </Item17>
+      <Item18>
+        <Filename Value="mod\sugar.markdown.pas"/>
+        <UnitName Value="sugar.markdown"/>
+      </Item18>
+      <Item19>
+        <Filename Value="mod\sugar.modelbase.pas"/>
+        <UnitName Value="sugar.modelbase"/>
+      </Item19>
+      <Item20>
+        <Filename Value="mod\sugar.ormgen.pas"/>
+        <UnitName Value="sugar.ormgen"/>
+      </Item20>
+      <Item21>
+        <Filename Value="mod\sugar.pascalcodemodel.pas"/>
+        <UnitName Value="sugar.pascalcodemodel"/>
+      </Item21>
+      <Item22>
+        <Filename Value="mod\sugar.profiler.pas"/>
+        <UnitName Value="sugar.profiler"/>
+      </Item22>
+      <Item23>
+        <Filename Value="mod\sugar.querybuilder.pas"/>
+        <UnitName Value="sugar.querybuilder"/>
+      </Item23>
+      <Item24>
+        <Filename Value="mod\sugar.sort.pas"/>
+        <UnitName Value="sugar.sort"/>
+      </Item24>
+      <Item25>
+        <Filename Value="mod\sugar.sqlitehelper.lfm"/>
+        <Type Value="LFM"/>
+      </Item25>
+      <Item26>
+        <Filename Value="mod\sugar.sqlitehelper.pas"/>
+        <UnitName Value="sugar.sqlitehelper"/>
+      </Item26>
+      <Item27>
+        <Filename Value="mod\sugar.templater.pas"/>
+        <UnitName Value="sugar.templater"/>
+      </Item27>
+      <Item28>
+        <Filename Value="mod\sugar.textfiler.pas"/>
+        <UnitName Value="sugar.textfiler"/>
+      </Item28>
+      <Item29>
+        <Filename Value="mod\sugar.threadwriter.pas"/>
+        <UnitName Value="sugar.threadwriter"/>
+      </Item29>
+      <Item30>
+        <Filename Value="mod\sugar.uihelper.pas"/>
+        <UnitName Value="sugar.uihelper"/>
+      </Item30>
+      <Item31>
+        <Filename Value="mod\sugar.utils.pas"/>
+        <UnitName Value="sugar.utils"/>
+      </Item31>
+      <Item32>
+        <Filename Value="mod\sugar.vuejs.pas"/>
+        <UnitName Value="sugar.vuejs"/>
+      </Item32>
+      <Item33>
+        <Filename Value="mod\sugar.webpage.pas"/>
+        <UnitName Value="sugar.webpage"/>
+      </Item33>
+      <Item34>
+        <Filename Value="mod\sugar.htmlpage.pas"/>
+        <UnitName Value="sugar.htmlpage"/>
+      </Item34>
+      <Item35>
+        <Filename Value="mod\webui\assets.pas"/>
+        <UnitName Value="assets"/>
+      </Item35>
+      <Item36>
+        <Filename Value="mod\webui\bulma.pas"/>
+        <UnitName Value="bulma"/>
+      </Item36>
+      <Item37>
+        <Filename Value="mod\webui\semanticui.pas"/>
+        <UnitName Value="semanticui"/>
+      </Item37>
+      <Item38>
+        <Filename Value="mod\webui\webui.pas"/>
+        <UnitName Value="webui"/>
+      </Item38>
+      <Item39>
+        <Filename Value="mod\sugar.jsgooglechart.pas"/>
+        <UnitName Value="sugar.jsGoogleChart"/>
+      </Item39>
+      <Item40>
+        <Filename Value="mod\sugar.jscharts.pas"/>
+        <UnitName Value="sugar.jscharts"/>
+      </Item40>
+      <Item41>
+        <Filename Value="mod\sugar.threadloader.pas"/>
+        <UnitName Value="sugar.threadloader"/>
+      </Item41>
+    </Files>
+    <RequiredPkgs Count="3">
+      <Item1>
+        <PackageName Value="rhl606"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="fpc_markdown"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="FCL"/>
+      </Item3>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

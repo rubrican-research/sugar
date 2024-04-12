@@ -2,8 +2,8 @@ object DBModule: TDBModule
   OnCreate = DataModuleCreate
   OldCreateOrder = False
   Height = 378
-  HorizontalOffset = 963
-  VerticalOffset = 207
+  HorizontalOffset = 363
+  VerticalOffset = 351
   Width = 353
   object libloader: TSQLDBLibraryLoader
     Enabled = False
@@ -55,7 +55,7 @@ object DBModule: TDBModule
         ParamType = ptInput
       end>
     Macros = <>
-    Left = 208
+    Left = 192
     Top = 80
   end
   object qGetNewID: TSQLQuery
@@ -73,7 +73,7 @@ object DBModule: TDBModule
         ParamType = ptInput
       end>
     Macros = <>
-    Left = 208
-    Top = 152
+    Left = 88
+    Top = 168
   end
 end

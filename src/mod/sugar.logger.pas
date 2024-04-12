@@ -364,11 +364,8 @@ begin
 end;
 
 
-
-
-
-
-
+finalization
+    if assigned(myLogger) then myLogger.Free;
 
 end.
 
