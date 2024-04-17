@@ -149,6 +149,11 @@ function profiler(const _name: string): TCodeProfiler;
 // Get list of files
 function getFiles(_dir: string; _filter: string): TStrings;
 
+// Convenience function to return the index, with boundary checking
+// for a list of count values
+function getPrevIndex(const _curr, _count: integer) : integer;
+function getNextIndex(const _curr, _count: integer) : integer;
+
 
 implementation
 uses
@@ -1094,6 +1099,34 @@ begin
 
 end;
 
+function getPrevIndex(const _curr, _count: integer): integer;
+begin
+    Result:= -1;
+    if _curr = 0 then
+    begin
+        if _count > 0 then
+            Result := 0
+	end
+    else if _count > 0 then
+        Result:= pred(_curr);
+end;
+
+function getNextIndex(const _curr, _count: integer): integer;
+begin
+    Result:= -1;
+    if _curr = 0 then begin
+        if _count >0 then
+            Result := 0
+
+    end else if _curr = _count then
+    begin
+       Result := pred(_curr);
+
+	end else if _count > _curr then
+        Result:= _curr
+
+end;
+
 initialization
     randomize;
      //InitCriticalSection(myFilerCriticalSection);
@@ -1104,7 +1137,5 @@ finalization
     //TTextFiler.shutdown;
     //DoneCriticalSection(myFilerCriticalSection);
     // DoneCriticalSection(myLockerCriticalSection);
-
-end.
 end.
 

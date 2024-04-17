@@ -25,6 +25,13 @@ type
 
     procedure populateFromArray(_sl: TStrings;_ar: array of string);
 
+    // extracts a real value from the edit box. if it is not a real value, it returns the default value
+    function realVal(constref _edt: TEdit; const _default: real = 0.0): real;
+
+    // Visual indication of the control when it enters;
+    procedure onControlFocus(Sender:TObject);
+    procedure onControlExit(Sender: TObject);
+
 
 implementation
 uses
@@ -110,6 +117,28 @@ begin
     for _s in _ar do
         _sl.Add(_s);
 end;
+
+function realVal(constref _edt: TEdit; const _default: real): real;
+begin
+    try
+        Result := StrToFloat(_edt.Text);
+	except
+        Result:= _default;
+	end;
+end;
+
+procedure onControlFocus(Sender: TObject);
+begin
+    if Sender is TFrame then
+        TFrame(Sender).Color:= clHighlight;
+end;
+
+procedure onControlExit(Sender: TObject);
+begin
+    if Sender is TFrame then
+        TFrame(Sender).Color:= clDefault;
+end;
+
 
 initialization
     myOnHover := TOnHover.Create;
