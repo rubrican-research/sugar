@@ -52,7 +52,7 @@ end;
 
 procedure uiShake(_c: TControl);
 const
-  WAIT = 400;
+  WAIT = 200;
 
 var
   i: integer;
@@ -63,6 +63,7 @@ begin
         Sleep(WAIT);
         Application.ProcessMessages;
         _c.Top := _c.Top - 3;
+        Application.ProcessMessages;
     end;
     _c.Visible:= true;
 
@@ -98,12 +99,16 @@ end;
 
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);
 begin
+    _c.Font.Style := _c.Font.Style - [fsBold];
     case _s of
     	uiDefault:   _c.Font.Color:= clDefault;
         uiHighlight: _c.Font.Color:= clHighlight;
         uiWarning:   _c.Font.Color:= clPurple;
-        uiError:     _c.Font.Color := clRed;
-    end;
+        uiError:    begin
+                    _c.Font.Color := clRed;
+                    _c.Font.Style := _c.Font.Style + [fsBold];
+		end;
+	end;
 
     _c.Hint:= _hint;
     _c.ShowHint:= not _hint.IsEmpty;
@@ -130,7 +135,7 @@ end;
 procedure onControlFocus(Sender: TObject);
 begin
     if Sender is TFrame then
-        TFrame(Sender).Color:= clHighlight;
+        TFrame(Sender).Color:= cl3DLight;
 end;
 
 procedure onControlExit(Sender: TObject);

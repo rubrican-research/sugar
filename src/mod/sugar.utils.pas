@@ -154,6 +154,9 @@ function getFiles(_dir: string; _filter: string): TStrings;
 function getPrevIndex(const _curr, _count: integer) : integer;
 function getNextIndex(const _curr, _count: integer) : integer;
 
+function ObjAddressAsHex(constref _obj: TObject): string;
+function HexStrAsObj(_hex: string):  TObject;
+
 
 implementation
 uses
@@ -1125,6 +1128,16 @@ begin
 	end else if _count > _curr then
         Result:= _curr
 
+end;
+
+function ObjAddressAsHex(constref _obj: TObject): string;
+begin
+    Result :=  PtrUInt(_obj).ToHexString(16);
+end;
+
+function HexStrAsObj(_hex: string): TObject;
+begin
+    Result := TObject(PtrUInt(Hex2Dec64(_hex)));
 end;
 
 initialization
