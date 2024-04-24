@@ -126,6 +126,9 @@ function limitWords(_str: string; _limit: word): string;
 {immediate if. If condition is true, returns first parameter else returns second}
 function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;
 
+// If true, calls t_trueProc, If not calls falseProc with _sender. Returns the result of the boolean value.
+function iif(_condition: boolean; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean;
+
 {Data functions}
 
 {Compares _prev and _current to see if the change is within plus or minus _tolerancePercentage
@@ -154,7 +157,10 @@ function getFiles(_dir: string; _filter: string): TStrings;
 function getPrevIndex(const _curr, _count: integer) : integer;
 function getNextIndex(const _curr, _count: integer) : integer;
 
+// Convenient way to store an object address as a hex string
+// to use for hash lists
 function ObjAddressAsHex(constref _obj: TObject): string;
+// Convert the string back to the object address.
 function HexStrAsObj(_hex: string):  TObject;
 
 
@@ -1007,6 +1013,21 @@ begin
         Result := _trueString
     else
         Result := _falseString;
+end;
+
+function iif(_condition: boolean; _trueProc: TNotifyEvent;
+	_falseProc: TNotifyEvent; _sender: TObject): boolean;
+begin
+    Result:= _condition;
+    try
+	    case Result of
+	        True:   if assigned(_trueProc) then _trueProc(_sender);
+	        False:  if assigned(_falseProc) then _falseProc(_sender);
+	    end;
+
+	except
+        ; // suppress exception
+	end;
 end;
 
 function hasDataChanged(_prev: real; _current: real;
