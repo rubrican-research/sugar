@@ -42,10 +42,12 @@ type
     procedure onControlFocus(Sender:TObject);
     procedure onControlExit(Sender: TObject);
 
+    procedure KeyDownFloatValues(Sender: TObject; var Key: Word;
+	Shift: TShiftState);
 
 implementation
 uses
-    Forms, sugar.utils;
+    Forms, sugar.utils, LCLType;
 var
   myOnHover: TOnHover;
 
@@ -254,6 +256,30 @@ procedure onControlExit(Sender: TObject);
 begin
     if Sender is TFrame then
         TFrame(Sender).Color:= clDefault;
+end;
+
+procedure KeyDownFloatValues(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+
+    if key in [
+            VK_0..VK_9,
+            VK_NUMPAD0..VK_NUMPAD9,
+            VK_DECIMAL,
+            VK_BACK,
+            VK_DELETE,
+            VK_LEFT,
+            VK_RIGHT,
+            VK_END,
+            VK_HOME,
+            VK_TAB,
+            ord(FormatSettings.DecimalSeparator)
+            ] then
+
+            // Do nothing
+
+    else
+        Key := 0;
+
 end;
 
 

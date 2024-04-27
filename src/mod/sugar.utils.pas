@@ -153,7 +153,10 @@ function profiler(const _name: string): TCodeProfiler;
 function getFiles(_dir: string; _filter: string): TStrings;
 
 // Convenience function to return the index, with boundary checking
-// for a list of count values
+// for a list of count values. Typical usage is the get the next index in
+// in a list of _count items, if the deleted index is _curr.
+// Call these functions AFTER the item is deleted, which means that _count
+// is the new number of items in the modified lists
 function getPrevIndex(const _curr, _count: integer) : integer;
 function getNextIndex(const _curr, _count: integer) : integer;
 
@@ -1137,9 +1140,9 @@ end;
 
 function getNextIndex(const _curr, _count: integer): integer;
 begin
-    Result:= -1;
+     Result:= -1;
     if _curr = 0 then begin
-        if _count >0 then
+        if _count > 0 then
             Result := 0
 
     end else if _curr = _count then
