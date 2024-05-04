@@ -117,27 +117,38 @@ begin
     case _s of
     	uiDefault:   begin
             _c.Font.Color   := clDefault;
-            _c.color        := clDefault
+            if _c is TLabel then
+                _c.color        := clNone
+            else
+                _c.color        := clDefault;
 		end;
 
 		uiHighlight: begin
             _c.Font.Color:= clHighlightText;
-            _c.color := clHighlight;
+
+            if _c is TLabel then
+                _c.color        := clNone
+            else
+                _c.color := clHighlight;
         end;
 
         uiWarning:   begin
             _c.Font.Color:= clPurple;
-            _c.color := clInfoBk;
-
+            if _c is TLabel then
+                _c.color        := clNone
+            else
+                _c.color := clInfoBk;
 		end;
 
 		uiError:    begin
             _c.Font.Color := clRed;
             _c.Font.Style := _c.Font.Style + [fsBold];
-            _c.color := clInfoBk;
+            if _c is TLabel then
+                _c.color        := clNone
+            else
+                _c.color := clInfoBk;
 		end;
 	end;
-
     _c.Hint:= _hint;
     _c.ShowHint:= not _hint.IsEmpty;
 end;
