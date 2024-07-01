@@ -6,6 +6,10 @@ interface
 
 uses
     Classes, SysUtils, Controls, ExtCtrls, StdCtrls, Graphics;
+
+const
+  _ = sLineBreak;
+
 type
 
     TUIState  = (uiDefault, uiHighlight, uiWarning, uiError);
@@ -18,6 +22,7 @@ type
 
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
+    procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
 
     function onHover: TOnHover;
     procedure setHover(_lbl: TLabel);
@@ -33,9 +38,9 @@ type
     procedure setVal(constref _c: TWinControl; const _value: integer); overload;
     procedure setVal(constref _c: TWinControl; const _value: double); overload;
     procedure setVal(constref _c: TWinControl; const _value: double; _format: TFormatSettings); overload;
-    function  numAsStr(const _val: integer): string;
-    function  numAsStr(const _val: double): string;
-    function  numAsStr(const _val: double; _format: TFormatSettings): string;
+    function  numAsStr(const _val: integer): string; overload;
+    function  numAsStr(const _val: double; _precision: word = 2): string; overload;
+    function  numAsStr(const _val: double; _format: TFormatSettings): string; overload;
 
 
     // Visual indication of the control when it enters;
@@ -153,6 +158,15 @@ begin
     _c.ShowHint:= not _hint.IsEmpty;
 end;
 
+procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string);
+var
+	_c: TControl;
+begin
+    for _c in _arrc do begin
+        uiState(_c, _s, _hint);
+	end;
+end;
+
 procedure populateFromArray(_sl: TStrings;
 	_ar: array of string);
 var
@@ -176,7 +190,9 @@ begin
             Result := StrToFloat(_val);
 	    except
             Result:= _default;
-	    end;
+	    end
+    else
+        Result:= _default;
 end;
 
 function intVal(constref _c: TWinControl; const _default: integer): integer;
@@ -193,7 +209,9 @@ begin
             Result := StrToInt(_val);
 	    except
             Result:= _default;
-	    end;
+	    end
+    else
+        Result:= _default;
 
 end;
 
@@ -238,10 +256,10 @@ begin
 	end;
 end;
 
-function numAsStr(const _val: double): string;
+function numAsStr(const _val: double; _precision: word): string;
 begin
     try
-        Result:= _val.ToString;
+        Result:= format('%.*f', [_precision, _val]);
 	except
         Result := 'NAN';
 	end;

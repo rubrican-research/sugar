@@ -178,6 +178,10 @@
         <Filename Value="mod\webui\webui.pas"/>
         <UnitName Value="webui"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.fmkvdisplay.pas"/>
+        <UnitName Value="sugar.fmkvdisplay"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

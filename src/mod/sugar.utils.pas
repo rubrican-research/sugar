@@ -124,10 +124,14 @@ function paddedNum(const _num: word; const _padCount: word = 3): string;
 function limitWords(_str: string; _limit: word): string;
 
 {immediate if. If condition is true, returns first parameter else returns second}
-function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;
+function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;overload;
+function iif(_condition: boolean; _trueVal: integer; _falseVal: integer = 0): integer;overload;
+function iif(_condition: boolean; _trueVal: double; _falseVal: double = 0): double;overload;
+function iif(_condition: boolean; _trueVal: TDateTime; _falseVal: TDateTime = 0): TDateTime; overload;
+function iif(_condition: boolean; _trueVal: TObject; _falseVal: TObject = nil): TObject; overload;
 
 // If true, calls t_trueProc, If not calls falseProc with _sender. Returns the result of the boolean value.
-function iif(_condition: boolean; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean;
+function iif(_condition: boolean; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean; overload;
 
 {Data functions}
 
@@ -1016,6 +1020,42 @@ begin
         Result := _trueString
     else
         Result := _falseString;
+end;
+
+function iif(_condition: boolean; _trueVal: integer; _falseVal: integer
+	): integer;
+begin
+    if _condition then
+        Result := _trueVal
+    else
+        Result := _falseVal;
+end;
+
+function iif(_condition: boolean; _trueVal: double; _falseVal: double): double;
+begin
+    if _condition then
+        Result := _trueVal
+    else
+        Result := _falseVal;
+
+end;
+
+function iif(_condition: boolean; _trueVal: TDateTime; _falseVal: TDateTime
+	): TDateTime;
+begin
+    if _condition then
+        Result := _trueVal
+    else
+        Result := _falseVal;
+end;
+
+function iif(_condition: boolean; _trueVal: TObject; _falseVal: TObject
+	): TObject;
+begin
+    if _condition then
+        Result := _trueVal
+    else
+        Result := _falseVal;
 end;
 
 function iif(_condition: boolean; _trueProc: TNotifyEvent;

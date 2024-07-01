@@ -1,0 +1,50 @@
+object FMKVDisplay: TFMKVDisplay
+  Left = 0
+  Height = 193
+  Top = 0
+  Width = 600
+  ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+  ChildSizing.ShrinkHorizontal = crsHomogenousChildResize
+  ChildSizing.Layout = cclLeftToRightThenTopToBottom
+  ChildSizing.ControlsPerLine = 2
+  ClientHeight = 193
+  ClientWidth = 600
+  OnResize = FrameResize
+  TabOrder = 0
+  DesignLeft = 1065
+  DesignTop = 299
+  object lblKey: TLabel
+    Left = 10
+    Height = 17
+    Top = 0
+    Width = 120
+    BorderSpacing.Left = 10
+    BorderSpacing.Right = 5
+    BorderSpacing.Bottom = 3
+    Caption = 'lblKey'
+    Constraints.MaxWidth = 120
+    Constraints.MinWidth = 120
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Segoe UI'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    Layout = tlCenter
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblValue: TLabel
+    Left = 138
+    Height = 17
+    Top = 0
+    Width = 452
+    BorderSpacing.Left = 5
+    BorderSpacing.Right = 10
+    Caption = 'lblValue'
+    Constraints.MinWidth = 450
+    Layout = tlCenter
+    ParentColor = False
+  end
+end
