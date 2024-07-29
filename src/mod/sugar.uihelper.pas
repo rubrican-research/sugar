@@ -48,7 +48,8 @@ type
     procedure onControlExit(Sender: TObject);
 
     procedure KeyDownFloatValues(Sender: TObject; var Key: Word;
-	Shift: TShiftState);
+	    Shift: TShiftState);
+
 
 implementation
 uses
@@ -289,19 +290,18 @@ end;
 
 procedure KeyDownFloatValues(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
     if key in [
             VK_0..VK_9,
             VK_NUMPAD0..VK_NUMPAD9,
-            VK_DECIMAL,
+            VK_OEM_PERIOD,
+            VK_OEM_COMMA,
             VK_BACK,
             VK_DELETE,
             VK_LEFT,
             VK_RIGHT,
             VK_END,
             VK_HOME,
-            VK_TAB,
-            ord(FormatSettings.DecimalSeparator)
+            VK_TAB
             ] then
 
             // Do nothing
@@ -310,6 +310,7 @@ begin
         Key := 0;
 
 end;
+
 
 
 initialization
