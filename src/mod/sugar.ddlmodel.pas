@@ -330,6 +330,8 @@ type
         function getCreateSQL(indent: string = ''): string; override;
         function getUpdateSQL(indent: string = ''): string; override;
         function getDeleteSQL(indent: string = ''): string; override;
+        function getAlterTableSQL(indent: string = ''): string;
+
         function getJSON(indent: string = ''): string; override;
         function BuildFromJSON(_json: string): boolean; override;
 
@@ -538,6 +540,7 @@ type
         function getCreateSQL(indent: string = ''): string; override;
         function getUpdateSQL(indent: string = ''): string; override;
         function getDeleteSQL(indent: string = ''): string; override;
+
         function getJSON(indent: string = ''): string; override;
 
         function isText: boolean;
@@ -586,41 +589,44 @@ function createTableSQL(const _tableDef: DTable): string;
 implementation
 
 const
-    Create = 'CREATE';
-    UPDATE = 'UPDATE';
-    Delete = 'DELETE';
-    DROP = 'DROP';
-    ALTER = 'ALTER';
+    CREATE  = 'CREATE';
+    UPDATE  = 'UPDATE';
+    Delete  = 'DELETE';
+    DROP    = 'DROP';
+    ALTER   = 'ALTER';
     DATABASE = 'DATABASE';
-    SCHEMA = 'SCHEMA';
-    TABLE = 'TABLE';
-    VIEW = 'VIEW';
+    SCHEMA  = 'SCHEMA';
+    TABLE   = 'TABLE';
+    VIEW    = 'VIEW';
     PRIMARY_KEY = 'PRIMARY KEY';
-    INSERT = 'INSERT';
-    INTO = 'INTO';
-    VALUES = 'VALUES';
-    SELECT = 'SELECT';
-    STAR = '*';
-    FROM = 'FROM';
-    INDEX = 'INDEX';
-    USE = 'USE';
+    INSERT  = 'INSERT';
+    INTO    = 'INTO';
+    VALUES  = 'VALUES';
+    SELECT  = 'SELECT';
+    STAR    = '*';
+    FROM    = 'FROM';
+    INDEX   = 'INDEX';
+    USE     = 'USE';
     CASCADE = 'CASCADE';
 
-    CREATE_DB = Create + ' ' + DATABASE + ' %s;';
-    DROP_DB = DROP = ' ' + DATABASE + ' %s;';
-    USE_DB = USE + ' ' + DATABASE;
+    CREATE_DB   = Create + ' ' + DATABASE + ' %s;';
+    DROP_DB     = DROP = ' ' + DATABASE + ' %s;';
+    USE_DB      = USE + ' ' + DATABASE;
 
     CREATE_SCHEMA = Create + ' ' + SCHEMA + ' %s;';
-    DROP_SCHEMA = DROP + ' ' + SCHEMA + ' %s;';
+    DROP_SCHEMA   = DROP + ' ' + SCHEMA + ' %s;';
 
-    CREATE_TBL = Create + ' ' + TABLE + ' %s (';
-    CREATE_TBL_IF_NOT_EXISTS = Create + ' ' + TABLE + ' IF NOT EXISTS %s (';
-    DROP_TBL = DROP + ' ' + TABLE + ' IF EXISTS %s;';
-    DROP_TBL_CASCADE = DROP + ' ' + TABLE + ' IF EXISTS %s ' + CASCADE + ';';
+    CREATE_TBL              = Create + ' ' + TABLE + ' %s (';
+    CREATE_TBL_IF_NOT_EXISTS= Create + ' ' + TABLE + ' IF NOT EXISTS %s (';
+    DROP_TBL                = DROP + ' ' + TABLE + ' IF EXISTS %s;';
+    DROP_TBL_CASCADE        = DROP + ' ' + TABLE + ' IF EXISTS %s ' + CASCADE + ';';
+    ALTER_TBL               = ALTER + ' ' + TABLE + ' %s ';
+    ADD_COLUMN              = 'ADD COLUMN %s';
 
-    PRIMARY_KEY_DEF = 'PRIMARY KEY (%s)';
-    FOREIGN_KEY_DEF = 'FOREIGN KEY (%s) REFERENCES %s (%s)';
-    DEFAULT_ID_FIELD = IDField;
+
+    PRIMARY_KEY_DEF     = 'PRIMARY KEY (%s)';
+    FOREIGN_KEY_DEF     = 'FOREIGN KEY (%s) REFERENCES %s (%s)';
+    DEFAULT_ID_FIELD    = IDField;
 
 var
     TARGETDB: TargetDBS = SQLiteDB;
@@ -2066,9 +2072,12 @@ try
                 addComma := true;
 
             fk := DField(FForeignKeys.Items[i]);
-            Result := Result + indent + DEFAULT_INDENT +
-                Format(FOREIGN_KEY_DEF, [fk.Name, fk.ReferenceTable,
-                fk.ReferenceField]);
+            Result :=   Result + indent + DEFAULT_INDENT +
+                        Format(FOREIGN_KEY_DEF,[
+                            fk.Name,
+                            fk.ReferenceTable,
+                            fk.ReferenceField
+                        ]);
 
             if fk.shouldCascadeDeletes then
                 Result:= Result + ' ON DELETE CASCADE';
@@ -2150,6 +2159,14 @@ end;
 function DTable.getDeleteSQL(indent: string): string;
 begin
     Result := getSQLFor(RbDeleteQueryBuilder.Create);
+end;
+
+function DTable.getAlterTableSQL(indent: string): string;
+begin
+    Result := indent + '/* ### ' + 'ALTER TABLE ' + UpperCase(FullName) + ' ### */' + ENDLINE;
+
+
+
 end;
 
 function DTable.getJSON(indent: string): string;

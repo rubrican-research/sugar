@@ -172,6 +172,8 @@ function ObjAddressAsHex(constref _obj: TObject): string;
 // Convert the string back to the object address.
 function HexStrAsObj(_hex: string):  TObject;
 
+{Clone functions}
+function clone(constref _s: TStrings): TStrings;
 
 implementation
 uses
@@ -1217,6 +1219,12 @@ end;
 function HexStrAsObj(_hex: string): TObject;
 begin
     Result := TObject(PtrUInt(Hex2Dec64(_hex)));
+end;
+
+function clone(constref _s: TStrings): TStrings;
+begin
+    Result := TStringList.Create;
+    Result.Assign(_s);
 end;
 
 initialization

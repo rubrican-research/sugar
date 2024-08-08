@@ -5,7 +5,7 @@ unit sugar.uihelper;
 interface
 
 uses
-    Classes, SysUtils, Controls, ExtCtrls, StdCtrls, Graphics;
+    Classes, SysUtils, Controls, ExtCtrls, StdCtrls, Graphics, Grids;
 
 const
   _ = sLineBreak;
@@ -50,10 +50,11 @@ type
     procedure KeyDownFloatValues(Sender: TObject; var Key: Word;
 	    Shift: TShiftState);
 
+    function gridSort(constref sg: TStringGrid; _cols: array of integer; _order: TSortOrder = soAscending): TStringGrid;
 
 implementation
 uses
-    Forms, sugar.utils, LCLType;
+    Forms, sugar.utils, LCLType, sugar.collections, sugar.sort, Math;
 var
   myOnHover: TOnHover;
 
@@ -311,7 +312,79 @@ begin
 
 end;
 
+type
 
+    TListOfTStringsBase = specialize GenericHashObjectList<TStrings>;
+    TListOfTStrings = class (TListOfTStringsBase)
+    end;
+
+
+function gridSort(constref sg: TStringGrid; _cols: array of integer; _order: TSortOrder = soAscending): TStringGrid;
+const
+  DELIM = '•';
+var
+    _index  : TStringIndexMap;
+    _rows   : TListOfTStrings;
+	_r, _col: Integer;
+    _sorted : TStringArray;
+	_term, s: String;
+    _delta  : integer;
+
+begin
+    Result := sg;
+
+    if sg.FixedRows = sg.RowCount then exit; // No rows to sort.
+
+    _index  := TStringIndexMap.Create();
+    _rows   := TListOfTStrings.Create(true);
+
+    try
+
+        for _r := sg.FixedRows to pred(sg.RowCount) do
+        begin
+            _term := '';
+
+            for _col in _cols do begin
+                if not InRange(_col, 0, pred(sg.ColCount)) then continue;
+                if not _term.isEmpty then _term := _term + '|';
+                _term := _term + sg.Cells[_col, _r];
+			end;
+
+			_term := Format('%s|%d',[_term, _r]);
+
+            _index.idx[_term] := _r;
+            _rows.add(_term, clone(sg.rows[_r]));
+
+		end;
+
+        _sorted := sortList(_index.getNames(DELIM), DELIM);
+
+        case _order of
+            soAscending:  begin
+                _r := sg.FixedRows;
+                _delta := 1;
+            end;
+            soDescending: begin
+                _r := pred(sg.RowCount);
+                _delta := -1;
+            end;
+        end;
+
+        sg.BeginUpdate;
+        for s in _sorted do
+        begin
+            sg.Rows[_r].AddStrings(_rows.get(s), true); // This adds the objects as well
+            _r := _r + _delta; {increments or decrements depending on sorting order}
+		end;
+
+        sg.EndUpdate;
+
+	finally
+        _index.Free;
+        _rows.Free;
+	end;
+
+end;
 
 initialization
     myOnHover := TOnHover.Create;
