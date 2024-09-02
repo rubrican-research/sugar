@@ -5,7 +5,7 @@ unit sugar.uihelper;
 interface
 
 uses
-    Classes, SysUtils, Controls, ExtCtrls, StdCtrls, Graphics, Grids;
+    Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids;
 
 const
   _ = sLineBreak;
@@ -383,8 +383,8 @@ begin
         _index.Free;
         _rows.Free;
 	end;
-
 end;
+
 
 initialization
     myOnHover := TOnHover.Create;

@@ -54,27 +54,24 @@ type
     function getLogLevelName(_l: TLogLevel): string;
     procedure pauseLog;
 
-
     {logInfo}
     procedure log(const logtext: string; _loglevel: TLogLevel = logInfo); overload;
     procedure log(const _fmt: string; _variables: array of const; _loglevel: TLogLevel = logInfo); overload;
 
     {logHints}
-    procedure log1(const logtext: string; _loglevel: TLogLevel = logHints); overload;
-    procedure log1(const _fmt: string; _variables: array of const; _loglevel: TLogLevel = logHints); overload;
+    procedure log1(const logtext: string); overload;
+    procedure log1(const _fmt: string; _variables: array of const); overload;
 
     {logDebug}
-    procedure log2(const logtext: string; _loglevel: TLogLevel = logDebug); overload;
-    procedure log2(const _fmt: string; _variables: array of const; _loglevel: TLogLevel = logDebug); overload;
+    procedure log2(const logtext: string); overload;
+    procedure log2(const _fmt: string; _variables: array of const); overload;
 
     {logExtra}
-    procedure log3(const logtext: string; _loglevel: TLogLevel = logExtra); overload;
-    procedure log3(const _fmt: string; _variables: array of const; _loglevel: TLogLevel = logExtra); overload;
-
+    procedure log3(const logtext: string); overload;
+    procedure log3(const _fmt: string; _variables: array of const); overload;
 
     procedure writeLog(_logfilename: string; _logstr: string);
     procedure freeLog;
-
 
 implementation
 
@@ -156,37 +153,34 @@ begin
     Log(format(_fmt, _variables), _loglevel);
 end;
 
-procedure log1(const logtext: string; _loglevel: TLogLevel);
+procedure log1(const logtext: string);
 begin
-    log(logtext, _loglevel);
+    log(logtext, logHints);
 end;
 
-procedure log1(const _fmt: string; _variables: array of const;
-	_loglevel: TLogLevel);
+procedure log1(const _fmt: string; _variables: array of const);
 begin
-    log(_fmt, _variables, _loglevel);
+    log(_fmt, _variables, logHints);
 end;
 
-procedure log2(const logtext: string; _loglevel: TLogLevel);
+procedure log2(const logtext: string);
 begin
-    log(logtext, _loglevel);
+    log(logtext, logDebug);
 end;
 
-procedure log2(const _fmt: string; _variables: array of const;
-	_loglevel: TLogLevel);
+procedure log2(const _fmt: string; _variables: array of const);
 begin
-    log(_fmt, _variables, _loglevel);
+    log(_fmt, _variables, logDebug);
 end;
 
-procedure log3(const logtext: string; _loglevel: TLogLevel);
+procedure log3(const logtext: string);
 begin
-    log(logtext, _loglevel);
+    log(logtext, logExtra);
 end;
 
-procedure log3(const _fmt: string; _variables: array of const;
-	_loglevel: TLogLevel);
+procedure log3(const _fmt: string; _variables: array of const);
 begin
-    log(_fmt, _variables, _loglevel);
+    log(_fmt, _variables, logExtra);
 end;
 
 procedure writeLog(_logfilename: string; _logstr: string);

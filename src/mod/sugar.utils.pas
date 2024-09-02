@@ -127,13 +127,23 @@ function lpad(_str: string; _times: word; _pad: char = ' '): string;
 
 {immediate if. If condition is true, returns first parameter else returns second}
 function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;overload;
-function iif(_condition: boolean; _trueVal: integer; _falseVal: integer = 0): integer;overload;
+function iif(_condition: boolean; _trueVal: int64; _falseVal: int64 = 0): int64;overload;
 function iif(_condition: boolean; _trueVal: double; _falseVal: double = 0): double;overload;
 function iif(_condition: boolean; _trueVal: TDateTime; _falseVal: TDateTime = 0): TDateTime; overload;
 function iif(_condition: boolean; _trueVal: TObject; _falseVal: TObject = nil): TObject; overload;
-
 // If true, calls t_trueProc, If not calls falseProc with _sender. Returns the result of the boolean value.
 function iif(_condition: boolean; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean; overload;
+
+// iif with embedded if assigned
+function iif(constref _obj:TObject; _trueString: string; _falseString: string = ''): string;overload;
+function iif(constref _obj:TObject; _trueVal: int64; _falseVal: int64 = 0): int64;   overload;
+function iif(constref _obj:TObject; _trueVal: double; _falseVal: double = 0): double;overload;
+function iif(constref _obj:TObject; _trueVal: TDateTime; _falseVal: TDateTime = 0): TDateTime; overload;
+function iif(constref _obj:TObject; _trueVal: TObject; _falseVal: TObject = nil): TObject; overload;
+function iif(constref _obj:TObject; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean; overload;
+
+
+
 
 {Data functions}
 
@@ -1039,8 +1049,7 @@ begin
         Result := _falseString;
 end;
 
-function iif(_condition: boolean; _trueVal: integer; _falseVal: integer
-	): integer;
+function iif(_condition: boolean; _trueVal: int64; _falseVal: int64): int64;
 begin
     if _condition then
         Result := _trueVal
@@ -1088,6 +1097,60 @@ begin
 	except
         ; // suppress exception
 	end;
+end;
+
+function iif(constref _obj: TObject; _trueString: string; _falseString: string
+	): string;
+begin
+    case Assigned(_obj) of
+        true    : Result := _trueString;
+        false   : Result := _falseString;
+	end;
+end;
+
+function iif(constref _obj: TObject; _trueVal: int64; _falseVal: int64): int64;
+begin
+    case Assigned(_obj) of
+        true    : Result := _trueVal;
+        false   : Result := _falseVal;
+    end;
+end;
+
+function iif(constref _obj: TObject; _trueVal: double; _falseVal: double
+	): double;
+begin
+    case Assigned(_obj) of
+        true    : Result := _trueVal;
+        false   : Result := _falseVal;
+    end;
+end;
+
+function iif(constref _obj: TObject; _trueVal: TDateTime; _falseVal: TDateTime
+	): TDateTime;
+begin
+    case Assigned(_obj) of
+        true    : Result := _trueVal;
+        false   : Result := _falseVal;
+    end;
+end;
+
+function iif(constref _obj: TObject; _trueVal: TObject; _falseVal: TObject
+	): TObject;
+begin
+    case Assigned(_obj) of
+        true    : Result := _trueVal;
+        false   : Result := _falseVal;
+    end;
+end;
+
+function iif(constref _obj: TObject; _trueProc: TNotifyEvent;
+	_falseProc: TNotifyEvent; _sender: TObject): boolean;
+begin
+    Result := Assigned(_obj);
+    case Result of
+        True:   if assigned(_trueProc) then _trueProc(_sender);
+        False:  if assigned(_falseProc) then _falseProc(_sender);
+    end;
 end;
 
 function hasDataChanged(_prev: real; _current: real;
