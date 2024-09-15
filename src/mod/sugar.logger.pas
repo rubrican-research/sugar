@@ -221,15 +221,31 @@ begin
 end;
 
 class procedure TLogger.writeToLog(_logfilename: string; _logstr: string);
+const
+    MAX_ATTEMPTS = 3;
 var
     logfile: Text;
+	_ioResult: Word;
+    _attempt : word = 1;
 begin
     AssignFile(logfile, _logfilename);
     try
         {$I-}
-        Append(logfile);
-        if IOResult = 0 then
-            Writeln(logfile, _logstr);
+        repeat
+            Append(logfile);
+            _ioResult := IOResult;
+            if _ioResult = 0 then begin
+                Writeln(logfile, _logstr)
+            end
+            else begin
+                inc(_attempt);
+                if _attempt > MAX_ATTEMPTS then
+                    _ioResult := 0 // Break the loop
+                else
+                    sleep(80);
+			end;
+		until _ioResult = 0;
+
         {$I+}
     finally
         CloseFile(logfile);
@@ -314,25 +330,12 @@ end;
 
 
 function TLogger.log(const _logstring: string): integer;
-var
-    _file: Text;
 begin
     Result := 1;
     // This logs a string into the log file.
     if myLogEnabled then
     begin
-        // {$IFDEF windows}
-        {Don't write the log file in a thread. Write it in the calling process}
-        AssignFile(_file, myLogFileName);
-        {$I-}
-        try
-            Append(_file);
-            WriteLn(_file, Format('%s:: %s', [FormatDateTime('hh:nn:ss:zzz', Now), _logstring]));
-        finally
-            CloseFile(_file);
-        end;
-        {$I+}
-
+        writeToLog(fileName(), Format('%s:: %s', [FormatDateTime('hh:nn:ss:zzz', Now), _logstring]));
         //{$ELSE}
         //   TThreadFileWriter.add(myLogFileName, Format('%s:: %s', [FormatDateTime('hh:nn:ss:zzz', Now), _logstring]) + sLineBreak);
         //{$ENDIF}

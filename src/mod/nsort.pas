@@ -70,6 +70,8 @@ var
 {$ENDIF}
 
 implementation
+uses
+  sugar.logger;
 
 {$DEFINE NATURAL_SORT}
 {
@@ -132,7 +134,7 @@ var
 
   function IsNumber(ch: char): boolean;
   begin
-    Result := ch in ['0'..'9'];
+    Result := ch in ['0'..'9', '-']; // minus sign
     //Result := ((ch >= '0') and (ch <= '9'));
   end;
 
@@ -183,13 +185,13 @@ var
   function GetInteger(var pch: PChar; var Len: integer): double;
   begin
     Result := 0;
+
     while (pch^ <> #0) and IsNumber(pch^) do
     begin
       Result := Result * 10 + Ord(pch^) - Ord('0');
       Inc(Len);
       Inc(pch);
     end;
-
   end;
 
   procedure GetChars;
@@ -227,6 +229,7 @@ begin
     pStr1 := PChar(Str1);
     pStr2 := PChar(Str2);
     Result := 0;
+
     while not ((pStr1^ = #0) or (pStr2^ = #0)) do
     begin
       TextLen1 := 1;

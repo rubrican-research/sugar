@@ -134,16 +134,6 @@ function iif(_condition: boolean; _trueVal: TObject; _falseVal: TObject = nil): 
 // If true, calls t_trueProc, If not calls falseProc with _sender. Returns the result of the boolean value.
 function iif(_condition: boolean; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean; overload;
 
-// iif with embedded if assigned
-function iif(constref _obj:TObject; _trueString: string; _falseString: string = ''): string;overload;
-function iif(constref _obj:TObject; _trueVal: int64; _falseVal: int64 = 0): int64;   overload;
-function iif(constref _obj:TObject; _trueVal: double; _falseVal: double = 0): double;overload;
-function iif(constref _obj:TObject; _trueVal: TDateTime; _falseVal: TDateTime = 0): TDateTime; overload;
-function iif(constref _obj:TObject; _trueVal: TObject; _falseVal: TObject = nil): TObject; overload;
-function iif(constref _obj:TObject; _trueProc: TNotifyEvent; _falseProc: TNotifyEvent = nil; _sender: TObject=nil): boolean; overload;
-
-
-
 
 {Data functions}
 
@@ -167,6 +157,7 @@ function profiler(const _name: string): TCodeProfiler;
 
 // Get list of files
 function getFiles(_dir: string; _filter: string): TStrings;
+function getFilePaths(_dir: string; _filterArr: TStringArray;_recursive: boolean = true): TStrings;
 
 // Convenience function to return the index, with boundary checking
 // for a list of count values. Typical usage is the get the next index in
@@ -1099,59 +1090,7 @@ begin
 	end;
 end;
 
-function iif(constref _obj: TObject; _trueString: string; _falseString: string
-	): string;
-begin
-    case Assigned(_obj) of
-        true    : Result := _trueString;
-        false   : Result := _falseString;
-	end;
-end;
 
-function iif(constref _obj: TObject; _trueVal: int64; _falseVal: int64): int64;
-begin
-    case Assigned(_obj) of
-        true    : Result := _trueVal;
-        false   : Result := _falseVal;
-    end;
-end;
-
-function iif(constref _obj: TObject; _trueVal: double; _falseVal: double
-	): double;
-begin
-    case Assigned(_obj) of
-        true    : Result := _trueVal;
-        false   : Result := _falseVal;
-    end;
-end;
-
-function iif(constref _obj: TObject; _trueVal: TDateTime; _falseVal: TDateTime
-	): TDateTime;
-begin
-    case Assigned(_obj) of
-        true    : Result := _trueVal;
-        false   : Result := _falseVal;
-    end;
-end;
-
-function iif(constref _obj: TObject; _trueVal: TObject; _falseVal: TObject
-	): TObject;
-begin
-    case Assigned(_obj) of
-        true    : Result := _trueVal;
-        false   : Result := _falseVal;
-    end;
-end;
-
-function iif(constref _obj: TObject; _trueProc: TNotifyEvent;
-	_falseProc: TNotifyEvent; _sender: TObject): boolean;
-begin
-    Result := Assigned(_obj);
-    case Result of
-        True:   if assigned(_trueProc) then _trueProc(_sender);
-        False:  if assigned(_falseProc) then _falseProc(_sender);
-    end;
-end;
 
 function hasDataChanged(_prev: real; _current: real;
 	_tolerancePercentage: real): boolean;
@@ -1228,22 +1167,77 @@ begin
     Result := TCodeProfiler.Create(_name);
 end;
 
-{From uData.pas}
 function getFiles(_dir: string; _filter: string): TStrings;
-var
-  fInfo: TSearchRec;
-  found: boolean;
 begin
-  Result := TStringList.Create;
+    Result := getFilePaths(_dir, [_filter], false);
+end;
 
-  found := FindFirst(_dir + {\}DirectorySeparator + _filter, faAnyFile, fInfo) = 0;
-  if found then begin
-    repeat
-      Result.Add(_dir + {\}DirectorySeparator + FInfo.Name);
-    until FindNext(fInfo) <> 0;
-  end;
-  FindClose(fInfo);
+//function getFiles(_dir: string; _filter: string): TStrings;
+//var
+//  fInfo: TSearchRec;
+//  found: boolean;
+//begin
+//  Result := TStringList.Create;
+//
+//  found := FindFirst(_dir + {\}DirectorySeparator + _filter, faAnyFile, fInfo) = 0;
+//  if found then begin
+//    repeat
+//      Result.Add(_dir + {\}DirectorySeparator + FInfo.Name);
+//    until FindNext(fInfo) <> 0;
+//  end;
+//  FindClose(fInfo);
+//end;
 
+
+function getFilePaths(_dir: string; _filterArr: TStringArray;
+    _recursive: boolean = true): TStrings;
+var
+    fInfo: TSearchRec;
+    found: boolean;
+    _path, _filter: string;
+    _tmpResult: TStrings;
+
+    function isDirectory(_finfo: TSearchRec): boolean;
+    begin
+        Result := faDirectory = (_finfo.Attr and faDirectory);
+    end;
+
+begin
+    Result := TStringList.Create;
+    if _recursive then
+    begin
+        found := FindFirst(appendPath([_dir, '*.*']), faDirectory, fInfo) = 0;
+        if found then begin
+            repeat
+
+                case FInfo.Name of
+                    '.', '..': continue;
+				end;
+
+				_path := _dir + {\}DirectorySeparator + FInfo.Name;
+	            if isDirectory(fInfo) then begin
+	                _tmpResult := getFilePaths(_path, _filterArr, _recursive);
+	                Result.AddStrings(_tmpResult);
+	                _tmpResult.Free;
+	            end;
+
+			until FindNext(fInfo) <> 0;
+		end;
+    end;
+
+    for _filter in _filterArr do
+    begin
+        _path := appendPath([_dir, _filter]);
+        found := FindFirst(_path, faAnyFile, fInfo) = 0;
+        if found then
+        begin
+            repeat
+                _path := appendPath([_dir, FInfo.Name]);
+                Result.Add(_path);
+            until FindNext(fInfo) <> 0;
+        end;
+        FindClose(fInfo);
+    end;
 end;
 
 function getPrevIndex(const _curr, _count: integer): integer;

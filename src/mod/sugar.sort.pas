@@ -14,6 +14,7 @@ uses
 implementation
 uses
     nsort, sugar.utils;
+
 function sortArr(_arr: array of string): TStringArray;
 var
   s: TStringList;

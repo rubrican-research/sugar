@@ -7,9 +7,6 @@ interface
 uses
     Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids;
 
-const
-  _ = sLineBreak;
-
 type
 
     TUIState  = (uiDefault, uiHighlight, uiWarning, uiError);
@@ -319,8 +316,10 @@ type
     end;
 
 
+
 function gridSort(constref sg: TStringGrid; _cols: array of integer; _order: TSortOrder = soAscending): TStringGrid;
 const
+  TERM_DELIM = '|';
   DELIM = '•';
 var
     _index  : TStringIndexMap;
@@ -346,11 +345,11 @@ begin
 
             for _col in _cols do begin
                 if not InRange(_col, 0, pred(sg.ColCount)) then continue;
-                if not _term.isEmpty then _term := _term + '|';
+                if not _term.isEmpty then _term := _term + TERM_DELIM;
                 _term := _term + sg.Cells[_col, _r];
 			end;
-
-			_term := Format('%s|%d',[_term, _r]);
+            // Append row number to the
+			_term := Format('%s' + TERM_DELIM + '%d',[_term, _r]);
 
             _index.idx[_term] := _r;
             _rows.add(_term, clone(sg.rows[_r]));
@@ -358,6 +357,7 @@ begin
 		end;
 
         _sorted := sortList(_index.getNames(DELIM), DELIM);
+
 
         case _order of
             soAscending:  begin
@@ -376,7 +376,6 @@ begin
             sg.Rows[_r].AddStrings(_rows.get(s), true); // This adds the objects as well
             _r := _r + _delta; {increments or decrements depending on sorting order}
 		end;
-
         sg.EndUpdate;
 
 	finally
