@@ -222,7 +222,7 @@ end;
 
 class procedure TLogger.writeToLog(_logfilename: string; _logstr: string);
 const
-    MAX_ATTEMPTS = 3;
+    MAX_ATTEMPTS = 13;
 var
     logfile: Text;
 	_ioResult: Word;

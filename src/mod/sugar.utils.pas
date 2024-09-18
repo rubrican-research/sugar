@@ -156,6 +156,7 @@ function plus1(var i: integer): integer;
 function profiler(const _name: string): TCodeProfiler;
 
 // Get list of files
+function getSubFolders(_dir: string; _recursive: boolean = true): TStrings;
 function getFiles(_dir: string; _filter: string): TStrings;
 function getFilePaths(_dir: string; _filterArr: TStringArray;_recursive: boolean = true): TStrings;
 
@@ -969,7 +970,6 @@ begin
         Result:= false
     else
     begin
-        _num.Replace(DefaultFormatSettings.DecimalSeparator, '');
         Result:= isNumber(_num.Replace('.', '').Replace(DefaultFormatSettings.DecimalSeparator, ''));
 	end;
 end;
@@ -1166,6 +1166,41 @@ function profiler(const _name: string): TCodeProfiler;
 begin
     Result := TCodeProfiler.Create(_name);
 end;
+
+function getSubFolders(_dir: string; _recursive: boolean): TStrings;
+var
+    fInfo: TSearchRec;
+    found: boolean;
+    _path, _filter: string;
+    _tmpResult: TStrings;
+
+    function isDirectory(_finfo: TSearchRec): boolean;
+    begin
+        Result := faDirectory = (_finfo.Attr and faDirectory);
+    end;
+
+begin
+    Result := TStringList.Create;
+    found := FindFirst(appendPath([_dir, '*.*']), faDirectory, fInfo) = 0;
+    if found then begin
+        repeat
+            case FInfo.Name of
+                '.', '..': continue;
+			end;
+			_path := _dir + {\}DirectorySeparator + FInfo.Name;
+            if isDirectory(fInfo) then begin
+                Result.Add(_path);
+                if _recursive then begin
+	                _tmpResult := getSubFolders(_path, _recursive);
+	                Result.AddStrings(_tmpResult);
+	                _tmpResult.Free;
+				end;
+			end;
+		until FindNext(fInfo) <> 0;
+	end;
+
+end;
+
 
 function getFiles(_dir: string; _filter: string): TStrings;
 begin
