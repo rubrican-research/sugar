@@ -760,7 +760,7 @@ begin
     if not Assigned(_factoryData) then
     begin
         _factoryData:= myModelFactory.get(_modelDef.Name);
-        _factoryData.def:= _modelDef;
+        _factoryData.def        := _modelDef;
         _factoryData.modelClass := _modelClass;
 	end;
 end;

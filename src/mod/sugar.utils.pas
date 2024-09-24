@@ -122,8 +122,8 @@ function asNumber(_j: TJSONData; _default: integer = 0) : integer;
 function hasWord(_word: string; _source: string): boolean;
 function paddedNum(const _num: word; const _padCount: word = 3): string;
 function limitWords(_str: string; _limit: word): string;
-function rpad(_str: string; _times: word; _pad: char = ' '): string;
-function lpad(_str: string; _times: word; _pad: char = ' '): string;
+
+
 
 {immediate if. If condition is true, returns first parameter else returns second}
 function iif(_condition: boolean; _trueString: string; _falseString: string = ''): string;overload;
@@ -381,6 +381,7 @@ function makeStringArray(_strings: TStrings): TStringArray;
 var
     i: integer;
 begin
+    Result := [];
     SetLength(Result, _strings.Count);
     for i := 0 to _strings.Count - 1 do
         Result[i] := _strings[i];
@@ -418,6 +419,7 @@ function toStringArray(const _source: string; _delim: string): TStringArray;
 var
     i: integer;
 begin
+    Result := [];
     if Trim(_source).isEmpty then
         setLength(Result, 0)
     else
@@ -442,6 +444,7 @@ function JSONToStringArray(const _source: TJSONArray): TStringArray;
 var
 	_el: TJSONEnum;
 begin
+    Result := [];
     SetLength(Result, _source.count);
     for _el in _source do
     begin
@@ -1020,16 +1023,6 @@ begin
     Result:= LeftStr(_str, wPos);
     if wPos<_str.Length then
         Result:= Result + '...';
-end;
-
-function rpad(_str: string; _times: word; _pad: char): string;
-begin
-
-end;
-
-function lpad(_str: string; _times: word; _pad: char): string;
-begin
-
 end;
 
 function iif(_condition: boolean; _trueString: string; _falseString: string): string;

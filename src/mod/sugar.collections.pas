@@ -73,7 +73,7 @@ type
     TFPHashObjectListClass = class of TFPHashObjectList;
     { GenericHashObjectList }
     generic GenericHashObjectList<GObj> = class(TFPHashObjectList)
-    public type
+	public type
         TObjectConstructor = function: GObj of object;
 
     protected
@@ -134,9 +134,9 @@ type
     {-----------------------------------------------}
 
     public
-        property Items[Index: integer]: GObj read GetItem write SetItem; default;
-        property Names[Index: integer]: string read getName;// write setName;
-        property Value[_key: shortstring]: GObj read get;// write setName;
+        property Items[Index: integer]: GObj read GetItem write SetItem;
+        property Names[Index: integer]: string read getName;
+        property Value[_key: shortstring]: GObj read get; default;
 
         property onFind: TNotifyEvent write setonFind;
         property onCreateObj: TNotifyEvent write setonCreateObj;
@@ -150,7 +150,7 @@ type
       new objects. These objects are destroyed on free}
     TDynamicKeyValueStore = class(TDynamicKeyValueStoreBase)
     public
-        constructor Create;
+        constructor Create; reintroduce;
         destructor Destroy; override;
 
         {creates an object and adds it to the list}
@@ -727,6 +727,7 @@ begin
     if myonCreateObj = _onCreateObj then Exit;
     myonCreateObj := _onCreateObj;
 end;
+
 
 procedure GenericHashObjectList.setonFind(const _onFind: TNotifyEvent);
 begin
