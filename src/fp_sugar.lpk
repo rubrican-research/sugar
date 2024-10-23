@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="mod"/>
         <OtherUnitFiles Value="mod;mod\webui"/>
-        <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="..\lib\3.x\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
     <Files>
@@ -185,10 +185,10 @@
     </Files>
     <RequiredPkgs>
       <Item>
-        <PackageName Value="fpc_markdown"/>
+        <PackageName Value="rhl_package"/>
       </Item>
       <Item>
-        <PackageName Value="rhl606"/>
+        <PackageName Value="fpc_markdown"/>
       </Item>
       <Item>
         <PackageName Value="LCLBase"/>

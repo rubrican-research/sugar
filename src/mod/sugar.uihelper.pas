@@ -48,10 +48,11 @@ type
 	    Shift: TShiftState);
 
     function gridSort(constref sg: TStringGrid; _cols: array of integer; _order: TSortOrder = soAscending): TStringGrid;
+    procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte);  overload; // resizes the grid according to the percentages in the array
 
 implementation
 uses
-    Forms, sugar.utils, LCLType, sugar.collections, sugar.sort, Math;
+    LCLType, LCLIntf, Forms, sugar.utils, sugar.collections, sugar.sort, Math;
 var
   myOnHover: TOnHover;
 
@@ -289,8 +290,10 @@ end;
 procedure KeyDownFloatValues(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if key in [
+            VK_RETURN,
             VK_0..VK_9,
             VK_NUMPAD0..VK_NUMPAD9,
+            VK_SUBTRACT,
             VK_OEM_PERIOD,
             VK_OEM_COMMA,
             VK_BACK,
@@ -299,7 +302,7 @@ begin
             VK_RIGHT,
             VK_END,
             VK_HOME,
-            VK_TAB
+            VK_TAB,
             ] then
 
             // Do nothing
@@ -381,6 +384,25 @@ begin
 	finally
         _index.Free;
         _rows.Free;
+	end;
+end;
+
+
+procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte
+	);
+const
+  __GRID_BUFFER = 4;
+
+var
+    _colCount: byte;
+	_col: TGridColumn;
+	_width, _i: Integer;
+begin
+    _colCount := Min(Length(_arrWidths), _grid.ColCount); // To loop over only the colums that are available.
+    _width := _grid.Width - __GRID_BUFFER - GetSystemMetrics(SM_CXVSCROLL); // to prevent the scroll bar from showing;
+    for _i := 0 to pred(_colCount) do begin
+        _col := _grid.Columns.Items[_i];
+        _col.Width:= trunc(_width * (_arrWidths[_i]/100));
 	end;
 end;
 

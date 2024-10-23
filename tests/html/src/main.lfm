@@ -1,0 +1,157 @@
+object Form1: TForm1
+  Left = 335
+  Height = 538
+  Top = 236
+  Width = 673
+  Caption = 'Form1'
+  ClientHeight = 538
+  ClientWidth = 673
+  LCLVersion = '3.4.0.0'
+  object Panel1: TPanel
+    Left = 498
+    Height = 506
+    Top = 27
+    Width = 170
+    Align = alRight
+    BorderSpacing.Around = 5
+    Caption = 'Panel1'
+    ChildSizing.VerticalSpacing = 12
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsHomogenousChildResize
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 506
+    ClientWidth = 170
+    TabOrder = 0
+    object Button1: TButton
+      Left = 6
+      Height = 27
+      Top = 6
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Indentation'
+      TabOrder = 0
+      OnClick = Button1Click
+    end
+    object Button2: TButton
+      Left = 6
+      Height = 27
+      Top = 45
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button2'
+      TabOrder = 1
+    end
+    object Button3: TButton
+      Left = 6
+      Height = 27
+      Top = 84
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button3'
+      TabOrder = 2
+    end
+    object Button4: TButton
+      Left = 6
+      Height = 27
+      Top = 123
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button4'
+      TabOrder = 3
+    end
+    object Button5: TButton
+      Left = 6
+      Height = 27
+      Top = 162
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button5'
+      TabOrder = 4
+    end
+    object Button6: TButton
+      Left = 6
+      Height = 27
+      Top = 201
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button6'
+      TabOrder = 5
+    end
+    object Button7: TButton
+      Left = 6
+      Height = 27
+      Top = 240
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button7'
+      TabOrder = 6
+    end
+    object Button8: TButton
+      Left = 6
+      Height = 27
+      Top = 279
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button8'
+      TabOrder = 7
+    end
+    object Button9: TButton
+      Left = 6
+      Height = 27
+      Top = 318
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button9'
+      TabOrder = 8
+    end
+    object Button10: TButton
+      Left = 6
+      Height = 27
+      Top = 357
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button10'
+      TabOrder = 9
+    end
+    object Button11: TButton
+      Left = 6
+      Height = 27
+      Top = 396
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button11'
+      TabOrder = 10
+    end
+    object Button12: TButton
+      Left = 6
+      Height = 27
+      Top = 435
+      Width = 158
+      BorderSpacing.Around = 5
+      Caption = 'Button12'
+      TabOrder = 11
+    end
+  end
+  object Label1: TLabel
+    Left = 5
+    Height = 17
+    Top = 5
+    Width = 663
+    Align = alTop
+    BorderSpacing.Around = 5
+    Caption = 'Label1'
+  end
+  object Memo1: TMemo
+    Left = 5
+    Height = 506
+    Top = 27
+    Width = 488
+    Align = alClient
+    BorderSpacing.Around = 5
+    Lines.Strings = (
+      'Memo1'
+    )
+    TabOrder = 1
+  end
+end

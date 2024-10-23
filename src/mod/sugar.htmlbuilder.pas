@@ -14,7 +14,8 @@ uses
 const
     HTML_DOC_HEADER = '<!DOCTYPE HTML>';
     br = '</br>';
-    DEFAULT_ELEMENT_ID_PREFIX = 'rbEL';
+    //DEFAULT_ELEMENT_ID_PREFIX = 'rbEL';
+    DEFAULT_ELEMENT_ID_PREFIX = 'E';
 
     {use this prefix when creating template fields in a view}
     DEFAULT_FIELD_PREFIX = 'rbf_';

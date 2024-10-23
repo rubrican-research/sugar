@@ -24,8 +24,6 @@ type
      	procedure setlogEnabled(const _logEnabled: boolean);
      	procedure WriteLog(_logstring: string);
      	function shouldWrite(): boolean;
- 	public
-    	class procedure writeToLog(_logfilename: string; _logstr: string);
 
  	public
      	constructor Create(const _logfile: string = 'logger.log';_enabled: boolean = True; _clearonstart: boolean = True);
@@ -46,6 +44,7 @@ type
  	end;
 
     {Log file}
+    procedure writeToLog(_logfilename: string; _logstr: string);
     procedure startLog(_filename: string = 'log.txt'; _logLevel: TLogLevel = logInfo; _shouldDisplayOnConsole: boolean = true);
     function isLogStarted: boolean;
     function getLogFileName: string;
@@ -79,6 +78,8 @@ var
 	myLogger: TLogger;
     myLogLevel: TLogLevel = logNone;
     myShouldDisplayOnConsole: boolean = false;
+
+    myLoggerCS: TRTLCriticalSection;
 
 
 procedure startLog(_filename: string; _logLevel: TLogLevel;
@@ -186,7 +187,7 @@ end;
 procedure writeLog(_logfilename: string; _logstr: string);
 begin
     try
-        TLogger.writeToLog(_logfilename, _logstr);
+        writeToLog(_logfilename, _logstr);
     except
         ; // don't react if logfile cannot be written.
     end;
@@ -220,36 +221,73 @@ begin
     writeToLog(myLogFileName, _logstring);
 end;
 
-class procedure TLogger.writeToLog(_logfilename: string; _logstr: string);
+procedure writeToLog(_logfilename: string; _logstr: string);
 const
-    MAX_ATTEMPTS = 13;
+    MAX_ATTEMPTS = 7;
 var
     logfile: Text;
-	_ioResult: Word;
-    _attempt : word = 1;
+	_ioResult: Word = 0;
+    _writeAttempt : word = 1;
+    _openAttempt: word = 1;
+	s: String;
 begin
-    AssignFile(logfile, _logfilename);
+    //EnterCriticalSection(myLoggerCS);
     try
-        {$I-}
         repeat
-            Append(logfile);
-            _ioResult := IOResult;
-            if _ioResult = 0 then begin
-                Writeln(logfile, _logstr)
-            end
-            else begin
-                inc(_attempt);
-                if _attempt > MAX_ATTEMPTS then
-                    _ioResult := 0 // Break the loop
-                else
-                    sleep(80);
-			end;
-		until _ioResult = 0;
+            {$I-}
+            {OPENT FILE}
+	        AssignFile(logfile, _logfilename);
+	        _ioResult := IOResult;
+	        if _ioResult = 0 then begin // Assign file
+                {WRITE FILE}
+		        repeat
+		            Append(logfile);
+		            _ioResult := IOResult;
+		            if _ioResult = 0 then begin
+		                Writeln(logfile, _logstr)
+		            end
+		            else begin
+		                inc(_writeAttempt);
+		                if _writeAttempt > MAX_ATTEMPTS then
+		                    _ioResult := 0; // Break the loop
+		                //else
+		                //    sleep(80);
+					end;
+				until _ioResult = 0;
 
-        {$I+}
-    finally
-        CloseFile(logfile);
-    end;
+                {CLOSE FILE}
+		        repeat
+		            CloseFile(logFile);
+		            _ioResult := IOResult;
+		            if _ioResult <> 0 then
+		            begin
+		                inc(_writeAttempt);
+		                if _writeAttempt > MAX_ATTEMPTS then
+		                    _ioResult := 0; // Break the loop
+		                //else
+		                //    sleep(80);
+					end;
+				until _ioResult = 0;
+
+	        end
+            else begin // Assign File was not successful
+                inc (_openAttempt);
+	            if _openAttempt > MAX_ATTEMPTS then
+	                _ioResult := 0; // Break the loop
+	            //else
+	            //    sleep(80);
+            end;
+            {$I+}
+        until _ioResult = 0;
+	except
+        on E:Exception do begin
+            s := E.Message;
+            sleep(10);
+		end;
+	end;
+    //LeaveCriticalSection(myLoggerCS);
+
+
 end;
 
 function TLogger.fileName: string;
@@ -331,6 +369,7 @@ end;
 
 function TLogger.log(const _logstring: string): integer;
 begin
+
     Result := 1;
     // This logs a string into the log file.
     if myLogEnabled then
@@ -360,9 +399,11 @@ begin
     raise Exception.Create('Function not implemented');
 end;
 
-
+initialization
+    InitCriticalSection(myLoggerCS);
 finalization
-    if assigned(myLogger) then myLogger.Free;
+    freeLog;
+    DoneCriticalSection(myLoggerCS);
 
 end.
 

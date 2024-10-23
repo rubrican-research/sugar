@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="testhtmlbuilder.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src\main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="39"/>
+        <CursorPos X="14" Y="75"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="9022"/>
+        <CursorPos X="26" Y="9043"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="37"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="38"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="39"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="40"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="41"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="42"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="43" TopLine="2"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="40" Column="15" TopLine="3"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="56" Column="18" TopLine="15"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="58" Column="28" TopLine="23"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="69" Column="17" TopLine="29"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="73" Column="9" TopLine="36"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="74" Column="29" TopLine="36"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9983" Column="5" TopLine="9981"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9966" Column="25" TopLine="9936"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9971" Column="33" TopLine="9937"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9976" Column="33" TopLine="9942"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="10057" Column="29" TopLine="10029"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="10065" Column="5" TopLine="10029"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="10067" Column="29" TopLine="10033"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="3589" Column="20" TopLine="3566"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="7605" Column="30" TopLine="7607"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="7929" Column="27" TopLine="7903"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="8293" Column="25" TopLine="8269"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="8562" Column="32" TopLine="8532"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="8681" Column="19" TopLine="8669"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9034" TopLine="8993"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <Caret Line="9043" Column="26" TopLine="9022"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="59" Column="30" TopLine="39"/>
+      </Position>
+      <Position>
+        <Filename Value="src\main.pas"/>
+        <Caret Line="69" Column="16"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

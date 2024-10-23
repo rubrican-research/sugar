@@ -262,7 +262,8 @@ const
 
 function quoted(const _value: string): string;
 begin
-    Result := QUOTE_CHAR + _value + QUOTE_CHAR;
+    //Result := QUOTE_CHAR + _value + QUOTE_CHAR;
+    Result := QuotedStr(_value);
 end;
 
 function stripQuotes(const _value: string): string;
