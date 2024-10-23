@@ -302,7 +302,7 @@ begin
             VK_RIGHT,
             VK_END,
             VK_HOME,
-            VK_TAB,
+            VK_TAB
             ] then
 
             // Do nothing
