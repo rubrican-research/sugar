@@ -1,0 +1,46 @@
+object Form1: TForm1
+  Left = 248
+  Height = 486
+  Top = 194
+  Width = 670
+  Caption = 'Form1'
+  ClientHeight = 486
+  ClientWidth = 670
+  LCLVersion = '3.4.0.0'
+  object Memo1: TMemo
+    Left = 8
+    Height = 466
+    Top = 8
+    Width = 503
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -12
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqCleartype
+    Lines.Strings = (
+      'Memo1'
+    )
+    ParentFont = False
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 577
+    Height = 25
+    Top = 8
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Button1'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 586
+    Height = 25
+    Top = 219
+    Width = 75
+    Caption = 'Button2'
+    TabOrder = 2
+    OnClick = Button2Click
+  end
+end

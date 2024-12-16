@@ -1,0 +1,32 @@
+object Form1: TForm1
+  Left = 910
+  Height = 314
+  Top = 373
+  Width = 649
+  Caption = 'Form1'
+  ClientHeight = 314
+  ClientWidth = 649
+  LCLVersion = '3.6.0.0'
+  object Memo1: TMemo
+    Left = 16
+    Height = 241
+    Top = 24
+    Width = 616
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Lines.Strings = (
+      'Memo1 has no reason to be grim'
+      'मेरे अंतरंग स्वप्न में आओ। मेरी जड़ से प्रेम करो।'
+    )
+    TabOrder = 0
+    OnClick = Memo1Click
+    OnKeyUp = Memo1KeyUp
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 17
+    Top = 274
+    Width = 38
+    Anchors = [akLeft, akBottom]
+    Caption = 'Label1'
+  end
+end

@@ -12,6 +12,14 @@ interface
 
 uses
      Classes, SysUtils, fpjson, sugar.collections, sugar.profiler;
+type
+    TArrInt64 = array of int64;
+    SChars    = set of char;
+    TArrChars = array of wideChar;
+
+const
+      __ILLEGAL_CHARS  = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ;
+      __whitespace: TStringArray =  (#10, #13, ' ', ',', '.', ';', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;
 function appendURL(_paths: array of string): string;
@@ -78,6 +86,12 @@ function getCommaSeparatedString(const _list: TJSONArray): string;
 
 function getDelimitedString(const _list: TStringArray; const _delim: string = ','): string; overload;
 function getDelimitedString(const _list: TJSONArray; const _delim: string = ','): string; overload;
+function getDelimitedString(const _list: TArrInt64; const _delim: string = ','): string; overload;
+
+{Implements select a whole world from cursor position from a line
+Extracts a string from  that lies between _prefix and _suffix.
+It maybe possible to do this with regular expressions... need to check}
+function strBetween(const _source: string; const _pos: integer; _prefix: TStringArray; _suffix: TStringArray; out _startPos: sizeInt; out _endPos: sizeInt): string;
 
 type
     THtmlTimeMode = (useLocalTime, useUniversalTime);
@@ -177,11 +191,14 @@ function HexStrAsObj(_hex: string):  TObject;
 {Clone functions}
 function clone(constref _s: TStrings): TStrings;
 
+
+
+
 implementation
 uses
      fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
-     math, base64, LazStringUtils, DateUtils, sugar.logger;
+     math, base64, LazStringUtils, DateUtils, sugar.logger, LazUTF8;
 
 	{nsort, MarkdownUtils,}
 
@@ -227,21 +244,23 @@ begin
 end;
 
 function sanitizeFileName(_varName: string; _extension: string): string;
+
 var
     i: integer;
-begin
-    Result := '';
-    {Replace invalid characters in one pass}
-    for i := 1 to _varName.Length do
+    function sanitize(_fName: string): string;
+    var
+    	i: Integer;
     begin
-        case _varName[i] of
-            ' ', ':', '.',
-            DirectorySeparator: Result := Result + '-';
-            else
-                Result := Result + _varName[i];
-        end;
+        Result:= '';
+        for i := 1 to _fName.Length do
+        begin
+            if not (_fName[i] in __ILLEGAL_CHARS) then
+                Result := Result + _fName[i];
+    	end;
     end;
 
+begin
+    Result := sanitize(_varName);
     if _extension.IsEmpty then
         exit;
 
@@ -249,7 +268,7 @@ begin
     if not _extension.StartsWith('.') then
         Result := Result + '.';
 
-    Result := Result + _extension;
+    Result := Result + sanitize(_extension);
 end;
 
 function getFileContent(const _filename: string; _touch: boolean): string;
@@ -687,6 +706,108 @@ begin
         end;
 	end;
 end;
+
+function getDelimitedString(const _list: TArrInt64; const _delim: string
+	): string;
+var
+	_i: Int64;
+begin
+  Result := '';
+  for _i in _list do begin
+      if not Result.isEmpty then Result := Result + _delim;
+      Result:= Result + IntToStr(_i);
+  end;
+end;
+
+//function strBetween(const _source: string; const _pos: integer;
+//	_prefix: SChars; _suffix: SChars): string;
+//var
+//  _length: SizeInt;
+//  _startPos, _endPos: SizeInt;
+//  _stage: set of 0..2 = [];
+//begin
+//   {From}
+//   {Class Function TStrings.GetNextLine (Const Value : String; Var S : String; Var P : SizeInt) : Boolean;}
+//
+//    _length   := Length(_source);
+//    _startPos := _pos;
+//    _endPos   := _startPos;
+//
+//    if (_startPos <= 0) or (_startPos > _length) then Exit('');
+//
+//    while (_startPos > 0) and not (_source[_startPos] in _prefix) do dec(_startPos);
+//    while (_endPos <= _length) and not (_source[_endPos] in _suffix) do Inc(_endPos);
+//
+//    if _startPos = 0 then _startPos := 1; // to fix empty space when selecting first word in string
+//    SetString(Result, @_source[_startPos], _endPos - _startPos);
+//end;
+
+type
+    TUTFCharArray = array of UnicodeChar;
+
+//function UTF8Array(S: String; _pos : sizeInt): TUTFCharArray;
+//var
+//    CurP, EndP: pChar;
+//    Len, i: Integer;
+//
+//begin
+//
+//    CurP := pChar(S);        // if S='' then PChar(S) returns a pointer to #0
+//    EndP := CurP + length(S);
+//
+//    log('NextUTF8():: EndP: %d, CurP: %d, Length(S): %d, EndP - CurP: %d, UTF8Length: %d', [SizeInt(EndP), SizeInt(CurP), Length(S), SizeInt(EndP - CurP), UTF8Length(S)] );
+//
+//    i := 0;
+//    Result := [];
+//    SetLength(Result, length(s));
+//
+//    while CurP < EndP do
+//    begin
+//        Len := UTF8CodepointSize(CurP);
+//        //Result[i] := UTF8Copy(s,  i, 1);
+//        log(' ==> %s (%d) - %d',[UTF8Copy(s,  i, 1), Len, i]);
+//        inc(CurP, Len);
+//        inc(i);
+//    end;
+//    Move(CurP^, Result[i], Len);
+//    SetLength(Result, i);
+//
+//end;
+
+function strBetween(const _source: string; const _pos: integer;
+	_prefix: TStringArray; _suffix: TStringArray; out _startPos: sizeInt; out
+	_endPos: sizeInt): string;
+var
+  _length,i: SizeInt;
+
+  function strIn(_source: string; _set: TStringArray): boolean;
+  var
+	  _c: String;
+  begin
+        Result := False;
+        for _c in _set do begin
+            Result := UTF8CompareStr(_source, _c) = 0;
+            if Result then break;
+		end;
+  end;
+
+begin
+    _length := UTF8Length(_source);
+
+    _startPos := _pos;
+    _endPos   := _startPos;
+
+    if (_startPos <= 0) or (_startPos > _length) then Exit('');
+
+    while (_startPos >= 0) and not(strIn(UTF8Copy(_source,_startPos, 1), _prefix)) do dec(_startPos);
+    while (_endPos <= _length) and not (strIn(UTF8Copy(_source,_endPos, 1),_suffix)) do Inc(_endPos);
+
+    if _startPos <= 0 then _startPos := 1; // to fix empty space when selecting first word in string
+
+    Result := UTF8Copy(_source,  _startPos, (_endPos - _startPos));
+
+end;
+
 
 var
     myHtmlTimeMode: THtmlTimeMode;

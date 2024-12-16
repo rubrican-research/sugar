@@ -9,7 +9,8 @@ uses
 
 type
 
-    TUIState  = (uiDefault, uiHighlight, uiWarning, uiError);
+    TUIState  = (uiDefault, uiHighlight, uiWarning, uiError, uiHover);
+
 	{ TOnHover }
 
     TOnHover = class
@@ -44,15 +45,17 @@ type
     procedure onControlFocus(Sender:TObject);
     procedure onControlExit(Sender: TObject);
 
-    procedure KeyDownFloatValues(Sender: TObject; var Key: Word;
-	    Shift: TShiftState);
+    // Only permits valid float value input
+    procedure KeyDownFloatValues(Sender: TObject; var Key: Word; Shift: TShiftState);
 
     function gridSort(constref sg: TStringGrid; _cols: array of integer; _order: TSortOrder = soAscending): TStringGrid;
     procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte);  overload; // resizes the grid according to the percentages in the array
 
+    function getCurrentWord(_memo: TMemo): string;
+
 implementation
 uses
-    LCLType, LCLIntf, Forms, sugar.utils, sugar.collections, sugar.sort, Math;
+    LCLType, LCLIntf, Forms, sugar.utils, sugar.collections, sugar.sort, Math, sugar.logger;
 var
   myOnHover: TOnHover;
 
@@ -95,9 +98,9 @@ begin
     if Sender is TLabel then
     begin
         _lbl := Sender as TLabel;
-        _lbl.Font.Style:= _lbl.Font.Style + [fsUnderline];
-        _lbl.Font.Color:= clHighlight;
-        _lbl.Cursor := crHandPoint;
+        _lbl.Font.Style := _lbl.Font.Style + [fsUnderline];
+        _lbl.Font.Color := clHighlight;
+        _lbl.Cursor     := crHandPoint;
 	end;
 end;
 
@@ -108,9 +111,9 @@ begin
     if Sender is TLabel then
     begin
         _lbl := Sender as TLabel;
-        _lbl.Font.Style:= _lbl.Font.Style - [fsUnderline];
-        _lbl.Font.Color:= clDefault;
-        _lbl.Cursor := crDefault;
+        _lbl.Font.Style := _lbl.Font.Style - [fsUnderline];
+        _lbl.Font.Color := clDefault;
+        _lbl.Cursor     := crDefault;
 	end;
 end;
 
@@ -404,6 +407,16 @@ begin
         _col := _grid.Columns.Items[_i];
         _col.Width:= trunc(_width * (_arrWidths[_i]/100));
 	end;
+end;
+
+function getCurrentWord(_memo: TMemo): string;
+var
+	_line, _col: LongInt;
+    _startPos, _endPos: sizeInt;
+begin
+    _line  := _memo.CaretPos.Y;
+    _col   := succ(_memo.CaretPos.X);
+    Result := strBetween(_memo.Lines.Strings[_line], _col, __whitespace, __whitespace, _startPos, _endPos);
 end;
 
 

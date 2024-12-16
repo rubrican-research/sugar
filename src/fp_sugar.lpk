@@ -182,6 +182,10 @@
         <Filename Value="mod\sugar.fmkvdisplay.pas"/>
         <UnitName Value="sugar.fmkvdisplay"/>
       </Item>
+      <Item>
+        <Filename Value="markdownhelper.pas"/>
+        <UnitName Value="markdownhelper"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

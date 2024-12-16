@@ -1002,6 +1002,7 @@ function GenericHashObjectList.keys: TStringArray;
 var
 	i: Integer;
 begin
+    Result := [];
     SetLength(Result, Count);
     for i:= 0 to pred(Count) do
         Result[i]:= Names[i];

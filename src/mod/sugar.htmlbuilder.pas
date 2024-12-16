@@ -23,6 +23,7 @@ const
     TEMPLATE_PREFIX = '{{'; TEMPLATE_POSTFIX = '}}';
 
     JSProp = '%s: %s';
+    DEFAULT_INDENT = '    ';
 
 type
     THtmlGlobalAttributes = (
@@ -1432,13 +1433,14 @@ type
         FText: string;
         procedure setFText(AValue: string);
     protected
+        indent: string;
         tag: string;
         hasEndTag: boolean; // says whether the tag has an end tag or not
         function tag_start: string; virtual;
         function tag_end: string; virtual;
         function getFormatTemplate: string; virtual;
         function formatAttributes: string; virtual;
-        function render: string; virtual;
+        function render(_indent: string): string; virtual;
         function renderVue: string; virtual;
         function renderMithril: string; virtual;
 
@@ -1494,7 +1496,7 @@ type
         function setStyle(_s: string): THtmlElement;
         function tag_start: string; override;
         function FormatAttributes: string; override;
-        function Render: string; override;
+        function render(_indent: string): string; override;
         function renderVue: string; override;
         function renderMithril: string; override;
     public
@@ -1630,7 +1632,7 @@ type
     protected
         myElementList: TFPHashObjectList;
         function getItems(index: integer): THtmlElement;
-        function Render: string; override;
+        function render(_indent: string): string; override;
     public
         autoFree: boolean;
         property Items[index: integer]: THtmlElement read getItems;
@@ -1899,7 +1901,7 @@ type
         myHeader: THtmlTableHeader;
         myFooter: THtmlTableFooter;
         myBody: THtmlTableBody;
-        function Render: string; override;
+        function Render(_indent: string): string; override;
 
     public
         constructor Create; override;
@@ -2000,7 +2002,7 @@ type
         myFooter: THtmlCollection;
         myEnding: THtmlCollection;
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         constructor Create; override;
         destructor Destroy; override;
@@ -2040,7 +2042,7 @@ type
         procedure setStyles(const _Styles: THtmlStyleSheet);
         procedure setDocName(_name: string);
     protected
-        function render: string; override;
+        function render(_indent: string): string; override;
     public
         property Name: string read myName write setDocName;
         property Head: THtmlHead read FHtmlHead;
@@ -2081,7 +2083,7 @@ type
         procedure setFAsync(const _async: boolean);
         procedure setFDefer(const _defer: boolean);
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         constructor Create; override;
         function setAttr(_key: string; _value: string): THtmlScript; overload;
@@ -2129,7 +2131,7 @@ type
         myUserScalable: boolean;
 
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         constructor Create; override;
 
@@ -2181,7 +2183,7 @@ type
         procedure setFFor(AValue: string);
         procedure setFForm(AValue: string);
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         constructor Create; override;
         property for_: string read getFor write setFFor;
@@ -2264,7 +2266,7 @@ type
 		procedure setlabelPosition(const _labelPosition: THtmlLabelPosition);
 
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         constructor Create; override;
         destructor Destroy; override;
@@ -2584,7 +2586,7 @@ type
         procedure setFText(_t: string); reintroduce;
         procedure setuseFiler(const _useFiler: boolean);
     protected
-        function Render: string; override;
+        function Render(_indent: string): string; override;
     public
         property Text: string read getText write setFText;
         property useFiler: boolean read myuseFiler write setuseFiler;
@@ -3585,9 +3587,9 @@ begin
     end;
 end;
 
-function THtmlTagless.Render: string;
+function THtmlTagless.Render(_indent: string): string;
 begin
-    Result := Text;
+    Result := inherited;
 end;
 
 constructor THtmlTagless.Create;
@@ -7603,7 +7605,7 @@ end;
 
 { THtmlViewPort }
 
-function THtmlViewPort.Render: string;
+function THtmlViewPort.Render(_indent: string): string;
 var
     _content: string;
     swidth: string;
@@ -7640,7 +7642,7 @@ begin
     self.tagName := 'viewport';
     self.content := _content;
 
-    Result := inherited Render;
+    Result := inherited;
 end;
 
 constructor THtmlViewPort.Create;
@@ -7927,13 +7929,13 @@ begin
     FAttributes.Values['form'] := AValue;
 end;
 
-function THtmlLabel.Render: string;
+function THtmlLabel.Render(_indent: string): string;
 begin
     if for_.isEmpty then
         rmAttr('for');
     if form.isEmpty then
         rmAttr('form');
-	Result:=inherited Render;
+	Result:=inherited;
 end;
 
 constructor THtmlLabel.Create;
@@ -8281,9 +8283,9 @@ begin
 	myBoundLabel:=_boundLabel;
 end;
 
-function THtmlInput.Render: string;
+function THtmlInput.Render(_indent: string): string;
 begin
-    Result := inherited Render;
+    Result := inherited;
     if not FLabel.Text.isEmpty then
     begin
         if not myBoundLabel then
@@ -8554,7 +8556,7 @@ begin
     end;
 end;
 
-function THTMLScript.Render: string;
+function THTMLScript.Render(_indent: string): string;
 begin
     if (not src.IsEmpty and not Text.isEmpty) then
     begin
@@ -8562,7 +8564,7 @@ begin
         {comment out the text}
         Text := '/*==FIX DEFINITION== ' + Text + '*/';
     end;
-    Result := inherited Render;
+    Result := inherited;
 end;
 
 constructor THTMLScript.Create;
@@ -8663,24 +8665,27 @@ end;
 
 { THtmlTable }
 
-function THtmlTable.Render: string;
+function THtmlTable.Render(_indent: string): string;
 var
     i: integer;
     _html: string;
 begin
+    indent := _indent;
     Result := '';
 
     {Table header}
     if Assigned(myHeader) then
-        Result := myHeader.html;
+        Result := myHeader.render(indent + DEFAULT_INDENT);
 
-    Result := Result + myBody.html;
+    Result := Result + myBody.render(indent + DEFAULT_INDENT);
 
     {Table Footer}
     if Assigned(myFooter) then
-        Result := Result + myFooter.html;
+        Result := Result + myFooter.render(indent + DEFAULT_INDENT);
+
     Text:= Result;
-    Result:= inherited Render;
+    Result:= inherited;
+
     {add to collection}
     // Result := Format(getFormatTemplate, [Result]) + sLineBreak;
 end;
@@ -8871,14 +8876,14 @@ begin
     FHtmlBody := Body_;
 
     {Create a default element for scripts}
-    FHtmlBody.ending.script.setId(PAGE_SCRIPT_ID);
+    Body.ending.script.setId(PAGE_SCRIPT_ID);
 
     {define the styles and the scripts in these }
     myScripts := TJavaScripts.Create;
     myStyles := THtmlStyleSheet.Create;
 
     tag := 'html';
-    Name :='document'; {default name}
+    Name:='document'; {default name}
 
 end;
 
@@ -8996,10 +9001,13 @@ begin
     myStyles.documentName:= myName;
 end;
 
-function THtmlDoc.render: string;
+function THtmlDoc.render(_indent: string): string;
 var
-    _styleTag: THtmlElement;
+    _styleTag, _script: THtmlElement;
 begin
+
+    indent := _indent;
+
  // First put the header
     Result := HTML_DOC_HEADER + sLineBreak;
     try
@@ -9019,38 +9027,41 @@ begin
             writeln('THtmlDoc.render page style: ' + E.Message);
 	    end;
 	end;
+
     try
-	    FHtmlBody.ending.get(PAGE_SCRIPT_ID).Text:= myScripts.code;
+        // Page script
+	    Body.ending.get(PAGE_SCRIPT_ID).Text:= myScripts.code;
 	except
         on e:exception do
         begin
             writeln('THtmlDoc.render page script: ' + E.Message);
 		end;
 	end;
-	Result := Result + inherited Render;
+
+	Result := Result + inherited ;
 end;
 
 
 { THtmlBody }
 
-function THtmlBody.Render: string;
+function THtmlBody.Render(_indent: string): string;
 var
     i: integer;
     _html: string;
 begin
-    Result := sLineBreak + myHeader.html + Text;
+    indent := _indent;
+    Result := sLineBreak + myHeader.render(indent + DEFAULT_INDENT) + Text;
 
     {Render all members}
     for i := 0 to myElementList.Count - 1 do
     begin
-        _html := Items[i].Html;
+        _html := Items[i].render(indent);
         if (_html <> '') then
             Result := Result + _html;
     end;
 
-    Result := Result + myfooter.html;
-
-    Result := Result + myEnding.html;
+    Result := Result + myfooter.render(indent + DEFAULT_INDENT);
+    Result := Result + myEnding.render(indent + DEFAULT_INDENT);
 
     {add to collection}
     Result := Format(getFormatTemplate, [Result]) + sLineBreak;
@@ -9063,7 +9074,7 @@ begin
     tag:= 'body';
     myHeader := THtmlCollection.Create('header');
     myFooter := THtmlCollection.Create('footer');
-    myEnding := THtmlCollection.Create(''); {render without tags}
+    myEnding := THtmlCollection.Create(''); {render without tags. place holder for everything that needs to go at the end of the body tag}
 end;
 
 destructor THtmlBody.Destroy;
@@ -9244,7 +9255,8 @@ end;
 function THtmlHead.charset(_charset: string): THtmlHead;
 begin
     Result := Self;
-    add(THtmlMetaTag.Create).setAttr('charset', _charset);
+    meta('charset',_charset);
+    //add(THtmlMetaTag.Create).setAttr('charset', _charset);
 end;
 
 { TParagraph }
@@ -9287,17 +9299,18 @@ begin
     Result := THtmlElement(myElementList.Items[index]);
 end;
 
-function THtmlCollection.Render: string;
+function THtmlCollection.render(_indent: string): string;
 var
     i: integer;
     _html: string;
 begin
     Result := '';
+    indent := _indent;
 
     {Render all members}
     for i := 0 to myElementList.Count - 1 do
     begin
-        _html := Items[i].Html;
+        _html := Items[i].render(indent + DEFAULT_INDENT);
         if not _html.isEmpty then
             Result:= Result + _html;
 	end;
@@ -9309,7 +9322,7 @@ begin
     Text:= Result + Text;
 
     {add to collection}
-    Result:= inherited Render;
+    Result:= inherited;
 end;
 
 function THtmlCollection.Count: integer;
@@ -9323,6 +9336,7 @@ begin
     Result := _htmlElement;
     Result.setParent(Self);
     Result.myIndex := myElementList.Add(_htmlElement.getID, _htmlElement);
+    Result.indent := self.Indent + DEFAULT_INDENT;
 end;
 
 function THtmlCollection.add(_htmlCollection: THtmlCollection): THtmlCollection;
@@ -9938,14 +9952,16 @@ end;
 
 function THTMLElementBase.getFormatTemplate: string;
 begin
-    Result := '%s';
     if (tag <> '') then
     begin
+        Result := indent +  tag_start;
         if hasEndTag then
-            Result := tag_start + '%s' + tag_end
-        else
-            Result := tag_start;
-    end;
+        begin
+            Result := Result +  '%s' + sLineBreak + indent + tag_end;
+		end;
+	end
+    else
+        Result := indent + '%s';
 end;
 
 function THTMLElementBase.formatAttributes: string;
@@ -9954,19 +9970,20 @@ begin
 end;
 
 
-function THTMLElementBase.render: string;
+function THTMLElementBase.render(_indent: string): string;
     {Sanitize the text. Ensure that the % character
     is escaped in the source before  sending it to format()}
     function sanitize(_str: string): string;
     begin
-        Result:= _str;
+        {sanitize _str here}
+        if not _str.isEmpty then
+            Result := sLineBreak + indent + DEFAULT_INDENT + _str
+        else
+            Result:= '';
 	end;
-
 begin
-    //if tag.IsEmpty then
-    //    Result := Text
-    //else
-        Result := Format(getFormatTemplate, [sanitize(Text)]) + sLineBreak;
+    indent := _indent;
+    Result := Format(getFormatTemplate, [sanitize(Text)]) + sLineBreak;
 end;
 
 function THTMLElementBase.renderVue: string;
@@ -9981,7 +9998,7 @@ end;
 
 function THTMLElementBase.html: string;
 begin
-    Result := Render;
+    Result := render(indent);
 end;
 
 function THTMLElementBase.vue: string;
@@ -10034,6 +10051,7 @@ begin
     inherited Create;
     tag := '';
     hasEndTag := True;
+    indent := '';
 end;
 
 
@@ -10052,12 +10070,12 @@ begin
 end;
 
 
-function THtmlElement.Render: string;
+function THtmlElement.render(_indent: string): string;
 begin
     if not (myStyle.Text.isEmpty) then
         setStyle(myStyle.Text);
 
-    Result := inherited Render;
+    Result := inherited;
 end;
 
 function THtmlElement.renderVue: string;

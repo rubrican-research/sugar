@@ -478,6 +478,7 @@ function gridColumnID(_index: word; _rowID: string): string; overload;
 function newGridCols(constref _grid: THtmlDiv; _colWidths: array of word; out _row: THtmlDiv): THtmlDivArray;
 
 function anchorhtml(const _url: string; const _caption: string): string;
+function csvToHtmlTable(const _csv: string;	const _defTableStyles: TStringArray; const _colStyle: TStringArray; const _delim: string): THtmlTable;
 
 type
     RbMessageType = (msgInfo, msgWarning, msgError);
@@ -488,7 +489,7 @@ function putMessageOnForm(_form: THtmlForm; _message: string; _msgType: RbMessag
 implementation
 
 uses
-    rbutils, semanticui, bulma;
+    sugar.utils, semanticui, bulma;
 
 var
     myUIFramework: UIFramework = uiSemantic;
@@ -566,6 +567,69 @@ begin
         Free;
 	end;
 end;
+
+function csvToHtmlTable(const _csv: string; const _defTableStyles: TStringArray; const _colStyle: TStringArray; const _delim: string): THtmlTable;
+var
+    _lines, _cols : TStringArray;
+	_line, _col: String;
+	_tbl: THtmlTable;
+	_tblrow: THtmlTableRow;
+	_tblCol: THtmlTableColumn;
+    _rowNo : integer = 0;
+    _colNo : integer = 0;
+
+    _tblDefaultStyle: string = '';
+    _colHeaderDefaultStyle: string = '';
+    _ColDefaultStyle: string = '';
+    _style: string = '';
+
+    _i, _defStyleCount: SmallInt;
+begin
+
+    _defStyleCount := Length(_defTableStyles);
+    for _i := 0 to pred(_defStyleCount) do begin
+        _style := _defTableStyles[_i];
+        case _i of
+            0: _tblDefaultStyle       := _style;
+            1: _colHeaderDefaultStyle := _style;
+            2: _ColDefaultStyle       := _style;
+        end;
+	end;
+
+    _tbl := THtmlTable.Create;
+    //_tbl.addClass('full-width parameters');
+    _tbl.addClass(_tblDefaultStyle);
+
+    _lines := toStringArray(_csv, sLineBreak);
+    for _line in _lines do begin
+        if _rowNo = 0 then
+            _tblrow := _tbl.tableheader.newRow
+        else
+            _tblRow := _tbl.newRow;
+
+        _cols := toStringarray(_line, _delim);
+        for _col in _cols do begin
+            _tblCol := _tblRow.newCol();
+            _tblCol.Text := _col;
+
+            if _rowNo = 0 then begin // Header
+                //_tblCol.addClass('middle-aligned');
+                _tblCol.addClass(_colHeaderDefaultStyle);
+			end else begin
+                //_tblCol.addClass('top-aligned');
+                _tblCol.addClass(_ColDefaultStyle);
+                if _colNo <= High(_colStyle) then
+                    _tblCol.addClass(_colStyle[_colNo]);
+			end;
+            inc(_colNo);
+		end;
+        _colNo := 0;
+        inc(_rowNo);
+	end;
+
+	Result:= _tbl;
+end;
+
 
 {SUI specific error message function. Adds a DIV to the form
 with message class. Also addes the _message text.}

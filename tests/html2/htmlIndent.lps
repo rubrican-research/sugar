@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="htmlIndent.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="68"/>
+      </Unit>
+      <Unit>
+        <Filename Value="main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <TopLine Value="13"/>
+        <CursorPos Y="23"/>
+        <UsageCount Value="68"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\src\mod\sugar.htmlbuilder.pas"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="9057"/>
+        <CursorPos X="24" Y="9090"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\packages\fcl-base\src\contnrs.pp"/>
+        <UnitName Value="Contnrs"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="1801"/>
+        <CursorPos X="3" Y="1803"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\packages\rtl-objpas\src\inc\rtti.pp"/>
+        <UnitName Value="Rtti"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="4320"/>
+        <CursorPos X="5" Y="4349"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\types.pp"/>
+        <UnitName Value="Types"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="273"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\packages\fcl-base\src\rttiutils.pp"/>
+        <UnitName Value="RttiUtils"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos X="3" Y="163"/>
+        <UsageCount Value="34"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\packages\fcl-json\src\fpjsonrtti.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="585"/>
+        <CursorPos X="51" Y="608"/>
+        <UsageCount Value="34"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <UnitName Value="TypInfo"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="31"/>
+        <CursorPos X="31" Y="50"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\inc\rttih.inc"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="3"/>
+        <CursorPos X="15" Y="21"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="rtti_test.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form2"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="23"/>
+        <CursorPos Y="54"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\components\rtticontrols\rttictrls.pas"/>
+        <UnitName Value="RTTICtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3818"/>
+        <CursorPos Y="3838"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\3.4\lcl\lresources.pp"/>
+        <UnitName Value="LResources"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="783"/>
+        <CursorPos Y="804"/>
+        <UsageCount Value="10"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="19">
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="8" Column="80" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="1562" Column="3" TopLine="1536"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="797" Column="17" TopLine="776"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="1797" Column="15" TopLine="1791"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="987" TopLine="969"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="879" Column="10" TopLine="859"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="236" Column="7" TopLine="215"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\3.4\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <Caret Line="50" Column="31" TopLine="31"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="18" Column="12" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="8" Column="80"/>
+      </Position>
+      <Position>
+        <Filename Value="rtti_test.pas"/>
+        <Caret Line="43" TopLine="7"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="8" Column="80"/>
+      </Position>
+      <Position>
+        <Filename Value="rtti_test.pas"/>
+        <Caret Line="28" Column="23" TopLine="7"/>
+      </Position>
+      <Position>
+        <Filename Value="rtti_test.pas"/>
+        <Caret Line="53" Column="27" TopLine="15"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="25" Column="4" TopLine="7"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="27" Column="4" TopLine="7"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="35" Column="33" TopLine="14"/>
+      </Position>
+      <Position>
+        <Filename Value="rtti_test.pas"/>
+        <Caret Line="54" TopLine="23"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="24"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="23" TopLine="13"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
