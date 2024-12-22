@@ -1,4 +1,4 @@
-unit markdownhelper;
+unit sugar.markdownhelper;
 
 {$mode objfpc}{$H+}
 

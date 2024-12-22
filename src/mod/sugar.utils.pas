@@ -18,8 +18,9 @@ type
     TArrChars = array of wideChar;
 
 const
-      __ILLEGAL_CHARS  = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ;
-      __whitespace: TStringArray =  (#10, #13, ' ', ',', '.', ';', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
+      __ILLEGAL_CHARS             = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ;
+      //__WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
+      __WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', ':', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;
 function appendURL(_paths: array of string): string;
@@ -88,10 +89,15 @@ function getDelimitedString(const _list: TStringArray; const _delim: string = ',
 function getDelimitedString(const _list: TJSONArray; const _delim: string = ','): string; overload;
 function getDelimitedString(const _list: TArrInt64; const _delim: string = ','): string; overload;
 
+function strIn(const _source: string; const _set: TStringArray): boolean;
 {Implements select a whole world from cursor position from a line
 Extracts a string from  that lies between _prefix and _suffix.
 It maybe possible to do this with regular expressions... need to check}
 function strBetween(const _source: string; const _pos: integer; _prefix: TStringArray; _suffix: TStringArray; out _startPos: sizeInt; out _endPos: sizeInt): string;
+function wordArray(const _source: string): TStringArray; // Returns an array of words
+
+// Adds each item in _ar to _sl
+procedure populateFromArray(_sl: TStrings; _ar: array of string);
 
 type
     THtmlTimeMode = (useLocalTime, useUniversalTime);
@@ -719,78 +725,22 @@ begin
   end;
 end;
 
-//function strBetween(const _source: string; const _pos: integer;
-//	_prefix: SChars; _suffix: SChars): string;
-//var
-//  _length: SizeInt;
-//  _startPos, _endPos: SizeInt;
-//  _stage: set of 0..2 = [];
-//begin
-//   {From}
-//   {Class Function TStrings.GetNextLine (Const Value : String; Var S : String; Var P : SizeInt) : Boolean;}
-//
-//    _length   := Length(_source);
-//    _startPos := _pos;
-//    _endPos   := _startPos;
-//
-//    if (_startPos <= 0) or (_startPos > _length) then Exit('');
-//
-//    while (_startPos > 0) and not (_source[_startPos] in _prefix) do dec(_startPos);
-//    while (_endPos <= _length) and not (_source[_endPos] in _suffix) do Inc(_endPos);
-//
-//    if _startPos = 0 then _startPos := 1; // to fix empty space when selecting first word in string
-//    SetString(Result, @_source[_startPos], _endPos - _startPos);
-//end;
-
-type
-    TUTFCharArray = array of UnicodeChar;
-
-//function UTF8Array(S: String; _pos : sizeInt): TUTFCharArray;
-//var
-//    CurP, EndP: pChar;
-//    Len, i: Integer;
-//
-//begin
-//
-//    CurP := pChar(S);        // if S='' then PChar(S) returns a pointer to #0
-//    EndP := CurP + length(S);
-//
-//    log('NextUTF8():: EndP: %d, CurP: %d, Length(S): %d, EndP - CurP: %d, UTF8Length: %d', [SizeInt(EndP), SizeInt(CurP), Length(S), SizeInt(EndP - CurP), UTF8Length(S)] );
-//
-//    i := 0;
-//    Result := [];
-//    SetLength(Result, length(s));
-//
-//    while CurP < EndP do
-//    begin
-//        Len := UTF8CodepointSize(CurP);
-//        //Result[i] := UTF8Copy(s,  i, 1);
-//        log(' ==> %s (%d) - %d',[UTF8Copy(s,  i, 1), Len, i]);
-//        inc(CurP, Len);
-//        inc(i);
-//    end;
-//    Move(CurP^, Result[i], Len);
-//    SetLength(Result, i);
-//
-//end;
+function strIn(const _source: string; const _set: TStringArray): boolean;
+var
+    _c: String;
+begin
+    Result := False;
+    for _c in _set do begin
+        Result := UTF8CompareStr(_source, _c) = 0;
+        if Result then break;
+  	end;
+end;
 
 function strBetween(const _source: string; const _pos: integer;
 	_prefix: TStringArray; _suffix: TStringArray; out _startPos: sizeInt; out
 	_endPos: sizeInt): string;
 var
   _length,i: SizeInt;
-
-  function strIn(_source: string; _set: TStringArray): boolean;
-  var
-	  _c: String;
-  begin
-        Result := False;
-        for _c in _set do begin
-            Result := UTF8CompareStr(_source, _c) = 0;
-            if Result then break;
-		end;
-  end;
-
 begin
     _length := UTF8Length(_source);
 
@@ -806,6 +756,43 @@ begin
 
     Result := UTF8Copy(_source,  _startPos, (_endPos - _startPos));
 
+end;
+
+function wordArray(const _source: string): TStringArray;
+var
+    _count, _startPos, _endPos: sizeInt;
+    _length : sizeInt;
+
+begin
+    Result := [];
+    _length := UTF8Length(_source);
+    if _length = 0 then exit;
+
+    _count    := 0;
+    _startPos := 1;
+    _endPos   := 1;
+
+    SetLength(Result, _length);
+    while (_endPos <= _length) do begin
+        while (_startPos <= _length) and (strIn(UTF8Copy(_source,_startPos, 1), __WHITESPACE)) do inc(_startPos);
+
+        _endPos := _startPos;
+        while (_endPos <= _length) and not(strIn(UTF8Copy(_source,_endPos, 1), __WHITESPACE)) do inc(_endPos);
+
+        if _endPos >= _startPos then begin
+            Result[_count] := UTF8Copy(_source,  _startPos, (_endPos - _startPos));
+            inc(_count);
+		end;
+        _startPos := _endPos;
+	end;
+    SetLength(Result, _count);
+end;
+
+procedure populateFromArray(_sl: TStrings; _ar: array of string);
+var
+	_s: String;
+begin
+    for _s in _ar do _sl.Add(_s);
 end;
 
 

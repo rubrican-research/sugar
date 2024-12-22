@@ -23,10 +23,9 @@ type
     procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
 
     function onHover: TOnHover;
-    procedure setHover(_lbl: TLabel);
-    procedure uiShake(_c: TControl);
-
-    procedure populateFromArray(_sl: TStrings;_ar: array of string);
+    procedure setHover(constref _lbl: TLabel); overload;
+    procedure setHover(constref _pnl: TPanel); overload;
+    procedure uiShake(constref _c: TControl);
 
     // extracts a real value from the edit box. if it is not a real value, it returns the default value
     function realVal(constref _c: TWinControl; const _default: real = 0.0): real;
@@ -53,6 +52,8 @@ type
 
     function getCurrentWord(_memo: TMemo): string;
 
+    procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
+
 implementation
 uses
     LCLType, LCLIntf, Forms, sugar.utils, sugar.collections, sugar.sort, Math, sugar.logger;
@@ -64,13 +65,19 @@ begin
     Result:= myOnHover;
 end;
 
-procedure setHover(_lbl: TLabel);
+procedure setHover(constref _lbl: TLabel);
 begin
     _lbl.OnMouseEnter:= @onHover.OnMouseEnter;
     _lbl.OnMouseLeave:= @onHover.OnMouseLeave;
 end;
 
-procedure uiShake(_c: TControl);
+procedure setHover(constref _pnl: TPanel);
+begin
+    _pnl.OnMouseEnter:= @onHover.OnMouseEnter;
+    _pnl.OnMouseLeave:= @onHover.OnMouseLeave;
+end;
+
+procedure uiShake(constref _c: TControl);
 const
   WAIT = 200;
 
@@ -95,25 +102,49 @@ procedure TOnHover.OnMouseEnter(Sender: TObject);
 var
 	_lbl: TLabel;
 begin
-    if Sender is TLabel then
+    with Sender as TControl do begin
+        Cursor:= crHandPoint;
+        Font.Color := clHighlight;
+	end;
+
+	if Sender is TLabel then
     begin
         _lbl := Sender as TLabel;
         _lbl.Font.Style := _lbl.Font.Style + [fsUnderline];
         _lbl.Font.Color := clHighlight;
-        _lbl.Cursor     := crHandPoint;
 	end;
+
+    if Sender is TPanel then
+    begin
+        with Sender as TPanel do begin
+            Color:= clSkyBlue;
+		end;
+	end;
+
 end;
 
 procedure TOnHover.OnMouseLeave(Sender: TObject);
 var
 	_lbl: TLabel;
 begin
+    with Sender as TControl do begin
+        Cursor:= crDefault;
+        Font.Color := clDefault;
+	end;
+
     if Sender is TLabel then
     begin
         _lbl := Sender as TLabel;
         _lbl.Font.Style := _lbl.Font.Style - [fsUnderline];
         _lbl.Font.Color := clDefault;
         _lbl.Cursor     := crDefault;
+	end;
+
+    if Sender is TPanel then
+    begin
+        with Sender as TPanel do begin
+            Color:= clDefault;
+		end;
 	end;
 end;
 
@@ -150,7 +181,7 @@ begin
 
 		uiError:    begin
             _c.Font.Color := clRed;
-            _c.Font.Style := _c.Font.Style + [fsBold];
+            _c.Font.Style := _c.Font.Style; // + [fsBold];
             if _c is TLabel then
                 _c.color        := clNone
             else
@@ -170,14 +201,6 @@ begin
 	end;
 end;
 
-procedure populateFromArray(_sl: TStrings;
-	_ar: array of string);
-var
-	_s: String;
-begin
-    for _s in _ar do
-        _sl.Add(_s);
-end;
 
 function realVal(constref _c: TWinControl; const _default: real): real;
 var
@@ -416,7 +439,16 @@ var
 begin
     _line  := _memo.CaretPos.Y;
     _col   := succ(_memo.CaretPos.X);
-    Result := strBetween(_memo.Lines.Strings[_line], _col, __whitespace, __whitespace, _startPos, _endPos);
+    Result := strBetween(_memo.Lines.Strings[_line], _col, __WHITESPACE, __WHITESPACE, _startPos, _endPos);
+end;
+
+procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
+begin
+    _child.Top   := _anchor.Top + _anchor.Height + _child.BorderSpacing.Around + _child.BorderSpacing.Top;
+    _child.Left  := _anchor.Left;
+    _child.Width := _anchor.Width;
+    if assigned(_child.Parent) then
+        _child.Height:= _child.Parent.Height - _child.Top;
 end;
 
 

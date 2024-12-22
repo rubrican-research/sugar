@@ -1,0 +1,29 @@
+object Form1: TForm1
+  Left = 425
+  Height = 868
+  Top = 102
+  Width = 1266
+  HorzScrollBar.Increment = 1
+  HorzScrollBar.Page = 1
+  HorzScrollBar.Smooth = True
+  HorzScrollBar.Tracking = True
+  VertScrollBar.Increment = 1
+  VertScrollBar.Page = 1
+  VertScrollBar.Smooth = True
+  VertScrollBar.Tracking = True
+  AutoScroll = True
+  Caption = 'Form1'
+  Color = clWindow
+  OnCreate = FormCreate
+  SnapOptions.SnapToMonitor = True
+  SnapOptions.SnapToForms = True
+  LCLVersion = '3.6.0.0'
+  object JvTFGlanceTextViewer1: TJvTFGlanceTextViewer
+    Left = 760
+    Top = 328
+  end
+  object JvHTMLParser1: TJvHTMLParser
+    Left = 760
+    Top = 416
+  end
+end

@@ -1,0 +1,41 @@
+object TagsEditor: TTagsEditor
+  Left = 0
+  Height = 111
+  Top = 0
+  Width = 732
+  HorzScrollBar.Page = 1
+  VertScrollBar.Page = 1
+  AutoScroll = True
+  AutoSize = True
+  ClientHeight = 111
+  ClientWidth = 732
+  TabOrder = 0
+  DesignLeft = 321
+  DesignTop = 323
+  object Edit1: TEdit
+    Left = 0
+    Height = 25
+    Top = 0
+    Width = 732
+    Align = alTop
+    TabOrder = 0
+    Text = 'One two three four'
+    OnKeyDown = Edit1KeyDown
+  end
+  object pnlTags: TFlowPanel
+    Left = 0
+    Height = 83
+    Top = 28
+    Width = 732
+    Align = alClient
+    AutoSize = True
+    BevelOuter = bvNone
+    BorderSpacing.Top = 3
+    Color = clWindow
+    ControlList = <>
+    FlowLayout = tlTop
+    FlowStyle = fsLeftRightTopBottom
+    ParentColor = False
+    TabOrder = 1
+  end
+end

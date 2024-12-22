@@ -9,7 +9,7 @@
       <PathDelim Value="\"/>
       <SearchPaths>
         <IncludeFiles Value="mod"/>
-        <OtherUnitFiles Value="mod;mod\webui"/>
+        <OtherUnitFiles Value="mod;mod\webui;mod\tags"/>
         <UnitOutputDirectory Value="..\lib\3.x\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
@@ -183,8 +183,12 @@
         <UnitName Value="sugar.fmkvdisplay"/>
       </Item>
       <Item>
-        <Filename Value="markdownhelper.pas"/>
-        <UnitName Value="markdownhelper"/>
+        <Filename Value="mod\sugar.markdownhelper.pas"/>
+        <UnitName Value="sugar.markdownhelper"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\tags\sugar.tagui.pas"/>
+        <UnitName Value="sugar.tagui"/>
       </Item>
     </Files>
     <RequiredPkgs>
