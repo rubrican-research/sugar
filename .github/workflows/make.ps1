@@ -18,7 +18,7 @@ Options:
 Function Build-Project {
     New-Variable -Option Constant -Name VAR -Value @{
         Src = 'tests'
-        Use = 'use'
+        Use = '.'
         Pkg = 'use\components.txt'
     }
     If (! (Test-Path -Path $Var.Src)) {
