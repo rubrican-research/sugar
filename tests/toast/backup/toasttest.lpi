@@ -5,7 +5,7 @@
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="tagsPane"/>
+      <Title Value="toasttest"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -26,42 +26,6 @@
     </RunParams>
     <RequiredPackages>
       <Item>
-        <PackageName Value="JvNetLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvNetLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvTimeFrameworkLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvTimeFrameworkLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvStdCtrlsLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvStdCtrlsLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvJansLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvJansLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvCtrlsLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvCtrlsLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvAppFrmLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvAppFrmLazD"/>
-      </Item>
-      <Item>
         <PackageName Value="fp_sugar"/>
       </Item>
       <Item>
@@ -70,15 +34,15 @@
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="tagsPane.lpr"/>
+        <Filename Value="toasttest.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="main.pas"/>
+        <Filename Value="unit1.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
-        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Unit1"/>
       </Unit>
     </Units>
   </ProjectOptions>
@@ -86,17 +50,15 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\..\bin\tagsPane"/>
+      <Filename Value="bin\toasttest"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <UnitOutputDirectory Value="..\..\..\lib\$(TargetCPU)-$(TargetOS)"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
       <Debugging>
         <DebugInfoType Value="dsDwarf3"/>
-        <UseHeaptrc Value="True"/>
-        <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <Options>
         <Win32>

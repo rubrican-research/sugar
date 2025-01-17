@@ -18,9 +18,8 @@ type
     TArrChars = array of wideChar;
 
 const
-      __ILLEGAL_CHARS             = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ;
-      //__WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
-      __WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', ':', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!');
+      __ILLEGAL_CHARS             = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ; // set
+      __WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', ':', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!'); // array
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;
 function appendURL(_paths: array of string): string;
@@ -180,11 +179,31 @@ function getSubFolders(_dir: string; _recursive: boolean = true): TStrings;
 function getFiles(_dir: string; _filter: string): TStrings;
 function getFilePaths(_dir: string; _filterArr: TStringArray;_recursive: boolean = true): TStrings;
 
+
+{*******************************************************************************}
 // Convenience function to return the index, with boundary checking
 // for a list of count values. Typical usage is the get the next index in
 // in a list of _count items, if the deleted index is _curr.
 // Call these functions AFTER the item is deleted, which means that _count
-// is the new number of items in the modified lists
+// is the new number of items in the modified lists.
+
+//Usage:
+//------
+//    1. Get the index of the item from a list that you want to delete. Store this in _curr.
+//    2. Delete the item from the list. (this changes the count)
+//    3. Get the new count of the list and store in _count.
+//    4. Call getNextCurrIndex(_curr, _count); This gives you the next valid, boundary-checked index to use in a for loop to re-index items
+//
+//Example:
+//--------
+//    _curr := myList.IndexOf(_obj);
+//    myList.Delete(_curr);
+//	 _count := myList.Count;
+//	 _curr  := getNextIndex(_curr, _count);
+//	 for c := _curr to pred(_count) do begin
+//	     myList.Data[c].rank:= c;
+//	 end;
+{*******************************************************************************}
 function getPrevIndex(const _curr, _count: integer) : integer;
 function getNextIndex(const _curr, _count: integer) : integer;
 
@@ -197,12 +216,18 @@ function HexStrAsObj(_hex: string):  TObject;
 {Clone functions}
 function clone(constref _s: TStrings): TStrings;
 
+function GetFileVersion(const aExeFile: String): String;
+
 
 
 
 implementation
 uses
-     fpmimetypes, variants, strutils, jsonparser, FileUtil,
+     fileinfo
+     , winpeimagereader {need this for reading exe info}
+     , elfreader {needed for reading ELF executables}
+     , machoreader {needed for reading MACH-O executables}
+     , fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
      math, base64, LazStringUtils, DateUtils, sugar.logger, LazUTF8;
 
@@ -1419,6 +1444,48 @@ begin
     Result := TStringList.Create;
     Result.Assign(_s);
 end;
+
+
+function GetFileVersion(const aExeFile: String): String;
+var
+  FileVerInfo: TFileVersionInfo;
+
+begin
+    Result := '?';
+    if not FileExists(aExeFile) then begin
+        Exit;
+    end;
+
+    FileVerInfo:=TFileVersionInfo.Create(nil);
+    FileVerInfo.FileName:= aExeFile;
+    try
+        FileVerInfo.ReadFileInfo;
+        Result := FileVerInfo.VersionStrings.Values['FileVersion'];
+    finally
+        FileVerInfo.Free;
+    end;
+
+    //begin
+    //  FileVerInfo:=TFileVersionInfo.Create(nil);
+    //  try
+    //    FileVerInfo.ReadFileInfo;
+    //    writeln('Company: ',FileVerInfo.VersionStrings.Values['CompanyName']);
+    //    writeln('File description: ',FileVerInfo.VersionStrings.Values['FileDescription']);
+    //    writeln('File version: ',FileVerInfo.VersionStrings.Values['FileVersion']);
+    //    writeln('Internal name: ',FileVerInfo.VersionStrings.Values['InternalName']);
+    //    writeln('Legal copyright: ',FileVerInfo.VersionStrings.Values['LegalCopyright']);
+    //    writeln('Original filename: ',FileVerInfo.VersionStrings.Values['OriginalFilename']);
+    //    writeln('Product name: ',FileVerInfo.VersionStrings.Values['ProductName']);
+    //    writeln('Product version: ',FileVerInfo.VersionStrings.Values['ProductVersion']);
+    //  finally
+    //    FileVerInfo.Free;
+    //  end;
+    //end.
+
+
+end;
+
+
 
 initialization
     randomize;

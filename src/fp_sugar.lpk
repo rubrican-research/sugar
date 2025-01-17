@@ -188,7 +188,15 @@
       </Item>
       <Item>
         <Filename Value="mod\tags\sugar.tagui.pas"/>
-        <UnitName Value="sugar.tagui"/>
+        <UnitName Value="sugar.tagUI"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.toast.pas"/>
+        <UnitName Value="sugar.toast"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.uistyles.pas"/>
+        <UnitName Value="sugar.uistyles"/>
       </Item>
     </Files>
     <RequiredPkgs>

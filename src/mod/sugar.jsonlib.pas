@@ -243,10 +243,14 @@ end;
 
 function loadJSON(const _file: string): TJSONData;
 begin
+    Result := nil;
     with TJSONParser.Create(getFileContent(ExpandFileName(_file)), [joUTF8]) do
     begin
-        Result := Parse;
-        Free;
+        try
+            Result := Parse;
+		finally
+           Free;
+		end;
     end;
 end;
 

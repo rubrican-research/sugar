@@ -1,5 +1,4 @@
 unit sugar.uihelper;
-
 {$mode ObjFPC}{$H+}
 
 interface
@@ -10,6 +9,9 @@ uses
 type
 
     TUIState  = (uiDefault, uiHighlight, uiWarning, uiError, uiHover);
+    EUIValidatorResult = (uivUnknown, uivOK, uivError, uivMissing, uivDefaultApplied);
+    TUIValidator = function:EUIValidatorResult of object;
+    TArrayControl = array of TControl;
 
 	{ TOnHover }
 
@@ -53,6 +55,34 @@ type
     function getCurrentWord(_memo: TMemo): string;
 
     procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
+
+//type
+//    {Fields}
+//    TUIField = class
+//     published
+//        property control          : TWinControl;
+//        property captionControl   : TLabel;
+//        property Name: string;  // Name of the field
+//        property Value: variant read getValue write setValue;       // Stored value
+//        property uiValue: variant read getUIValue write setUIValue; // Value in the UI Component
+//        property Caption: TCaption read getCaption write setCaption;
+//     public
+//        function undo: boolean;
+//        function redo: boolean;
+//        function historyVal(_hist: integer): variant;
+//        function historyCount: integer;
+//        function commit: boolean;
+//        function rollback: boolean;
+//     end;
+//
+//    generic TUIControlField<TC: TControl> = class(TUIField)
+//	end;
+
+    procedure activateHint(_ctr: TControl);
+
+
+
+
 
 implementation
 uses
@@ -449,6 +479,17 @@ begin
     _child.Width := _anchor.Width;
     if assigned(_child.Parent) then
         _child.Height:= _child.Parent.Height - _child.Top;
+end;
+
+procedure activateHint(_ctr: TControl);
+var
+    _point: TPoint;
+begin
+    if _ctr.ShowHint then begin
+        _point.x := _ctr.left;
+        _point.y := _ctr.top;
+        Application.ActivateHint(_point);
+    end;
 end;
 
 

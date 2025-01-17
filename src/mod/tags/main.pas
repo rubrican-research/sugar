@@ -5,17 +5,13 @@ unit main;
 interface
 
 uses
-    Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-	JvFormWallpaper, JvHtControls, JvMarkupViewer, JvMarkupLabel, JvCheckBox,
-	JvPanel, JvTFGlanceTextViewer, JvHtmlParser;
+    Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls;
 
 type
 
 	{ TForm1 }
 
     TForm1 = class(TForm)
-		JvHTMLParser1: TJvHTMLParser;
-		JvTFGlanceTextViewer1: TJvTFGlanceTextViewer;
 		procedure FormCreate(Sender: TObject);
     private
 

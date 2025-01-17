@@ -7,14 +7,15 @@ interface
 uses
     Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
 	JvFormWallpaper, JvHtControls, JvMarkupViewer, JvMarkupLabel, JvCheckBox,
-	JvPanel;
+	JvPanel, JvTFGlanceTextViewer, JvHtmlParser;
 
 type
 
 	{ TForm1 }
 
     TForm1 = class(TForm)
-		JvPanel1: TJvPanel;
+		JvHTMLParser1: TJvHTMLParser;
+		JvTFGlanceTextViewer1: TJvTFGlanceTextViewer;
 		procedure FormCreate(Sender: TObject);
     private
 

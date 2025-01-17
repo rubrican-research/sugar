@@ -157,11 +157,12 @@ type
         function add(const _key: string; _value: string): integer; overload;
 
         {updates existing value. If not existing, adds the key-value pair}
-        function put(const _key: string; _value: string): integer;
+        function put(const _key: shortstring; _value: string): integer;
 
-        function valueOf(const key: string): string;
+        function valueOf(const key: ShortString): string;
         function stringVal(const _i: integer): string;
         function asString(const _delim: string = ','): string;
+        function parse(const _c: string; const _delim: string = ','): integer;
         function delete(_key: string): boolean; overload;
     end;
 
@@ -453,8 +454,7 @@ begin
     end;
 end;
 
-function TDynamicKeyValueStore.put(const _key: string; _value: string): integer;
-
+function TDynamicKeyValueStore.put(const _key: shortstring; _value: string): integer;
 begin
     Result := FindIndexOf(_key);
     if Result > -1 then
@@ -466,7 +466,7 @@ begin
         Result := Add(_key, _value);
 end;
 
-function TDynamicKeyValueStore.valueOf(const key: string): string;
+function TDynamicKeyValueStore.valueOf(const key: ShortString): string;
 var
     _strObj: TStringObject;
 begin
@@ -496,7 +496,23 @@ begin
         else
             addDelim := true;
 
-        Result += '"' + Names[i] + '" = "' + valueOf(Names[i]) + '"';
+        Result += '"' + Names[i] + '"="' + valueOf(Names[i]) + '"';
+	end;
+end;
+
+function TDynamicKeyValueStore.parse(const _c: string; const _delim: string
+	): integer;
+var
+    _kvstr : string;
+	_kv: TStringArray;
+
+begin
+    for _kvstr in toStringArray(_c, _delim) do
+    begin
+        _kvstr.Replace('"', '');
+        _kv := toStringArray(_kvstr, '=');
+        if length(_kv) = 2 then
+            put(trim(_kv[0]), TrimLeft(_kv[1]));
 	end;
 end;
 

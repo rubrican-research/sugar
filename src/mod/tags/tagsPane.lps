@@ -19,8 +19,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="9"/>
-        <CursorPos X="5" Y="49"/>
+        <CursorPos X="4" Y="22"/>
         <UsageCount Value="25"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -253,18 +252,6 @@
     <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="191" TopLine="186"/>
-      </Position>
-      <Position>
-        <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="69" Column="27" TopLine="50"/>
-      </Position>
-      <Position>
-        <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="231" Column="48" TopLine="219"/>
-      </Position>
-      <Position>
-        <Filename Value="sugar.tagui.pas"/>
         <Caret Line="226" Column="5" TopLine="204"/>
       </Position>
       <Position>
@@ -370,6 +357,18 @@
       <Position>
         <Filename Value="main.pas"/>
         <Caret Line="48" Column="5" TopLine="9"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="21" Column="11"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="20" Column="11"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="19" Column="11"/>
       </Position>
     </JumpHistory>
     <RunParams>

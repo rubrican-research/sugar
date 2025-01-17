@@ -1,0 +1,27 @@
+object FormToast: TFormToast
+  Left = 528
+  Height = 87
+  Top = 416
+  Width = 348
+  AlphaBlend = True
+  BorderStyle = bsNone
+  Caption = 'sugar.toast'
+  FormStyle = fsSystemStayOnTop
+  OnClick = FormClick
+  OnClose = FormClose
+  Position = poDefaultSizeOnly
+  LCLVersion = '3.6.0.0'
+  object fadeTimer: TTimer
+    Enabled = False
+    OnTimer = fadeTimerTimer
+    Left = 40
+    Top = 16
+  end
+  object motionTimer: TTimer
+    Enabled = False
+    Interval = 30
+    OnTimer = motionTimerTimer
+    Left = 176
+    Top = 16
+  end
+end
