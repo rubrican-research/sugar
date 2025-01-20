@@ -1449,7 +1449,6 @@ end;
 function GetFileVersion(const aExeFile: String): String;
 var
   FileVerInfo: TFileVersionInfo;
-
 begin
     Result := '?';
     if not FileExists(aExeFile) then begin
