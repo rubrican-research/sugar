@@ -80,7 +80,8 @@ type
 
     procedure activateHint(_ctr: TControl);
 
-
+    function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
+    function gridToKV(_grid: TStringGrid; _delimiter: string = '='; _keyCol: integer = 0; _valCol: integer = 1): string;
 
 
 
@@ -181,7 +182,7 @@ end;
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);
 begin
 
-    _c.Font.Style := _c.Font.Style - [fsBold];
+    //_c.Font.Style := _c.Font.Style - [fsBold];
 
     case _s of
     	uiDefault:   begin
@@ -490,6 +491,60 @@ begin
         _point.y := _ctr.top;
         Application.ActivateHint(_point);
     end;
+end;
+
+function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
+var
+	r: Integer;
+    function rowAsCSV(_row: integer): string;
+	var
+		_c: Integer;
+    begin
+        _c := 0;
+        if _c < _grid.ColCount then
+            Result := _grid.Cells[_c, _row];
+
+        for _c := 1 to pred(_grid.ColCount) do begin
+            Result := Result + _delimiter + _grid.Cells[_c, _row];
+		end;
+	end;
+
+begin
+    Result := '';
+
+    // first row
+    r := 0;
+    if r < _grid.RowCount then
+        Result := rowAsCSV(r);
+
+    for r := 1 to pred(_grid.RowCount) do begin
+        Result := Result
+                    + sLineBreak
+                    + rowAsCSV(r);
+	end;
+end;
+
+function gridToKV(_grid: TStringGrid; _delimiter: string = '='; _keyCol: integer = 0; _valCol: integer = 1): string;
+const
+    __F = '%s %s %s';
+var
+	r: Integer;
+begin
+    Result := '';
+    if _grid.ColCount < 2 then exit;
+    if _keyCol > _grid.ColCount then exit;
+    if _valCol > _grid.ColCount then exit;
+
+    // first row
+    r := 0;
+    if r < _grid.RowCount then
+        Result := format(__F ,[_grid.Cells[_keyCol, r], _delimiter, _grid.Cells[_valCol, r]]);
+
+    for r := 1 to pred(_grid.RowCount) do begin
+        Result := Result
+                    + sLineBreak
+                    + format(__F ,[Trim(_grid.Cells[_keyCol, r]), _delimiter, Trim(_grid.Cells[_valCol, r])]);
+	end;
 end;
 
 
