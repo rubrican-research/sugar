@@ -80,6 +80,7 @@ type
 
     procedure activateHint(_ctr: TControl);
 
+    function gridHeaderToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToKV(_grid: TStringGrid; _delimiter: string = '='; _keyCol: integer = 0; _valCol: integer = 1): string;
 
@@ -491,6 +492,11 @@ begin
         _point.y := _ctr.top;
         Application.ActivateHint(_point);
     end;
+end;
+
+function gridHeaderToCSV(_grid: TStringGrid; _delimiter: string): string;
+begin
+
 end;
 
 function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
