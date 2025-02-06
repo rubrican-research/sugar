@@ -22,14 +22,15 @@ var
   i: integer;
 begin
     s:= TStringList.Create;
-    for a in _arr do s.Add(a);
+    try
+        for a in _arr do s.Add(a);
+        NaturalSort(s,stFloatThousand);
+        SetLength(Result, s.Count);
+        for i:= 0 to pred(s.Count) do Result[i]:= s[i];
 
-    NaturalSort(s,stFloatThousand);
-
-    SetLength(Result, s.Count);
-    for i:= 0 to pred(s.Count) do Result[i]:= s[i];
-
-    s.Free;
+	finally
+        s.Free;
+	end;
 end;
 
 function sortList(_str: string; _delim: string): TStringArray;
@@ -37,9 +38,12 @@ var
   sl: TStrings;
 begin
     sl:= toStringList(_str, _delim);
-    NaturalSort(sl, stFloatThousand);
-    Result:= makeStringArray(sl);
-    sl.Free;
+    try
+	    NaturalSort(sl, stFloatThousand);
+	    Result:= makeStringArray(sl);
+	finally
+        sl.Free;
+	end;
 end;
 
 function sortList(_strlst: TStrings): TStrings;

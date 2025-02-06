@@ -20,6 +20,38 @@ type
         procedure OnMouseLeave(Sender: TObject);
     end;
 
+	{ TOnAlign }
+
+    TOnAlign = class(TPersistent, IFPObserver)
+	private
+		myprevParentResize: TNotifyEvent;
+		mySize: currency;
+		procedure setprevParentResize(const _value: TNotifyEvent);
+		procedure setSize(const _value: currency);
+	published
+        parent: TControl;
+        child : TControl;
+        property prevParentResize: TNotifyEvent read myprevParentResize write setprevParentResize;
+        property size: currency read mySize write setSize; // value less than 1 is treated as a percentage. values greater than one is treated as fixed size
+        procedure OnResize(Sender: TObject); virtual;
+        constructor Create(constref _child: TControl; _size: currency);
+	public
+		procedure FPOObservedChanged(ASender: TObject;
+			Operation: TFPObservedOperation; Data: Pointer);
+    end;
+
+	{ TOnHAlign }
+
+    TOnHAlign = class(TOnAlign)
+        procedure OnResize(Sender: TObject); override;
+    end;
+
+	{ TOnVAlign }
+
+    TOnVAlign = class(TOnAlign)
+        procedure OnResize(Sender: TObject); override;
+    end;
+
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
     procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
@@ -53,8 +85,16 @@ type
     procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte);  overload; // resizes the grid according to the percentages in the array
 
     function getCurrentWord(_memo: TMemo): string;
-
     procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
+
+    {Aligns the _control in its parent. }
+    procedure alignVCenter(constref _child: TControl; _heightPercent: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
+    procedure alignHCenter(constref _child: TControl; _widthPercent: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
+    procedure alignCenter(constref _child: TControl; _widthPercent: currency = 0.7; _heightPercent: currency = 0.7);  // Aligns the panel to the center of the container. Preserves the width of the panel
+
+
+
+
 
 //type
 //    {Fields}
@@ -178,6 +218,111 @@ begin
             Color:= clDefault;
 		end;
 	end;
+end;
+
+{ TOnAlign }
+
+procedure TOnAlign.setprevParentResize(const _value: TNotifyEvent);
+begin
+	if myprevParentResize=_value then Exit;
+	myprevParentResize:=_value;
+end;
+
+procedure TOnAlign.setSize(const _value: currency);
+begin
+	if mySize=_value then Exit;
+	mySize:=_value;
+end;
+
+
+procedure TOnAlign.OnResize(Sender: TObject);
+begin
+    if assigned(prevParentResize) then prevParentResize(parent);
+end;
+
+
+constructor TOnAlign.Create(constref _child: TControl; _size: currency);
+begin
+    inherited Create;
+    if not assigned(_child) then begin
+        child           := nil;
+        parent          := nil;
+        prevParentResize:= nil;
+        exit;
+    end;
+
+    child := _child;
+    child.FPOAttachObserver(Self);
+    size:= _size;
+
+    if assigned(child.Parent) then begin
+        parent := child.Parent;
+        if assigned(parent) then begin
+            if Assigned(parent.OnResize) then begin
+                prevParentResize := parent.OnResize
+		    end
+            else
+                prevParentResize := nil;
+            parent.OnResize  := @OnResize;
+        end
+		else
+            prevParentResize := nil;
+    end
+	else
+        parent := nil;
+
+end;
+
+procedure TOnAlign.FPOObservedChanged(ASender: TObject;
+	Operation: TFPObservedOperation; Data: Pointer);
+begin
+    case Operation of
+    	ooChange: ;
+        ooFree: begin
+            log('TOnAlign.FPOObservedChanged -- ooFree');
+            Free; // Destroy this object
+		end;
+        ooAddItem: ;
+        ooDeleteItem: ;
+        ooCustom: ;
+    end;
+end;
+
+{ TOnHAlign }
+
+procedure TOnHAlign.OnResize(Sender: TObject);
+var
+	_width: Integer;
+begin
+    inherited;
+    if size < 1 then
+        _width := Floor(parent.Width * size)
+    else
+        _width := Min(Round(size), parent.Width);
+
+    Child.Width := _width;
+    Child.Left  := Floor((parent.Width - Child.Width) / 2);
+    Child.Invalidate;
+
+end;
+
+{ TOnVAlign }
+
+
+procedure TOnVAlign.OnResize(Sender: TObject);
+var
+	_height: Integer;
+begin
+
+    inherited;
+    if size < 1 then
+        _height := Floor(Parent.height * size)
+    else
+        _height := Min(Round(size), Parent.height);
+
+    Child.Height := _height;
+    Child.Top    := Floor((Parent.Height - Child.Height) / 2);
+    Child.Invalidate;
 end;
 
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);
@@ -481,6 +626,25 @@ begin
     _child.Width := _anchor.Width;
     if assigned(_child.Parent) then
         _child.Height:= _child.Parent.Height - _child.Top;
+end;
+
+
+
+procedure alignVCenter(constref _child: TControl; _heightPercent: currency);
+begin
+    TOnVAlign.Create(_child, _heightPercent);
+end;
+
+procedure alignHCenter(constref _child: TControl; _widthPercent: currency);
+begin
+    TOnHAlign.Create(_child, _widthPercent);
+end;
+
+procedure alignCenter(constref _child: TControl; _widthPercent: currency;
+	_heightPercent: currency);
+begin
+    TOnVAlign.Create(_child, _widthPercent);
+    TOnHAlign.Create(_child, _heightPercent);
 end;
 
 procedure activateHint(_ctr: TControl);
