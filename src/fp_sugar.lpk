@@ -198,6 +198,14 @@
         <Filename Value="mod\sugar.uistyles.pas"/>
         <UnitName Value="sugar.uistyles"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.animateui.pas"/>
+        <UnitName Value="sugar.animateui"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.dragui.pas"/>
+        <UnitName Value="sugar.dragui"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

@@ -55,7 +55,7 @@ type
 
         function fields: TStringArray;
         function fieldCount: integer;
-        procedure parse;
+        function parse: boolean;
         function Text: string; {replaced with template}
         function debug: string;
 
@@ -180,7 +180,7 @@ begin
     inherited Destroy;
 end;
 
-procedure TRbTemplater.parse;
+function TRbTemplater.parse: boolean;
 type
     TRecFieldMatch = record
         id: integer;
@@ -197,6 +197,7 @@ var
     _fieldlen: integer;
     _tmpStringObj: TStringObject;
 begin
+    Result := false;
     {No template defined so don't parse}
     _len := Length(myTemplate);
     if _len = 0 then exit;
@@ -217,9 +218,9 @@ begin
             if _postfixPos < 1 then
             begin
                 {don't look for fields}
-                _prefixPos := _len + 1;
+                _prefixPos  := _len + 1;
                 _postFixPos := _len + 1;
-                _fieldLen := 0;
+                _fieldLen   := 0;
             end
             else
                 _fieldlen := _postFixPos - _prefixPos + myprefixlen;
@@ -258,6 +259,7 @@ begin
         _start := _prefixPos + _fieldlen;
 
     until _fieldLen = 0;
+    Result := true;
 end;
 
 function TRbTemplater.Text: string;

@@ -19,7 +19,7 @@ uses
     sugar.htmlbuilder.htmx, sugar.threadloader, sugar.jsGoogleChart, 
     sugar.jscharts, sugar.htmlpage, assets, bulma, semanticui, webui, 
     sugar.fmkvdisplay, sugar.markdownhelper, sugar.tagUI, sugar.toast, 
-    sugar.uistyles, LazarusPackageIntf;
+    sugar.uistyles, sugar.animateui, sugar.dragui, LazarusPackageIntf;
 
 implementation
 

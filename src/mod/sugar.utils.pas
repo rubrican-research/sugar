@@ -13,6 +13,7 @@ interface
 uses
      Classes, SysUtils, fpjson, sugar.collections, sugar.profiler;
 type
+    TArrInt   = array of Integer;
     TArrInt64 = array of int64;
     SChars    = set of char;
     TArrChars = array of wideChar;
@@ -215,10 +216,12 @@ function HexStrAsObj(_hex: string):  TObject;
 
 {Clone functions}
 function clone(constref _s: TStrings): TStrings;
+function findIndex(constref _search: TStrings; constref _source: TStrings): TArrInt; overload;
+function findIndex(const _search: TStringArray; constref _source: TStrings): TArrInt; overload;
 
 function GetFileVersion(const aExeFile: String): String;
 
-
+function loremIpsum(_len: shortint = 0): string;
 
 
 implementation
@@ -1445,6 +1448,41 @@ begin
     Result.Assign(_s);
 end;
 
+function findIndex(constref _search: TStrings; constref _source: TStrings
+	): TArrInt;
+begin
+    Result := findIndex(makeStringArray(_search), _source);
+end;
+
+function findIndex(const _search: TStringArray; constref _source: TStrings
+	): TArrInt;
+var
+    _map: TStringIndexMap;
+	i, c: Integer;
+	_s: String;
+begin
+    Result := [];
+    _map := TStringIndexMap.Create();
+    try
+        for i := 0 to pred(_source.Count) do begin
+            _map.idx[_source.Strings[i]] := i;
+    	end;
+
+        SetLength(Result, Length(_search));
+        c := 0;
+        for _s in _search do begin
+            i := _map.idx[_s];
+            if  i <> NOINDEX then
+                Result[c] := i;
+            inc(c);
+		end;
+
+        setLength(Result, c);
+	finally
+        _map.Free;
+	end;
+end;
+
 
 function GetFileVersion(const aExeFile: String): String;
 var
@@ -1482,6 +1520,34 @@ begin
     //end.
 
 
+end;
+
+function loremIpsum(_len: shortint): string;
+const
+    S = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Huius ego nunc auctoritatem sequens idem faciam. Duo Reges: constructio interrete. Primum Theophrasti, Strato, physicum se voluit; Bork Prave, nequiter, turpiter cenabat; Istic sum, inquit.'+ sLineBreak +
+    ''+ sLineBreak +
+    'Ut aliquid scire se gaudeant? Hoc sic expositum dissimile est superiori. Id enim natura desiderat. Quid autem habent admirationis, cum prope accesseris?'+ sLineBreak +
+    ''+ sLineBreak +
+    'Sed quae tandem ista ratio est? Cui Tubuli nomen odio non est? Cum praesertim illa perdiscere ludus esset. Quid autem habent admirationis, cum prope accesseris? Nam ista vestra: Si gravis, brevis; Bork'+ sLineBreak +
+    ''+ sLineBreak +
+    'Mihi quidem Antiochum, quem audis, satis belle videris attendere. Ut pulsi recurrant? Ille enim occurrentia nescio quae comminiscebatur;'+ sLineBreak +
+    ''+ sLineBreak +
+    'Quid ergo attinet gloriose loqui, nisi constanter loquare? Non laboro, inquit, de nomine. Quid dubitas igitur mutare principia naturae? Quae cum essent dicta, discessimus.'+ sLineBreak +
+    ''+ sLineBreak +
+    'At ille pellit, qui permulcet sensum voluptate. Illud non continuo, ut aeque incontentae. Quaerimus enim finem bonorum. Paria sunt igitur.'+ sLineBreak +
+    ''+ sLineBreak +
+    'Quid censes in Latino fore? Quae cum dixisset paulumque institisset, Quid est?'+ sLineBreak +
+    ''+ sLineBreak +
+    'Quis istum dolorem timet? Tum Torquatus: Prorsus, inquit, assentior; Minime vero istorum quidem, inquit. Que Manilium, ab iisque M. Esse enim quam vellet iniquus iustus poterat inpune. Age, inquies, ista parva sunt. Haec para/doca illi, nos admirabilia dicamus. Cupiditates non Epicuri divisione finiebat, sed sua satietate.'+ sLineBreak +
+    ''+ sLineBreak +
+    'Bork Illi enim inter se dissentiunt. Ut aliquid scire se gaudeant? At ille pellit, qui permulcet sensum voluptate.'+ sLineBreak +
+    ''+ sLineBreak +
+    'Istam voluptatem perpetuam quis potest praestare sapienti? Invidiosum nomen est, infame, suspectum. Utram tandem linguam nescio? Quamvis enim depravatae non sint, pravae tamen esse possunt. Quis Aristidem non mortuum diligit? Mihi enim satis est, ipsis non satis.';
+begin
+    if _len = 0 then
+        Result := Copy(S, 0)
+    else
+        Result := Copy(S, 0, _len);
 end;
 
 

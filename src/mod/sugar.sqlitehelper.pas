@@ -74,7 +74,7 @@ type
 	 public
 		constructor Create; overload;// So that we can use this with hash lists;
 
-			 {Creates the db file if it doesn't exist}
+		{Creates the db file if it doesn't exist}
 		function getSQLite3LibraryPath(): string;
 		function getDBFileName(): string;
 
@@ -90,7 +90,7 @@ type
         function openMemDB(_dbFile: string; _openState: TDBOpenState = dbopenExclusive): boolean;
         function initMemDB(_openState: TDBOpenState = dbopenExclusive): boolean;
 
-		procedure doUpgradeDB;
+		 procedure doUpgradeDB;
 		 function dropDB: boolean;
 		 procedure makeDatabase;
 
@@ -187,7 +187,7 @@ type
 			function makeTable(_tbl: string): integer; virtual;
 
 			function exists(_key: string): boolean;
-			function findKeysFor(_val: string): TStringArray; virtual;
+			function findKeysFor(_val: string; _limit: integer = 0): TStringArray; virtual;
 			function findFirstKeyFor(_val: string): string; virtual;
 			function renKey(_oldKey: string; _newKey: string): integer; virtual;
 			function del(_key: string): integer; virtual;
@@ -209,7 +209,7 @@ type
 			function get(_key: string): string;
 			function put(_key: string; _val: string): integer; // Return -2 if tbl is empty
 
-			function findKeysFor(_val: string): TStringArray; override;
+			function findKeysFor(_val: string; _limit: integer = 0): TStringArray; override;
 			function findFirstKeyFor(_val: string): string; override;
 		end;
 
@@ -251,11 +251,10 @@ type
 	 end;
 
 {Creates a new TDBModule object}
-function NewDBModule(_dbFile: string; _dbFolder: string;
+function newSqliteDB(_dbFile: string; _dbFolder: string;
 	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TDBModule;
 
-
-{ function DBModule(): V2
+{ function sqliteDB(): V2
     This function instantiates a TDBModule object with the parameters supplied, ready for use.
     Internally, this unit maintains a hash list of the instantiated TDBModules and returns the object
     referred to by _dbFile (name). This way you can connect to multiple SQLite DB files by just calling
@@ -264,12 +263,13 @@ function NewDBModule(_dbFile: string; _dbFolder: string;
     NOTE: _dbFile parameter has a default value. So calling the function without any parameters
     returns an object that is instantiated to use a efault DB file in the folder where the exe is stored.
 }
-function DBModule(  _dbFile: string = DEFAULT_DB_FILE;
+
+function sqliteDB (  _dbFile: string = DEFAULT_DB_FILE;
                     _dbFolder: string = '';
                     _initScriptFunc: TScriptFunc = nil;
                     _upgradeScriptFunc: TScriptFunc = nil): TDBModule;
 
-function dbModuleFree(_dbFile: string): boolean;
+function sqliteDBFree(_dbFile: string): boolean;
 
 
 implementation
@@ -288,7 +288,7 @@ type
 var
 	 myDBModules: TDBModuleList;
 
-function NewDBModule(_dbFile: string; _dbFolder: string;
+function newSqliteDB(_dbFile: string; _dbFolder: string;
 	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TDBModule;
 begin
 	Result := TDBModule.Create(nil);
@@ -299,13 +299,13 @@ begin
 
 end;
 
-function DBModule(_dbFile: string; _dbFolder: string; _initScriptFunc: TScriptFunc;
+function sqliteDB(_dbFile: string; _dbFolder: string; _initScriptFunc: TScriptFunc;
 	 _upgradeScriptFunc: TScriptFunc): TDBModule;
 begin
 	Result := myDBModules.find(_dbFile);
 	 if not Assigned(Result) then
 	 begin
-	 	 Result := newDBModule(_dbFile, _dbFolder, _initScriptFunc, _upgradeScriptFunc);
+	 	 Result := newSqliteDB(_dbFile, _dbFolder, _initScriptFunc, _upgradeScriptFunc);
 		Result.initDB;
 		myDBModules.add(_dbfile, Result);
 	 end;
@@ -316,7 +316,7 @@ begin
 
 end;
 
-function dbModuleFree(_dbFile: string): boolean;
+function sqliteDBFree(_dbFile: string): boolean;
 begin
     Result:= myDBModules.delete(_dbFile);
 end;
@@ -408,7 +408,8 @@ begin
 	 Result := dm.Exists(tbl, format('k = "%s"', [_key]));
 end;
 
-function TDBModule.TDBStore.findKeysFor(_val: string): TStringArray;
+function TDBModule.TDBStore.findKeysFor(_val: string; _limit: integer
+	): TStringArray;
 begin
      Result := [];
 end;
@@ -585,15 +586,17 @@ end;
 
 
 
-function TDBModule.TDBKeyValueStore.findKeysFor(_val: string): TStringArray;
+function TDBModule.TDBKeyValueStore.findKeysFor(_val: string; _limit: integer
+	): TStringArray;
 const
-	 Q = 'SELECT k from %s WHERE v = :val ORDER BY K ASC';
+	 Q = 'SELECT k from %s WHERE v = :val ORDER BY K ASC %s';
 var
 	 _qry: TSQLQuery;
 	 _i: integer;
 	_result: string = '';
 	_comma: string = '';
 	_addComma: boolean = False;
+    _limStr : string = '';
 begin
 	if tbl.isEmpty then
 	begin
@@ -604,13 +607,15 @@ begin
 
 	 _qry := dm.newQuery();
 	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
+         if _limit > 0 then _limStr := Format(' LIMIT %d ', [_limit]);
+
+	 	_qry.SQL.Text := Format(Q, [tbl, _limStr]);
 		_qry.Params[0].AsString := _val;
-			_qry.Open;
+		_qry.Open;
 
 		SetLength(Result, _qry.RowsAffected);
 
-			_qry.First;
+		_qry.First;
 		_i := 0;
 
 		while not _qry.EOF do
@@ -640,27 +645,39 @@ var
 	_keys: TStringArray;
 begin
 	Result := '';
-	 _keys	:= findKeysFor(_val);
+	 _keys	:= findKeysFor(_val, 1);
 	if Length(_keys) > 0 then Result := _keys[0];
 end;
-
-
 
 
 { TDBModule }
 
 procedure TDBModule.DataModuleCreate(Sender: TObject);
 begin
-		{$IFDEF windows}
+     {$IFDEF WINDOWS}
+	 libLoader.ConnectionType := 'SQLite3';
+	 libLoader.LibraryName    := getSQLite3LibraryPath();
+	 libLoader.Enabled        := True;
+     {$ENDIF}
+
+     {$IF defined(UNIX)}
+     {TODO}
 	 libLoader.ConnectionType := 'SQLite3';
 	 libLoader.LibraryName := getSQLite3LibraryPath();
 	 libLoader.Enabled := True;
-		{$ENDIF}
+     {$ENDIF}
 
-	 useSequences	:= True;
+     {$IF defined(DARWIN)}
+	 {TODO}
+     libLoader.ConnectionType := 'SQLite3';
+	 libLoader.LibraryName := getSQLite3LibraryPath();
+	 libLoader.Enabled := True;
+     {$ENDIF}
+
+	 useSequences	    := True;
 	 qUpdateID.SQL.Text := getSequenceUpsertScript();
 	 qGetNewID.SQL.Text := getSequenceSelectScript();
-	 myDbOpenState := dbopenExclusive;
+	 myDbOpenState      := dbopenExclusive;
 end;
 
 procedure TDBModule.SetDbFile(const _DbFile: string);
@@ -690,8 +707,15 @@ begin
 	{$IFDEF windows}
 	 Result := ExpandFileName('sqlite3.dll');
 	{$ELSE}
-	 Result := ExpandFileName('sqlite3.so');
-	{$ENDIF}
+
+    {$ELSEIFDEF UNIX}
+    Result := ExpandFileName('sqlite3.so');
+    if not fileExists(Result) then
+        Result :=
+    {$ELSEIFDEF DARWIN}
+
+    {$ENDIF}
+
 end;
 
 function TDBModule.getDBFileName(): string;

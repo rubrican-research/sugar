@@ -4,16 +4,16 @@ unit sugar.uihelper;
 interface
 
 uses
-    Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids;
+    Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids, Forms;
 
 type
+    EUIValidatorResult = (uivUnknown, uivOK, uivError, uivMissing, uivDefaultApplied);
+    TUIValidator    = function:EUIValidatorResult of object;
+    TArrayControl   = array of TControl;
 
     TUIState  = (uiDefault, uiHighlight, uiWarning, uiError, uiHover);
-    EUIValidatorResult = (uivUnknown, uivOK, uivError, uivMissing, uivDefaultApplied);
-    TUIValidator = function:EUIValidatorResult of object;
-    TArrayControl = array of TControl;
 
-	{ TOnHover }
+    { TOnHover }
 
     TOnHover = class
         procedure OnMouseEnter(Sender: TObject);
@@ -93,9 +93,6 @@ type
     procedure alignCenter(constref _child: TControl; _widthPercent: currency = 0.7; _heightPercent: currency = 0.7);  // Aligns the panel to the center of the container. Preserves the width of the panel
 
 
-
-
-
 //type
 //    {Fields}
 //    TUIField = class
@@ -118,17 +115,21 @@ type
 //    generic TUIControlField<TC: TControl> = class(TUIField)
 //	end;
 
+    {Make the hint visible programatically}
     procedure activateHint(_ctr: TControl);
 
+    {TStringGrid export functions}
     function gridHeaderToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToKV(_grid: TStringGrid; _delimiter: string = '='; _keyCol: integer = 0; _valCol: integer = 1): string;
 
+    {Returns the height of the window bar}
+    function windowBarHeight(_form: TForm) : integer;
 
 
 implementation
 uses
-    LCLType, LCLIntf, Forms, sugar.utils, sugar.collections, sugar.sort, Math, sugar.logger;
+    LCLType, LCLIntf, sugar.utils, sugar.collections, sugar.sort, Math, sugar.logger;
 var
   myOnHover: TOnHover;
 
@@ -367,6 +368,7 @@ begin
 	end;
     _c.Hint:= _hint;
     _c.ShowHint:= not _hint.IsEmpty;
+    _c.Invalidate;
 end;
 
 procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string);
@@ -545,6 +547,7 @@ begin
 
     try
 
+        {EXTRACT ROWS (strings + objects) FROM THE GRID AS A LIST OF DELIMITED VALUE STRINGS}
         for _r := sg.FixedRows to pred(sg.RowCount) do
         begin
             _term := '';
@@ -715,6 +718,15 @@ begin
                     + sLineBreak
                     + format(__F ,[Trim(_grid.Cells[_keyCol, r]), _delimiter, Trim(_grid.Cells[_valCol, r])]);
 	end;
+end;
+
+function windowBarHeight(_form: TForm): integer;
+{https://www.tweaking4all.com/forum/delphi-lazarus-free-pascal/lazarus-pascal-determine-titlebar-height-crossplatform-quick-and-easy/}
+var
+  global_pos : TPoint;
+begin
+    global_pos := _form.ClientToScreen(Point (1,1));
+    Result     := global_pos.Y - _form.Top;
 end;
 
 
