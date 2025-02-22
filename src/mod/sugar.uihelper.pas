@@ -52,6 +52,24 @@ type
         procedure OnResize(Sender: TObject); override;
     end;
 
+
+	{ TMouseWizard }
+
+    TMouseWizard = class
+    private
+        prevX, prevY: integer;
+        currX, currY: integer;
+		function getDeltaX: integer;
+		function getDeltaY: integer;
+    public
+        constructor Create;
+        procedure MouseMove (Sender: TObject; Shift: TShiftState; X, Y: Integer);
+        property X: integer read currX;
+        property Y: integer read currY;
+        property deltaX : integer read getDeltaX;
+        property deltaY : integer read getDeltaY;
+    end;
+
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
     procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
@@ -324,6 +342,31 @@ begin
     Child.Height := _height;
     Child.Top    := Floor((Parent.Height - Child.Height) / 2);
     Child.Invalidate;
+end;
+
+{ TMouseWizard }
+
+function TMouseWizard.getDeltaX: integer;
+begin
+    Result := prevX - currX;
+end;
+
+function TMouseWizard.getDeltaY: integer;
+begin
+    Result := prevY - currY;
+end;
+
+constructor TMouseWizard.Create;
+begin
+    currX:= 0; currY:= 0;
+    prevX:= 0; prevY:= 0;
+end;
+
+procedure TMouseWizard.MouseMove(Sender: TObject; Shift: TShiftState; X,
+	Y: Integer);
+begin
+    prevX := currX; currX := X;
+    prevY := currY; currY := Y;
 end;
 
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);

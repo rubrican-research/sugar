@@ -13,7 +13,7 @@ type
     {To fine tune duration of animation according to context. The Animation Framework uses milliseconds.
     Depending on the application, you can implement a function that returns a customized se to timeToDone values based on this enum}
     NAnimationSpeed = (aspeedInstant, aspeedQuick, aspeedNormal, aspeedSlow);
-
+    TAnimationDurationArray = array[NAnimationSpeed] of cardinal;
 
     {Animation handler}
     // How to implement the animation handler.
@@ -36,10 +36,22 @@ type
     {Object Method based}
     procedure animate(const _controls: TControlArray; _animateMeth: ProcAnimateMeth; const _timeToDone: cardinal = 0); overload;
 
+    {Maps NAnimationSpeed to time in milliseconds}
+    function animationDuration(animationSpeed: NAnimationSpeed): cardinal;
+
+
     {ANIMATION LIBRARIES}
     {bloom(): grow the control in height from 0 to configured height.}
     procedure bloom (constref _controls: TControlArray; constref _state: TJSONObject);
 
+var
+    {Defines the mapping of animation speed and duration}
+    animationDurationArray : TAnimationDurationArray = (
+            {millisconds for aspeedInstant}  30,
+            {millisconds for aspeedQuick}   100,
+            {millisconds for aspeedNormal}  160,
+            {millisconds for aspeedSlow}    800
+    );
 
 implementation
 uses
@@ -147,6 +159,12 @@ begin
 	end;
 
 end;
+
+function animationDuration(animationSpeed: NAnimationSpeed): cardinal;
+begin
+    Result := animationDurationArray[animationSpeed];
+end;
+
 
 { TBreakAnimation }
 

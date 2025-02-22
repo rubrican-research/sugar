@@ -206,6 +206,14 @@
         <Filename Value="mod\sugar.dragui.pas"/>
         <UnitName Value="sugar.dragui"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.register.pas"/>
+        <UnitName Value="sugar.register"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.dragui2.pas"/>
+        <UnitName Value="sugar.dragui2"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

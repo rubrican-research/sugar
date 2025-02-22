@@ -19,7 +19,8 @@ uses
     sugar.htmlbuilder.htmx, sugar.threadloader, sugar.jsGoogleChart, 
     sugar.jscharts, sugar.htmlpage, assets, bulma, semanticui, webui, 
     sugar.fmkvdisplay, sugar.markdownhelper, sugar.tagUI, sugar.toast, 
-    sugar.uistyles, sugar.animateui, sugar.dragui, LazarusPackageIntf;
+    sugar.uistyles, sugar.animateui, sugar.dragui, sugar.register, 
+    sugar.dragui2, LazarusPackageIntf;
 
 implementation
 
