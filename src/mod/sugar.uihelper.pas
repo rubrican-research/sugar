@@ -15,9 +15,31 @@ type
 
     { TOnHover }
 
-    TOnHover = class
+    TOnHover = class(TPersistent, IFPObserver)
+	private
+        myDefaultColor: TColor;
+		myOnHoverColor: TColor;
+		procedure setonHoverColor(const _value: TColor);
+		procedure setonHoverFont(const _value: TFont);
+    protected
+        prevOnMouseEnter: TNotifyEvent;
+        prevOnMouseLeave: TNotifyEvent;
+        myonHoverFont: TFont;
+        myDefaultFont : TFont;
+    public
         procedure OnMouseEnter(Sender: TObject);
         procedure OnMouseLeave(Sender: TObject);
+	public
+		procedure FPOObservedChanged(ASender: TObject;
+			Operation: TFPObservedOperation; Data: Pointer);
+        destructor Destroy; override;
+        constructor Create(_control: TControl); overload;
+        constructor Create(_label: TLabel); overload;
+        constructor Create(_panel: TPanel); overload;
+
+    public
+        property onHoverFont: TFont read myonHoverFont write setonHoverFont;
+        property onHoverColor: TColor read myonHoverColor write setonHoverColor;
     end;
 
 	{ TOnAlign }
@@ -57,26 +79,39 @@ type
 
     TMouseWizard = class
     private
+		myenabled: boolean;
+		myshiftState: TShiftState;
+        myStarted: boolean;
         prevX, prevY: integer;
         currX, currY: integer;
 		function getDeltaX: integer;
 		function getDeltaY: integer;
+		procedure setenabled(const _value: boolean);
+		procedure setshiftState(const _value: TShiftState);
+        function prep(Sender: TObject; Shift: TShiftState; X, Y: Integer): boolean; // Returns true if you can move the control
+        function setCoordinates(X, Y: Integer): boolean;
+        procedure moveControl(_control: TControl);
     public
         constructor Create;
-        procedure MouseMove (Sender: TObject; Shift: TShiftState; X, Y: Integer);
+        procedure reset;
+        procedure Move (Sender: TObject; Shift: TShiftState; X, Y: Integer);
+        procedure Move (_controls: TArrayControl; Shift: TShiftState; X, Y: Integer);
+        property started: boolean read myStarted;
         property X: integer read currX;
         property Y: integer read currY;
         property deltaX : integer read getDeltaX;
         property deltaY : integer read getDeltaY;
+        property enabled: boolean read myenabled write setenabled;
+        property shiftState: TShiftState read myshiftState write setshiftState;
     end;
 
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
     procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
 
-    function onHover: TOnHover;
-    procedure setHover(constref _lbl: TLabel); overload;
-    procedure setHover(constref _pnl: TPanel); overload;
+
+    procedure setHover(constref _lbl: TLabel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clSkyBlue ); overload;
+    procedure setHover(constref _pnl: TPanel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clSkyBlue ); overload;
     procedure uiShake(constref _c: TControl);
 
     // extracts a real value from the edit box. if it is not a real value, it returns the default value
@@ -144,28 +179,43 @@ type
     {Returns the height of the window bar}
     function windowBarHeight(_form: TForm) : integer;
 
+    {Creates a placeholder for the control. Primarily to take up the place of the control. It makes a copy of the
+     controls dimensions and alignment}
+    function makeProxy (_ctr: TControl): TLabel;
+    function makeBitmap(_ctr: TControl): TBitmap;
+
 
 implementation
 uses
     LCLType, LCLIntf, sugar.utils, sugar.collections, sugar.sort, Math, sugar.logger;
+
+
+function newHoverHandler(constref _control: TControl; constref _hoverFont: TFont; _hoverColor: TColor): TOnHover;
+begin
+    Result := TOnHover.Create(_control);
+    if assigned(_hoverFont) then
+        Result.onHoverFont.Assign(_hoverFont);
+    Result.onHoverColor:= _hoverColor;
+end;
+
+procedure setHover(constref _lbl: TLabel; constref _hoverFont: TFont;
+	_hoverColor: TColor);
 var
-  myOnHover: TOnHover;
-
-function onHover: TOnHover;
+	_hoverHandler: TOnHover;
 begin
-    Result:= myOnHover;
+    _hoverHandler     := newHoverHandler(TControl(_lbl), _hoverFont, _hoverColor);
+    _lbl.OnMouseEnter := @_hoverHandler.OnMouseEnter;
+    _lbl.OnMouseLeave := @_hoverHandler.OnMouseLeave;
 end;
 
-procedure setHover(constref _lbl: TLabel);
+procedure setHover(constref _pnl: TPanel; constref _hoverFont: TFont;
+	_hoverColor: TColor);
+var
+	_hoverHandler: TOnHover;
 begin
-    _lbl.OnMouseEnter:= @onHover.OnMouseEnter;
-    _lbl.OnMouseLeave:= @onHover.OnMouseLeave;
-end;
-
-procedure setHover(constref _pnl: TPanel);
-begin
-    _pnl.OnMouseEnter:= @onHover.OnMouseEnter;
-    _pnl.OnMouseLeave:= @onHover.OnMouseLeave;
+    _hoverHandler     := newHoverHandler(TControl(_pnl), _hoverFont, _hoverColor);
+    _pnl.OnMouseEnter := @_hoverHandler.OnMouseEnter;
+    _pnl.OnMouseLeave := @_hoverHandler.OnMouseLeave;
 end;
 
 procedure uiShake(constref _c: TControl);
@@ -189,54 +239,117 @@ end;
 
 { TOnHover }
 
+procedure TOnHover.setonHoverColor(const _value: TColor);
+begin
+	if myonHoverColor=_value then Exit;
+	myonHoverColor:=_value;
+end;
+
+procedure TOnHover.setonHoverFont(const _value: TFont);
+begin
+	if myonHoverFont=_value then Exit;
+	myonHoverFont:=_value;
+end;
+
 procedure TOnHover.OnMouseEnter(Sender: TObject);
 var
 	_lbl: TLabel;
+    _pnl: TPanel;
 begin
-    with Sender as TControl do begin
-        Cursor:= crHandPoint;
-        Font.Color := clHighlight;
-	end;
-
-	if Sender is TLabel then
-    begin
-        _lbl := Sender as TLabel;
-        _lbl.Font.Style := _lbl.Font.Style + [fsUnderline];
-        _lbl.Font.Color := clHighlight;
-	end;
-
     if Sender is TPanel then
     begin
-        with Sender as TPanel do begin
-            Color:= clSkyBlue;
-		end;
+        _pnl := Sender as TPanel;
+        _pnl.Color:= myOnHoverColor;
+	end
+    else if Sender is TLabel then begin
+        _lbl := Sender as TLabel;
+        _lbl.Font.Assign(myonHoverFont);
 	end;
+
+    if Sender is TControl then begin
+        with Sender as TControl do begin
+            Cursor:= crHandPoint;
+	    end;
+	end;
+
+    if assigned(prevOnMouseEnter) then prevOnMouseEnter(Sender);
 
 end;
 
 procedure TOnHover.OnMouseLeave(Sender: TObject);
 var
 	_lbl: TLabel;
+    _pnl: TPanel;
 begin
-    with Sender as TControl do begin
-        Cursor:= crDefault;
-        Font.Color := clDefault;
-	end;
-
-    if Sender is TLabel then
-    begin
-        _lbl := Sender as TLabel;
-        _lbl.Font.Style := _lbl.Font.Style - [fsUnderline];
-        _lbl.Font.Color := clDefault;
-        _lbl.Cursor     := crDefault;
-	end;
-
     if Sender is TPanel then
     begin
-        with Sender as TPanel do begin
-            Color:= clDefault;
+        _pnl := Sender as TPanel;
+        _pnl.Color:= myDefaultColor;
+	end
+    else if Sender is TLabel then
+    begin
+        _lbl := Sender as TLabel;
+        _lbl.Font.Assign(myDefaultFont);
+	end;
+
+    if Sender is TControl then begin
+	    with Sender as TControl do begin
+	        Cursor     := crDefault;
 		end;
 	end;
+
+    if assigned(prevOnMouseLeave) then prevOnMouseLeave(Sender);
+end;
+
+procedure TOnHover.FPOObservedChanged(ASender: TObject;
+	Operation: TFPObservedOperation; Data: Pointer);
+begin
+    case Operation of
+    	ooChange: ;
+        ooFree: Free;
+        ooAddItem: ;
+        ooDeleteItem: ;
+        ooCustom: ;
+    end;
+end;
+
+destructor TOnHover.Destroy;
+begin
+    myDefaultFont.Free;
+    myOnHoverFont.Free;
+	inherited Destroy;
+end;
+
+constructor TOnHover.Create(_control: TControl);
+begin
+    inherited Create;
+    myDefaultFont := TFont.Create;
+    myOnHoverFont := TFont.Create;
+
+    _control.FPOAttachObserver(self);
+    myDefaultColor := _control.Color;
+    myonHoverColor := clSkyBlue;
+
+    myDefaultFont.Assign(_control.Font);
+
+    myOnHoverFont.Assign(myDefaultFont);
+    myOnHoverFont.Color := clHighlight;
+    myOnHoverFont.Style := myOnHoverFont.Style + [fsUnderline];
+
+end;
+
+constructor TOnHover.Create(_label: TLabel);
+begin
+    Create(TControl(_label));
+    prevOnMouseEnter:= _label.OnMouseEnter;
+    prevOnMouseLeave:= _label.OnMouseLeave;
+end;
+
+constructor TOnHover.Create(_panel: TPanel);
+begin
+    Create(TControl(_panel));
+    prevOnMouseEnter:= _panel.OnMouseEnter;
+    prevOnMouseLeave:= _panel.OnMouseLeave;
 end;
 
 { TOnAlign }
@@ -348,32 +461,104 @@ end;
 
 function TMouseWizard.getDeltaX: integer;
 begin
-    Result := prevX - currX;
+    Result := currX - prevX;
 end;
 
 function TMouseWizard.getDeltaY: integer;
 begin
-    Result := prevY - currY;
+    Result := currY - prevY;
+end;
+
+procedure TMouseWizard.setenabled(const _value: boolean);
+begin
+	if myenabled=_value then Exit;
+	myenabled:=_value;
+end;
+
+procedure TMouseWizard.setshiftState(const _value: TShiftState);
+begin
+	if myshiftState=_value then Exit;
+	myshiftState:=_value;
+end;
+
+function TMouseWizard.prep(Sender: TObject; Shift: TShiftState; X, Y: Integer
+	): boolean;
+begin
+    Result := false;
+
+    if not enabled then exit;
+
+    if not (shiftState = Shift) then begin
+        reset;
+        exit;
+	end;
+
+    if Sender is TControl then begin
+        Result := setCoordinates(X, Y);
+	end;
+
+end;
+
+function TMouseWizard.setCoordinates(X, Y: Integer): boolean;
+begin
+    if not started then
+    begin
+    	prevX := X;
+        prevY := Y;
+        myStarted := true;
+	end;
+    currX := X;
+    currY := Y;
+
+    Result := started;
+
+end;
+
+procedure TMouseWizard.moveControl(_control: TControl);
+begin
+    with _control do begin
+        if Align <> alNone then exit; // You can't move something that is aligned.
+        Top  := Top  + deltaY;
+	    Left := Left + deltaX;
+	end;
 end;
 
 constructor TMouseWizard.Create;
 begin
     currX:= 0; currY:= 0;
     prevX:= 0; prevY:= 0;
+    reset;
 end;
 
-procedure TMouseWizard.MouseMove(Sender: TObject; Shift: TShiftState; X,
+procedure TMouseWizard.reset;
+begin
+    if myStarted then
+        myStarted := false;
+end;
+
+procedure TMouseWizard.Move(Sender: TObject; Shift: TShiftState; X,
 	Y: Integer);
 begin
-    prevX := currX; currX := X;
-    prevY := currY; currY := Y;
+    if prep(sender, shift, x, y) then
+        moveControl(TControl(Sender));
+end;
+
+procedure TMouseWizard.Move(_controls: TArrayControl; Shift: TShiftState; X,
+	Y: Integer);
+var
+	ctrl: TControl;
+begin
+    if Length(_controls) = 0 then exit;
+
+    for ctrl in _controls do begin
+        if prep(ctrl, shift, x, y) then
+            moveControl(ctrl);
+	end;
 end;
 
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);
 begin
-
     //_c.Font.Style := _c.Font.Style - [fsBold];
-
     case _s of
     	uiDefault:   begin
             _c.Font.Color   := clDefault;
@@ -772,11 +957,40 @@ begin
     Result     := global_pos.Y - _form.Top;
 end;
 
+function makeProxy (_ctr: TControl): TLabel;
+begin
+    Result := TLabel.Create(Application);
+    Result.Name     := '';
+    Result.Alignment:= taCenter;
+    Result.Caption  := '';
+    Result.Layout   := tlCenter;
+    Result.AutoSize := false;
+    Result.Top      := Max(0, _ctr.Top-1);
+    Result.Left     := _ctr.Left;
+    Result.Height   := _ctr.Height;
+    Result.Width    := _ctr.Width;
+    Result.Align    := _ctr.Align;
+end;
+
+function makeBitmap(_ctr: TControl): TBitmap;
+begin
+    Result := TBitmap.Create;
+    Result.Width  := _ctr.Width;
+    Result.Height := _ctr.Height;
+
+    if _ctr is TWinControl then
+      (_ctr as TWinControl).PaintTo(Result.Canvas,0,0)
+    else if _ctr is TGraphicControl then begin
+        ; //_pnl := TPnl
+	end;
+end;
+
 
 initialization
-    myOnHover := TOnHover.Create;
+;
 
 finalization
-    myOnHover.Free;
+;
+
 end.
 

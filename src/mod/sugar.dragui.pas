@@ -476,6 +476,11 @@ begin
 	end;
 
     initMouseDelta;
+    TPanel(Sender).OnMouseDown  := nil;
+    TPanel(Sender).OnMouseUp    := nil;
+    TPanel(Sender).OnMouseEnter := nil;
+    TPanel(Sender).OnMouseMove  := nil;
+    TPanel(Sender).OnMouseLeave := nil;
 
 end;
 

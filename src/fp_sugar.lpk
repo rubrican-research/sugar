@@ -211,8 +211,8 @@
         <UnitName Value="sugar.register"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.dragui2.pas"/>
-        <UnitName Value="sugar.dragui2"/>
+        <Filename Value="mod\sugar.repositionui.pas"/>
+        <UnitName Value="sugar.repositionui"/>
       </Item>
     </Files>
     <RequiredPkgs>
