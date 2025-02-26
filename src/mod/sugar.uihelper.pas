@@ -76,7 +76,8 @@ type
 
 
 	{ TMouseWizard }
-
+    // implements the mouse move handler. It moves the sender
+    // when the user presses the keys/buttons defined in shiftState
     TMouseWizard = class
     private
 		myenabled: boolean;
@@ -104,6 +105,36 @@ type
         property enabled: boolean read myenabled write setenabled;
         property shiftState: TShiftState read myshiftState write setshiftState;
     end;
+
+	{ TGlobalMouseWizard }
+    {Works by following the mouse position across the whole desktop area.
+     Not limited to the application screen. See mPoint()}
+    TGlobalMouseWizard =  class
+    protected
+        form: TForm;
+        prevMousePoint : TPoint;
+        containerHOffset  : cardinal;
+        containerVOffset  : cardinal;
+
+    public
+ 	   function mPoint: TPoint;
+ 	   function mX: integer;
+ 	   function mY: integer;
+       function deltaX: integer;
+   	   function deltaY: integer;
+
+ 	   {These calculate the horizontal and vertical offset of the container }
+       procedure reset;
+       procedure initMouseDelta;
+
+       function calcOffests(constref _container: TWinControl): TPoint;
+ 	   function calcHOffset(constref _container: TWinControl): integer;
+ 	   function calcVOffset(constref _container: TWinControl): integer;
+
+       function move(constref _control: TControl; X: integer; Y: integer): TPoint;
+
+    end;
+
 
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
@@ -527,6 +558,7 @@ constructor TMouseWizard.Create;
 begin
     currX:= 0; currY:= 0;
     prevX:= 0; prevY:= 0;
+    shiftState := [ssLeft]; // Default behaviour. Moves when you hold down the left mouse button
     reset;
 end;
 
@@ -554,6 +586,138 @@ begin
         if prep(ctrl, shift, x, y) then
             moveControl(ctrl);
 	end;
+end;
+
+{ TGlobalMouseWizard }
+
+function TGlobalMouseWizard.deltaX: integer;
+var
+    _currPoint : TPoint;
+begin
+    _currPoint := mPoint;
+    Result := _currPoint.x - prevMousePoint.X; // determines whether it moved left or right
+    prevMousePoint:= _currPoint;
+end;
+
+function TGlobalMouseWizard.deltaY: integer;
+var
+    _currPoint : TPoint;
+begin
+    _currPoint := mPoint;
+    Result := _currPoint.Y - prevMousePoint.Y; // determines if it moved up or down
+    prevMousePoint:= _currPoint;
+end;
+
+procedure TGlobalMouseWizard.initMouseDelta;
+begin
+    prevMousePoint := mPoint; // stores the current mouse posioint
+end;
+
+function TGlobalMouseWizard.calcOffests(constref _container: TWinControl
+	): TPoint;
+begin
+    containerHOffset  := calcHOffset(_container);
+    containerVOffset  := calcVOffset(_container);
+    Result := point(containerHOffset, containerVOffset);
+end;
+
+function TGlobalMouseWizard.mPoint: TPoint;
+begin
+    Result := Controls.Mouse.CursorPos;
+end;
+
+function TGlobalMouseWizard.mX: integer;
+begin
+    Result := Controls.Mouse.CursorPos.X;
+end;
+
+function TGlobalMouseWizard.mY: integer;
+begin
+    Result := Controls.Mouse.CursorPos.Y;
+end;
+
+function TGlobalMouseWizard.calcHOffset(constref _container: TWinControl
+	): integer;
+var
+    _parent: TControl;
+    _continue : boolean =  true;
+begin
+    Result  := _container.Left - (_container.BorderSpacing.Around + _container.BorderSpacing.Left);
+    _parent := _container.Parent;
+    while _continue do begin
+        _continue := assigned(_parent);
+        if _continue then begin
+            _continue := (_parent is TForm);
+            if _continue then begin
+                // any additional adjustments
+                if not assigned(form) then begin
+                    form := TForm(_parent);
+                    _continue := false;
+				end;
+			end;
+            Result := Result - (_parent.Left + _parent.BorderSpacing.Around + _parent.BorderSpacing.Left);
+            _parent := _parent.Parent;
+		end;
+	end;
+end;
+
+function TGlobalMouseWizard.calcVOffset(constref _container: TWinControl
+	): integer;
+var
+    _parent: TControl;
+    _continue: boolean =  true;
+begin
+    Result  := _container.Top - (_container.BorderSpacing.Around + _container.BorderSpacing.Top);
+    _parent := _container.Parent;
+
+    while _continue do begin
+        _continue := assigned(_parent);
+        if _continue then begin
+            _continue := (_parent is TForm);
+            if _continue then begin
+                if not assigned(form) then begin
+                    form := TForm(_parent);
+                    _continue := false;
+				end;
+				Result := Result +  windowBarHeight(TForm(_parent));
+			end;
+            Result := Result + _parent.Top - (_parent.BorderSpacing.Around + _parent.BorderSpacing.Top);
+            _parent := _parent.Parent;
+		end;
+	end;
+end;
+
+function TGlobalMouseWizard.move(constref _control: TControl; X: integer;
+	Y: integer): TPoint;
+var
+    _newX, _newY: integer;
+begin
+    _newX := mX - containerHOffset;
+    _newY := mY - containerVOffset;
+
+    log(
+    'TGlobalMouseWizard'                            + sLineBreak +
+    '              move(x,y): (%d, %d):: '          + sLineBreak +
+    '                 mx, my: (%d, %d) '            + sLineBreak +
+    '           offset(h, v): (h: %d, v: %d) '      + sLineBreak +
+    '     control(left, top): (left: %d, top: %d). '+ sLineBreak +
+    '     NewPos(newX, newY): (%d, %d)',
+
+                             [X, Y,
+                             mx, my,
+                             containerHOffset, containerVOffset,
+                             _control.left, _control.top,
+                             _newX, _newY]);
+    log('');
+    //_control.Left := _newX + 10;
+    _control.Top  := _newY + 10;  {spacing below the cursor};
+end;
+
+procedure TGlobalMouseWizard.reset;
+begin
+    prevMousePoint    := Point(-99999, 99999);
+    containerHOffset  := 0;
+    containerVOffset  := 0;
 end;
 
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);

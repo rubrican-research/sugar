@@ -10,8 +10,8 @@ uses
 
 type
 
-	{ TRepositioner }
-    TRepositioner  = class(TPersistent, IFPObserver)
+	{ TUIMover }
+    TUIMover  = class(TPersistent, IFPObserver)
     public
         type TReposSelectState = (rssUnselected, rssSelected, rssMoving, rssResize, rssRotate);
 
@@ -91,7 +91,7 @@ type
         procedure visualizeSelState(_selState: TReposSelectState);virtual;
     public
         {EVENT HANDLERS}
-        function toggleState: TRepositioner;virtual;
+        function toggleState: TUIMover;virtual;
 
         procedure OnControlClick(Sender: TObject);virtual;
         procedure OnControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);virtual;
@@ -147,7 +147,9 @@ type
 
 	{ GRepositioner }
 
-    generic GRepositioner <C: TControl> = class(TRepositioner)
+	{ GUIMover }
+
+    generic GUIMover <C: TControl> = class(TUIMover)
     protected
         myControl: C;
     protected
@@ -168,6 +170,7 @@ type
 
         function canResize: boolean; override;
         function canRepos: boolean; override;
+        procedure repos(X, Y: integer);override;
 
     public
         // Exposes the control
@@ -177,24 +180,24 @@ type
         function controlObj: TControl; override;
 	end;
 
-    TPanelRepositioner    = class(specialize GRepositioner<TPanel>);
-    TLabelRepositioner    = class(specialize GRepositioner<TLabel>);
-    TEditRepositioner     = class(specialize GRepositioner<TEdit>);
-    TCheckBoxRepositioner = class(specialize GRepositioner<TCheckBox>);
-    TListBoxRepositioner  = class(specialize GRepositioner<TListBox>);
-    TButtonRepositioner   = class(specialize GRepositioner<TButton>);
-    TFrameRepositioner    = class(specialize GRepositioner<TFrame>);
+    TPanelMover    = class(specialize GUIMover<TPanel>);
+    TLabelMover    = class(specialize GUIMover<TLabel>);
+    TEditMover     = class(specialize GUIMover<TEdit>);
+    TCheckBoxMover = class(specialize GUIMover<TCheckBox>);
+    TListBoxMover  = class(specialize GUIMover<TListBox>);
+    TButtonMover   = class(specialize GUIMover<TButton>);
+    TFrameMover    = class(specialize GUIMover<TFrame>);
 
-    TRepositionerClass = class of TRepositioner;
+    TUIMoverClass = class of TUIMover;
 
-	{ TRepositionerList }
+	{ TUIMoverList }
 
-    TRepositionerList = class(specialize TFPGMap<ptrInt, TRepositioner>)
+    TUIMoverList = class(specialize TFPGMap<ptrInt, TUIMover>)
     private type
 			{ TWatcher }
             TWatcher = class(TPersistent, IFPObserver)
 			public
-                owner : TRepositionerList;
+                owner : TUIMoverList;
 				procedure FPOObservedChanged(ASender: TObject;
 					Operation: TFPObservedOperation; Data: Pointer);
             end;
@@ -204,53 +207,63 @@ type
         constructor Create;
         destructor Destroy; override;
 
-        function add(constref _control: TControl; constref _repositioner: TRepositioner): TRepositioner; overload;
+        function add(constref _control: TControl; constref _repositioner: TUIMover): TUIMover; overload;
     end;
-    function addRepositioner(constref _control: TControl): TRepositioner;
-    function addRepositioner(constref _repositioner: TRepositioner): TRepositioner;
-    function repositioner(_control: TControl): TRepositioner;
+    {Global list of repositioners}
+    function addUIMover(constref _control: TControl): TUIMover;       // Creates a TRepositioner object for the control and adds it to the lsit.
+    function addUIMover(constref _controls: TControlArray): TUIMover; // convenience. Add multiple control repositioners
+    function addUIMover(constref _repositioner: TUIMover): TUIMover;  // If you have a custom repositioner, you can add that object to the list
+    function getUIMover(_control: TControl): TUIMover;                // Finds and returns the repositioner object for the control. Use this when you want to change repositioner properties.
 
 implementation
 
 uses
     Math, sugar.logger;
 var
-    myRespositionerList : TRepositionerList = nil;
+    myRespositionerList : TUIMoverList = nil;
 
-function addRepositioner(constref _control: TControl): TRepositioner;
+function addUIMover(constref _control: TControl): TUIMover;
 begin
     if _control is TLabel then
-        Result := addRepositioner(TLabelRepositioner.Create(TLabel(_control)))
+        Result := addUIMover(TLabelMover.Create(TLabel(_control)))
 
     else if _control is TEdit then
-        Result := addRepositioner(TEditRepositioner.Create(TEdit(_control)))
+        Result := addUIMover(TEditMover.Create(TEdit(_control)))
 
     else if _control is TPanel then
-        Result := addRepositioner(TPanelRepositioner.Create(TPanel(_control)))
+        Result := addUIMover(TPanelMover.Create(TPanel(_control)))
 
     else if _control is TCheckBox then
-        Result := addRepositioner(TCheckBoxRepositioner.Create(TCheckBox(_control)))
+        Result := addUIMover(TCheckBoxMover.Create(TCheckBox(_control)))
 
     else if _control is TListBox then
-        Result := addRepositioner(TListBoxRepositioner.Create(TListBox(_control)))
+        Result := addUIMover(TListBoxMover.Create(TListBox(_control)))
 
     else if _control is TButton then
-            Result := addRepositioner(TButtonRepositioner.Create(TButton(_control)))
+            Result := addUIMover(TButtonMover.Create(TButton(_control)))
 
     else if _control is TFrame then
-            Result := addRepositioner(TFrameRepositioner.Create(TFrame(_control)))
+            Result := addUIMover(TFrameMover.Create(TFrame(_control)))
     else
         raise Exception.Create(Format('There is currently no TRepositioner implementation for %d',[_control.ClassName]));
 
 end;
 
-function addRepositioner(constref _repositioner: TRepositioner): TRepositioner;
+function addUIMover(constref _controls: TControlArray): TUIMover;
+var
+	c: TControl;
+begin
+    for c in _controls do
+        addUIMover(c);
+end;
+
+function addUIMover(constref _repositioner: TUIMover): TUIMover;
 begin
     //log('reposition: %s', [_repositioner.ClassName]);
     Result := myRespositionerList.add(_repositioner.controlObj, _repositioner);
 end;
 
-function repositioner(_control: TControl): TRepositioner;
+function getUIMover(_control: TControl): TUIMover;
 var
     i: integer;
 begin
@@ -259,119 +272,119 @@ begin
         Result := myRespositionerList.Data[i];
 end;
 
-procedure TRepositioner.start(X, Y: integer);
+procedure TUIMover.start(X, Y: integer);
 begin
     //top  := Y;
     //left := X;
 	resetChanges;
 end;
 
-procedure TRepositioner.incChange;
+procedure TUIMover.incChange;
 begin
     inc(myChange);
 end;
 
-function TRepositioner.getXOffset: integer;
+function TUIMover.getXOffset: integer;
 begin
     Result := myXOffset;
 end;
 
-function TRepositioner.getYOffset: integer;
+function TUIMover.getYOffset: integer;
 begin
     Result := myYOffset;
 end;
 
-function TRepositioner.changed: boolean;
+function TUIMover.changed: boolean;
 begin
     Result := myChange > 0;
 end;
 
-procedure TRepositioner.resetChanges;
+procedure TUIMover.resetChanges;
 begin
     myChange:=0;
 end;
 
-function TRepositioner.getBottom: integer;
+function TUIMover.getBottom: integer;
 begin
     Result := top + Height;
 end;
 
-function TRepositioner.getFocused: boolean;
+function TUIMover.getFocused: boolean;
 begin
     Result:= myFocused;
 end;
 
-function TRepositioner.getHeight: integer;
+function TUIMover.getHeight: integer;
 begin
     Result := -1;
 end;
 
-function TRepositioner.getLeft: integer;
+function TUIMover.getLeft: integer;
 begin
     Result := 1;
 end;
 
-function TRepositioner.getMoving: boolean;
+function TUIMover.getMoving: boolean;
 begin
     Result := mySelState = rssMoving;
 end;
 
-function TRepositioner.getResizing: boolean;
+function TUIMover.getResizing: boolean;
 begin
     Result := mySelState = rssResize;
 end;
 
-function TRepositioner.getRight: integer;
+function TUIMover.getRight: integer;
 begin
     Result := left + Width;
 end;
 
-function TRepositioner.getRotating: boolean;
+function TUIMover.getRotating: boolean;
 begin
     Result := myselState >= rssRotate;
 end;
 
-function TRepositioner.getSelected: boolean;
+function TUIMover.getSelected: boolean;
 begin
     Result := myselState >= rssSelected;
 end;
 
-function TRepositioner.getTop: integer;
+function TUIMover.getTop: integer;
 begin
     Result := 1;
 end;
 
-function TRepositioner.getWidth: integer;
+function TUIMover.getWidth: integer;
 begin
     Result := 1;
 end;
 
-function TRepositioner.getX1: integer;
+function TUIMover.getX1: integer;
 begin
     Result := myX1;
 end;
 
-function TRepositioner.getX2: integer;
+function TUIMover.getX2: integer;
 begin
     Result := myX2;
 end;
 
-function TRepositioner.getY1: integer;
+function TUIMover.getY1: integer;
 begin
     Result := myY1;
 end;
 
-function TRepositioner.getY2: integer;
+function TUIMover.getY2: integer;
 begin
     Result := myY2;
 end;
 
-procedure TRepositioner.setBottom(const _value: integer);
+procedure TUIMover.setBottom(const _value: integer);
 begin
     Height := Abs(_value - top);
 end;
 
-procedure TRepositioner.setFocused(const _value: boolean);
+procedure TUIMover.setFocused(const _value: boolean);
 begin
     myFocused := _value;
     case myFocused of
@@ -391,17 +404,17 @@ begin
     visualizeSelState(mySelState);
 end;
 
-procedure TRepositioner.setHeight(const _value: integer);
+procedure TUIMover.setHeight(const _value: integer);
 begin
 
 end;
 
-procedure TRepositioner.setLeft(const _value: integer);
+procedure TUIMover.setLeft(const _value: integer);
 begin
 
 end;
 
-procedure TRepositioner.setMoving(const _value: boolean);
+procedure TUIMover.setMoving(const _value: boolean);
 begin
     case _value of
         True:
@@ -414,7 +427,7 @@ begin
     visualizeSelState(mySelState);
 end;
 
-procedure TRepositioner.setResizing(const _value: boolean);
+procedure TUIMover.setResizing(const _value: boolean);
 begin
     case
         _value of
@@ -433,12 +446,12 @@ begin
     visualizeSelState(mySelState);
 end;
 
-procedure TRepositioner.setRight(const _value: integer);
+procedure TUIMover.setRight(const _value: integer);
 begin
     Width := Abs(_value - left);
 end;
 
-procedure TRepositioner.setRotating(const _value: boolean);
+procedure TUIMover.setRotating(const _value: boolean);
 begin
     case _value of
         True: begin
@@ -450,7 +463,7 @@ begin
     visualizeSelState(mySelState);
 end;
 
-procedure TRepositioner.setSelected(const _value: boolean);
+procedure TUIMover.setSelected(const _value: boolean);
 begin
     case _value of
         True: begin
@@ -464,63 +477,63 @@ begin
     visualizeSelState(mySelState);
 end;
 
-procedure TRepositioner.setTop(const _value: integer);
+procedure TUIMover.setTop(const _value: integer);
 begin
 
 end;
 
-procedure TRepositioner.setWidth(const _value: integer);
+procedure TUIMover.setWidth(const _value: integer);
 begin
 
 end;
 
-procedure TRepositioner.setX1(const _value: integer);
+procedure TUIMover.setX1(const _value: integer);
 begin
     myX1 := _value;
     left := myX1 + XOffset;
 end;
 
-procedure TRepositioner.setX2(const _value: integer);
+procedure TUIMover.setX2(const _value: integer);
 begin
     myX2  := _value;
     right := myX2 + XOffset;
 end;
 
-procedure TRepositioner.SetXOffset(const _value: integer);
+procedure TUIMover.SetXOffset(const _value: integer);
 begin
 	if myXOffset=_value then Exit;
 	myXOffset:=_value;
 end;
 
-procedure TRepositioner.setY1(const _value: integer);
+procedure TUIMover.setY1(const _value: integer);
 begin
     myY1 := _value;
     top  := myY1 + YOffset;
 end;
 
-procedure TRepositioner.setY2(const _value: integer);
+procedure TUIMover.setY2(const _value: integer);
 begin
     myY2   := _value;
     bottom := myY2 + YOffset;
 end;
 
-procedure TRepositioner.SetYOffset(const _value: integer);
+procedure TUIMover.SetYOffset(const _value: integer);
 begin
 	if myYOffset=_value then Exit;
 	myYOffset:=_value;
 end;
 
-function TRepositioner.canResize: boolean;
+function TUIMover.canResize: boolean;
 begin
     Result := false;
 end;
 
-function TRepositioner.canRepos: boolean;
+function TUIMover.canRepos: boolean;
 begin
     Result := false;
 end;
 
-procedure TRepositioner.resize(X, Y: integer);
+procedure TUIMover.resize(X, Y: integer);
 var
     _deltaX, _deltaY: integer;
 begin
@@ -547,7 +560,7 @@ begin
     end;
 end;
 
-procedure TRepositioner.repos(X, Y: integer);
+procedure TUIMover.repos(X, Y: integer);
 var
     _deltaX, _deltaY: integer;
 begin
@@ -576,38 +589,38 @@ begin
     incChange;
 end;
 
-procedure TRepositioner.moveX(_dx: integer);
+procedure TUIMover.moveX(_dx: integer);
 begin
 	X1:= X1 + _dx;
     X2:= X2 + _dx;
     incChange;
 end;
 
-procedure TRepositioner.moveY(_dy: integer);
+procedure TUIMover.moveY(_dy: integer);
 begin
 	Y1:= Y1 + _dy;
     Y2:= Y2 + _dy;
     incChange;
 end;
 
-procedure TRepositioner.sizeW(_dw: integer);
+procedure TUIMover.sizeW(_dw: integer);
 begin
 	X2 := X2 + _dw;
     incChange;
 end;
 
-procedure TRepositioner.sizeH(_dh: integer);
+procedure TUIMover.sizeH(_dh: integer);
 begin
 	Y2 := Y2 + _dh;
     incChange;
 end;
 
-procedure TRepositioner.visualizeSelState(_selState: TReposSelectState);
+procedure TUIMover.visualizeSelState(_selState: TReposSelectState);
 begin
     // nothing here
 end;
 
-function TRepositioner.toggleState: TRepositioner;
+function TUIMover.toggleState: TUIMover;
 begin
     Result:= Self;
     case selState of
@@ -621,14 +634,14 @@ begin
 end;
 
 
-procedure TRepositioner.OnControlClick(Sender: TObject);
+procedure TUIMover.OnControlClick(Sender: TObject);
 begin
     if assigned(myOnClick) then myOnClick(Sender);
     if not enabled then exit;
 end;
 
 
-procedure TRepositioner.OnControlMouseDown(Sender: TObject;
+procedure TUIMover.OnControlMouseDown(Sender: TObject;
 	Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
     if assigned(myOnMouseDown) then myOnMouseDown(Sender, Button, Shift, X, Y);
@@ -636,21 +649,21 @@ begin
     // Todo
 
 end;
-procedure TRepositioner.OnControlMouseUp(Sender: TObject; Button: TMouseButton;
+procedure TUIMover.OnControlMouseUp(Sender: TObject; Button: TMouseButton;
 	Shift: TShiftState; X, Y: Integer);
 begin
     if assigned(myOnMouseUp) then myOnMouseUp(Sender, Button, Shift, X, Y);
     if not enabled then exit;
 end;
 
-procedure TRepositioner.OnControlMouseEnter(Sender: TObject);
+procedure TUIMover.OnControlMouseEnter(Sender: TObject);
 begin
     if assigned(myOnMouseEnter) then myOnMouseEnter(Sender);
     if not enabled then exit;
     Focused := true;
 end;
 
-procedure TRepositioner.OnControlMouseMove(Sender: TObject; Shift: TShiftState;
+procedure TUIMover.OnControlMouseMove(Sender: TObject; Shift: TShiftState;
 	X, Y: integer);
 begin
     if assigned(myOnMouseMove) then myOnMouseMove(Sender, Shift, X, Y);
@@ -680,7 +693,7 @@ begin
     end;
 end;
 
-procedure TRepositioner.OnControlMouseLeave(Sender: TObject);
+procedure TUIMover.OnControlMouseLeave(Sender: TObject);
 begin
     if assigned(myOnMouseLeave) then myOnMouseLeave(Sender);
 
@@ -699,18 +712,18 @@ begin
 
 end;
 
-procedure TRepositioner.OnControlKeyDown(Sender: TObject; var Key: word;
+procedure TUIMover.OnControlKeyDown(Sender: TObject; var Key: word;
 	Shift: TShiftState);
 begin
     if not enabled then exit;
 end;
 
-function TRepositioner.controlObj: TControl;
+function TUIMover.controlObj: TControl;
 begin
     Result := nil;
 end;
 
-procedure TRepositioner.FPOObservedChanged(ASender: TObject;
+procedure TUIMover.FPOObservedChanged(ASender: TObject;
 	Operation: TFPObservedOperation; Data: Pointer);
 begin
 
@@ -737,9 +750,9 @@ begin
     end;
 end;
 
-{ GRepositioner }
+{ GUIMover }
 
-function GRepositioner.getXOffset: integer;
+function GUIMover.getXOffset: integer;
 begin
     if assigned(myControl.Parent) then
         myXOffset := myControl.Parent.Left
@@ -749,7 +762,7 @@ begin
     Result := myXOffset;
 end;
 
-function GRepositioner.getYOffset: integer;
+function GUIMover.getYOffset: integer;
 begin
     if assigned(myControl.Parent) then
         myYOffset := myControl.Parent.Top
@@ -759,47 +772,47 @@ begin
     Result := myYOffset;
 end;
 
-function GRepositioner.getHeight: integer;
+function GUIMover.getHeight: integer;
 begin
 	Result := myControl.Height;
 end;
 
-function GRepositioner.getLeft: integer;
+function GUIMover.getLeft: integer;
 begin
     Result := myControl.Left;
 end;
 
-function GRepositioner.getTop: integer;
+function GUIMover.getTop: integer;
 begin
     Result := myControl.Top;
 end;
 
-function GRepositioner.getWidth: integer;
+function GUIMover.getWidth: integer;
 begin
 	Result := myControl.width;
 end;
 
-procedure GRepositioner.setHeight(const _value: integer);
+procedure GUIMover.setHeight(const _value: integer);
 begin
 	myControl.Height := _value;
 end;
 
-procedure GRepositioner.setLeft(const _value: integer);
+procedure GUIMover.setLeft(const _value: integer);
 begin
 	myControl.Left := _value;
 end;
 
-procedure GRepositioner.setTop(const _value: integer);
+procedure GUIMover.setTop(const _value: integer);
 begin
     myControl.Top := _value;
 end;
 
-procedure GRepositioner.setWidth(const _value: integer);
+procedure GUIMover.setWidth(const _value: integer);
 begin
 	myControl.Width := _value;
 end;
 
-procedure GRepositioner.visualizeSelState(_selState: TReposSelectState);
+procedure GUIMover.visualizeSelState(_selState: TReposSelectState);
 begin
     case _selState of
         rssUnselected: begin
@@ -824,17 +837,23 @@ begin
     end;
 end;
 
-function GRepositioner.canResize: boolean;
+function GUIMover.canResize: boolean;
 begin
 	Result := control.Align = alNone;
 end;
 
-function GRepositioner.canRepos: boolean;
+function GUIMover.canRepos: boolean;
 begin
 	Result := control.Align = alNone;
 end;
 
-constructor GRepositioner.Create(constref _control: C);
+procedure GUIMover.repos(X, Y: integer);
+begin
+    myControl.BringToFront;
+	inherited repos(X, Y);
+end;
+
+constructor GUIMover.Create(constref _control: C);
 begin
     //Log('Calling %s.Create()', [ClassName]);
     myControl := _control;
@@ -842,7 +861,7 @@ begin
     initControl(_control);
 end;
 
-function GRepositioner.initControl(constref _control: C): C;
+function GUIMover.initControl(constref _control: C): C;
 begin
      Result := _control;
 
@@ -871,36 +890,36 @@ begin
      enabled := true;
 end;
 
-function GRepositioner.controlObj: TControl;
+function GUIMover.controlObj: TControl;
 begin
 	Result:= control;
 end;
 
-constructor TRepositionerList.Create;
+constructor TUIMoverList.Create;
 begin
     inherited Create;
     watcher := TWatcher.Create;
     watcher.owner := self;
 end;
 
-destructor TRepositionerList.Destroy;
+destructor TUIMoverList.Destroy;
 begin
     watcher.Free;
 	inherited Destroy;
 end;
 
-{ TRepositionerList }
-function TRepositionerList.add(constref _control: TControl; constref
-	_repositioner: TRepositioner): TRepositioner;
+{ TUIMoverList }
+function TUIMoverList.add(constref _control: TControl; constref
+	_repositioner: TUIMover): TUIMover;
 begin
     Result := _repositioner;
     Add(ptrInt(_control), _repositioner);
     _control.FPOAttachObserver(watcher);
 end;
 
-{ TRepositionerList.TWatcher }
+{ TUIMoverList.TWatcher }
 
-procedure TRepositionerList.TWatcher.FPOObservedChanged(ASender: TObject;
+procedure TUIMoverList.TWatcher.FPOObservedChanged(ASender: TObject;
 	Operation: TFPObservedOperation; Data: Pointer);
 var
     i: integer;
@@ -922,7 +941,7 @@ begin
 end;
 
 initialization
-    myRespositionerList := TRepositionerList.Create;
+    myRespositionerList := TUIMoverList.Create;
 
 finalization
     myRespositionerList.Free;
