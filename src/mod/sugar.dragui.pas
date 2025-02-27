@@ -75,6 +75,10 @@ type
 		mycolorSelected: TColor;
 		mycontainer: ParentControl;
 		myform: TForm;
+		myPrevOnDragDrop: TDragDropEvent;
+		myPrevOnDragOver: TDragOverEvent;
+		myPrevOnEndDrag: TEndDragEvent;
+		myPrevOnStartDrag: TStartDragEvent;
  type
 
 		{ TLocalDragState }
@@ -85,9 +89,14 @@ type
             i       : integer; // current index
             pos     : TPoint;
             constructor Create;
+            destructor Destroy; override;
         end;
 
 	    function getDragAcceptProc: TDragAcceptProc;
+		function getPrevOnDragDrop: TDragDropEvent;
+		function getPrevOnDragOver: TDragOverEvent;
+		function getPrevOnEndDrag: TEndDragEvent;
+		function getPrevOnStartDrag: TStartDragEvent;
 		procedure setanimationSpeed(const _value: NAnimationSpeed);
 		procedure setcolorDefault(const _value: TColor);
 		procedure setcolorDragNotAllowed(const _value: TColor);
@@ -97,17 +106,16 @@ type
 		procedure setcolorSelected(const _value: TColor);
 		procedure setcontainer(const _value: ParentControl);
 		procedure setform(const _value: TForm);
+		procedure setPrevOnDragDrop(const _value: TDragDropEvent);
+		procedure setPrevOnDragOver(const _value: TDragOverEvent);
+		procedure setPrevOnEndDrag(const _value: TEndDragEvent);
+		procedure setPrevOnStartDrag(const _value: TStartDragEvent);
 		procedure setShowAnimation(const _value: boolean);
 	    procedure setDragAcceptProc(const _value: TDragAcceptProc);
 		procedure setenabled(const _value: boolean);
 
     protected
         myDragHandles    : TControlArray;
-        myPrevOnStartDrag: TStartDragEvent;
-        myPrevOnDragOver : TDragOverEvent;
-        myPrevOnDragDrop : TDragDropEvent;
-        myPrevOnEndDrag  : TEndDragEvent;
-
         myDragAcceptProc: TDragAcceptProc;
         myDragState     : TLocalDragState;
         myMouseWiz        : TMouseWizard;
@@ -157,6 +165,12 @@ type
         procedure addDragHandle(constref _shape: TShape);
         procedure initDragHandles(constref _child: TControl);
     public
+
+        property PrevOnStartDrag: TStartDragEvent read getPrevOnStartDrag write setPrevOnStartDrag;
+        property PrevOnDragOver : TDragOverEvent read  getPrevOnDragOver write setPrevOnDragOver;
+        property PrevOnDragDrop : TDragDropEvent read  getPrevOnDragDrop write setPrevOnDragDrop;
+        property PrevOnEndDrag  : TEndDragEvent read   getPrevOnEndDrag write setPrevOnEndDrag;
+
          property child[_index: cardinal]: ChildControl read getChild;
          property dragAcceptProc: TDragAcceptProc read getDragAcceptProc write setDragAcceptProc;
          property enabled: boolean read myenabled write setenabled;
@@ -338,10 +352,10 @@ end;
 function TDragRepositionUI.initChild(constref _child: ChildControl): ChildControl;
 begin
     Result := _child;
-    myPrevOnStartDrag:= Result.OnStartDrag;
-    myPrevOnDragOver := Result.OnDragOver;
-    myPrevOnDragDrop := Result.OnDragDrop;
-    myPrevOnEndDrag  := Result.OnEndDrag;
+    PrevOnStartDrag:= Result.OnStartDrag;
+    PrevOnDragOver := Result.OnDragOver;
+    PrevOnDragDrop := Result.OnDragDrop;
+    PrevOnEndDrag  := Result.OnEndDrag;
 
     Result.Align := alTop;
 
@@ -447,7 +461,11 @@ function TDragRepositionUI.defaultDragAcceptProc(Sender, Source: TObject; X,
 	Y: Integer; State: TDragState): boolean;
 begin
     //log('Deciding to accept drop');
-    Result := (source  <> sender) and isParent(container, TControl(Sender)) and isParent(container, TControl(Source));
+    Result :=   (source  <> sender)
+                and (source is ChildControl)
+                and isParent(container, TControl(Sender))
+                and isParent(container, TControl(Source))
+                ;
     //case Result of
     //	True:  log('Yes. Please drop');
     //    False: log('Na. Dont drop') ;
@@ -520,6 +538,26 @@ begin
 
 end;
 
+function TDragRepositionUI.getPrevOnDragDrop: TDragDropEvent;
+begin
+    Result := myPrevOnDragDrop;
+end;
+
+function TDragRepositionUI.getPrevOnDragOver: TDragOverEvent;
+begin
+    Result := myPrevOnDragOver;
+end;
+
+function TDragRepositionUI.getPrevOnEndDrag: TEndDragEvent;
+begin
+    Result := myPrevOnEndDrag;
+end;
+
+function TDragRepositionUI.getPrevOnStartDrag: TStartDragEvent;
+begin
+    Result := myPrevOnStartDrag;
+end;
+
 procedure TDragRepositionUI.setanimationSpeed(const _value: NAnimationSpeed);
 begin
 	if myanimationSpeed=_value then Exit;
@@ -574,6 +612,30 @@ begin
 	myform:=_value;
 end;
 
+procedure TDragRepositionUI.setPrevOnDragDrop(const _value: TDragDropEvent);
+begin
+	if myPrevOnDragDrop=_value then Exit;
+	myPrevOnDragDrop:=_value;
+end;
+
+procedure TDragRepositionUI.setPrevOnDragOver(const _value: TDragOverEvent);
+begin
+	if myPrevOnDragOver=_value then Exit;
+	myPrevOnDragOver:=_value;
+end;
+
+procedure TDragRepositionUI.setPrevOnEndDrag(const _value: TEndDragEvent);
+begin
+	if myPrevOnEndDrag=_value then Exit;
+	myPrevOnEndDrag:=_value;
+end;
+
+procedure TDragRepositionUI.setPrevOnStartDrag(const _value: TStartDragEvent);
+begin
+	if myPrevOnStartDrag=_value then Exit;
+	myPrevOnStartDrag:=_value;
+end;
+
 procedure TDragRepositionUI.setShowAnimation(const _value: boolean);
 begin
 	if myShowAnimation=_value then Exit;
@@ -605,10 +667,10 @@ var
     _source: ChildControl;
     h, w, l, t, _dy: Integer;
 begin
-     //log('~~~~~~~~~~~TDragRepositionUI.dragStart~~~~~~~~~~~~~~~');
+     log('~~~~~~~~~~~%s.dragStart~~~~~~~~~~~~~~~', [ClassName]);
     try
         myDragObjectMover.reset;
-	    if assigned(myPrevOnStartDrag) then myPrevOnStartDrag(Sender, DragObject);
+	    if assigned(PrevOnStartDrag) then PrevOnStartDrag(Sender, DragObject);
         if not enabled then exit;
 
         if Sender is ChildControl then begin
@@ -664,10 +726,10 @@ begin
     //log('');
     //log('TDragRepositionUI.dragOver --->>');
     try
-	    if assigned(myPrevOnDragOver) then begin
+	    if assigned(PrevOnDragOver) then begin
             // i:=0;
             //log('%d) TDragRepositionUI.dragOver', [i]);
-            myPrevOnDragOver(Sender, Source, X, Y, State, Accept);
+            PrevOnDragOver(Sender, Source, X, Y, State, Accept);
 		end;
 
 		if not enabled then exit;
@@ -750,11 +812,14 @@ begin
 	        if not Accept then begin
                 i:=6;
 	            Accept := dragAcceptProc(Sender, Source, X, Y, State);
-                //case Accept of
-                //	True:   Log('Drop Accepted');
-                //    False:  Log('Drop Denied');
-                //end;
+                case Accept of
+                	True:   ;
+                    False:  begin
+                        FreeAndNil(myDragState); {Because it won't get a chance to be freed. DragDrop and EndDrag won't be called.}
+					end;
+				end;
 			end;
+
 		end
         else
             ; //Log('Sender = Source');
@@ -771,16 +836,16 @@ end;
 
 procedure TDragRepositionUI.dragDrop(Sender, Source: TObject; X, Y: Integer);
 var
-    _sender, _source: ChildControl;
+    _sender, _source: TControl;
     _sourceParent, _senderParent: TWinControl;
     _idxSender, _idxSource: integer;
     _senderTop, _sourceTop, _okState, i: integer;
 begin
-    //log('TDragRepositionUI.dragDrop');
-    //log('Sender is %s, Sender.parent is %s;; Source is %s and Source.Parent is %s', [Sender.ClassName, TControl(Sender).Parent.ClassName, Source.ClassName, TControl(Source).Parent.ClassName]);
+    log('%s.dragDrop %d', [ClassName, PtrInt(Self)]);
+    log('Sender is %s, Sender.parent is %s;; Source is %s and Source.Parent is %s', [Sender.ClassName, TControl(Sender).Parent.ClassName, Source.ClassName, TControl(Source).Parent.ClassName]);
     try
         //log('.. check 1');
-        if assigned(myPrevOnDragDrop) then myPrevOnDragDrop(Sender, Source, X, Y);
+        if assigned(PrevOnDragDrop) then PrevOnDragDrop(Sender, Source, X, Y);
         //log('.. check 2');
         if not enabled then exit;
         //log('.. check 3');
@@ -792,6 +857,11 @@ begin
 
         _senderParent := TControl(Sender).Parent;
         _sourceParent := TControl(Source).Parent;
+
+
+        // Traverse up the control tree
+        // and check if the drag drop operation
+        // is actually happening on the container
 
         _okState := 0;
         i := 0;
@@ -826,8 +896,8 @@ begin
             inc(_okState);
 
         //Log('.. check 6');
-        if _okState <> 2 then
-            exit;
+        // Are we operating on controls in container?
+        if _okState <> 2 then exit;
 
 	    if source is ChildControl then begin
 	        _source := source as ChildControl;
@@ -841,6 +911,7 @@ begin
     	        _senderParent := _sender.Parent as ParentControl;
 		end;
 
+        // Check that all pointers are assigned
 	    if not (
 	                assigned(_source)
 	                and assigned(_sourceParent)
@@ -850,9 +921,11 @@ begin
 	    then exit;
 
         //log('.. check 7');
-        if _senderParent = _sourceParent then begin
+        if (_senderParent = container) and (_sourceParent = container) then begin
+            log('dropping:.....');
+            log('.... Sender is %s, Sender.parent is %s;; Source is %s and Source.Parent is %s', [_sender.ClassName, _senderParent.ClassName, _source.ClassName, _sourceParent.ClassName]);
             //log ('.... parents are identical');
-	        _idxSource  := _senderParent.GetControlIndex(_source);
+	        _idxSource  := _sourceParent.GetControlIndex(_source);
 	        _idxSender  := _senderParent.GetControlIndex(_sender);
 
 	        //log(' == BEFORE  idxSource %d, idxSender %d', [_idxSource, _idxSender]);
@@ -904,7 +977,7 @@ var
 begin
     //log('~~~~~~~~~~~~~~TDragRepositionUI.dragEnd~~~~~~~~~~~~~~');
     try
-        if assigned(myPrevOnEndDrag) then myPrevOnEndDrag(Sender, Target, X, Y);
+        if assigned(PrevOnEndDrag) then PrevOnEndDrag(Sender, Target, X, Y);
         if not enabled then exit;
         _sender := ChildControl(sender);
         _target := TWinControl(Target);
@@ -1054,7 +1127,7 @@ begin
         //    False: log('TDragRepositionUI.dragHandleOver:: 2) False Sender.Parent is %s and Source.Parent is %s', [TControl(Sender).Parent.ClassName, TControl(Source).Parent.ClassName]);
         //end;
 	end else
-        ; //log('TDragRepositionUI.dragHandleOver:: 02) MISMATCH:: Sender is %s, Sender.parent is %s and Source.Parent is %s', [Sender.ClassName, TControl(Sender).Parent.ClassName, TControl(Source).Parent.ClassName]);
+        //log('TDragRepositionUI.dragHandleOver:: 02) MISMATCH:: Sender is %s, Sender.parent is %s and Source.Parent is %s', [Sender.ClassName, TControl(Sender).Parent.ClassName, TControl(Source).Parent.ClassName]);
 
     //log('----------------------------------------------------------------------------------------------------------');
     //log('');
@@ -1073,7 +1146,10 @@ end;
 procedure TDragRepositionUI.dragHandleEnd(Sender, Target: TObject; X, Y: Integer
 	);
 begin
-    if not assigned(Target) then exit;
+    if not assigned(Target) then begin
+        FreeAndNil(myDragState);
+        exit;
+	end;
 
     if Target is ChildControl then
         dragEnd(TControl(Sender).Parent, Target, X, Y)
@@ -1108,7 +1184,13 @@ end;
 constructor TDragRepositionUI.TLocalDragState.Create;
 begin
     inherited Create;
-    FPOAttachObserver(Application);
+    Log('TLocalDragState Created %d',[ptrInt(Self)]);
+end;
+
+destructor TDragRepositionUI.TLocalDragState.Destroy;
+begin
+    Log('TLocalDragState destroyed %d',[ptrInt(Self)]);
+	inherited Destroy;
 end;
 
 end.
