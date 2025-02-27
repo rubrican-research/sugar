@@ -14,7 +14,7 @@ implementation
 
 procedure Register;
 begin
-    RegisterComponents(__pallette,[TDragHandle]);
+
 end;
 
 end.

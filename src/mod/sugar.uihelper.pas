@@ -215,6 +215,7 @@ type
     function makeProxy (_ctr: TControl): TLabel;
     function makeBitmap(_ctr: TControl): TBitmap;
 
+    function isParent(_container: TControl; _control: TControl): Boolean;
 
 implementation
 uses
@@ -1146,6 +1147,21 @@ begin
       (_ctr as TWinControl).PaintTo(Result.Canvas,0,0)
     else if _ctr is TGraphicControl then begin
         ; //_pnl := TPnl
+	end;
+end;
+
+function isParent(_container: TControl; _control: TControl): Boolean;
+const
+    MAX_ITERATIONS = 30;
+var
+  i : integer = 0;
+begin
+    Result := false;
+    while not Result and (i < MAX_ITERATIONS) do begin
+        if not (assigned(_control) and assigned(_container)) then break;
+        Result   := _container = _control.parent;
+        _control := _control.Parent;
+        inc(i);
 	end;
 end;
 
