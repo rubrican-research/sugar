@@ -13,7 +13,7 @@ procedure processMarkdownFor(constref _jdata: TJSONData);
 
 implementation
 uses
-    MarkdownProcessor, MarkdownUtils;
+    MarkdownProcessor;
 
 function processMarkDown(_source: string): string;
 var
@@ -21,7 +21,7 @@ var
 begin
     try
         mdProcessor:= TMarkdownProcessor.CreateDialect(mdDaringFireball);
-        mdProcessor.UnSafe:= True;
+        mdProcessor.AllowUnsafe:= True;
         Result:= mdProcessor.process(_source);
 	finally
 	    mdProcessor.Free;

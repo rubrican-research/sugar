@@ -118,6 +118,28 @@ function varDef(_name: string; _value: string): string;
 function jsConcat(_str: string; _joinWith: string): string;
 function jsConcat(_str_arr: array of string; _joinWith: string): string;
 
+
+{Readymade JS Functions that you can include}
+function jsPostRequest(_url: string; _body: string; _jsCode: string): string; overload;
+function jsPostRequest(_url: string; _body: TJSONObject; _jsCode: string): string; overload;
+
+type
+
+	{ TFetchJSON }
+
+    TFetchJSON = class(TJSONObject)
+    public
+        method: TRequestMethod;
+        body: string;
+        headers: TJSONObject;
+        constructor sCreate(const _elements: array of const); overload;
+        destructor Destroy; override;
+	end;
+
+function fetchJSObject: TFetchJSON;
+
+
+
 implementation
 uses
     sugar.utils;
@@ -228,6 +250,35 @@ begin
     Result:= jsConcat(getCommaSeparatedString(sa), _joinWith);
 end;
 
+const
+	JSPOST_REQ = CONCAT(
+	'fetch("%0:s", {',
+	'       method: "POST",',
+	'       body:   %1:s,',
+	'       headers: {',
+	'           "Content-type": "application/json; charset=UTF-8"',
+	'           }',
+	'       })',
+	'.then(response => response.json()) ',
+	'.then((json)=>{%02:s});');
+
+function jsPostRequest(_url: string; _body: string; _jsCode: string): string;
+begin
+    Result := Format(JSPOST_REQ,[_url, _body, _jsCode ]);
+end;
+
+function jsPostRequest(_url: string; _body: TJSONObject; _jsCode: string
+	): string;
+
+begin
+	Result := Format(JSPOST_REQ,[_url, concat('''',_body.FormatJSON(), ''''), _jsCode ]);
+end;
+
+function fetchJSObject: TFetchJSON;
+begin
+    Result := TFetchJSON.Create;
+end;
+
 { JSPrimitiveDataTypesHelper }
 
 function JSPrimitiveDataTypesHelper.asString: string;
@@ -278,6 +329,21 @@ end;
 function TJSFetch.code: string;
 begin
     Result:='TJSFetch.code is not implemented';
+end;
+
+{ TFetchJSON }
+
+constructor TFetchJSON.sCreate(const _elements: array of const);
+begin
+    inherited Create(_elements);
+    headers := TJSONObject.Create([]);
+
+end;
+
+destructor TFetchJSON.Destroy;
+begin
+    headers.Free;
+	inherited Destroy;
 end;
 
 { TJSPromise }

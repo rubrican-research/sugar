@@ -81,7 +81,7 @@ type
 implementation
 
 uses
-    sugar.htmlbuilder, sugar.utils, sugar.textfiler;
+    sugar.htmlbuilder, sugar.utils, sugar.textfiler, LazUTF8;
 
 { THtmlTemplater }
 
@@ -199,7 +199,7 @@ var
 begin
     Result := false;
     {No template defined so don't parse}
-    _len := Length(myTemplate);
+    _len := UTF8Length(myTemplate);
     if _len = 0 then exit;
 
     {start parsing}
@@ -211,10 +211,10 @@ begin
 
     {Field 1}
     repeat
-        _prefixPos := PosEx(myprefix, _template, _start);
+        _prefixPos := UTF8Pos(myprefix, _template, _start);
         if _prefixPos > 0 then
         begin
-            _postfixPos := PosEx(mypostfix, _template, _prefixPos + myprefixLen);
+            _postfixPos := UTF8Pos(mypostfix, _template, _prefixPos + myprefixLen);
             if _postfixPos < 1 then
             begin
                 {don't look for fields}
@@ -235,7 +235,8 @@ begin
 
         {push the document strand}
         _strandlen := _prefixPos - _start;
-        _strand := Copy(_template, _start, _strandlen);
+        _strand := UTF8Copy(_template, _start, _strandlen);
+
         if not _strand.isEmpty then
         begin
             _tmpStringObj := TStringObject.Create;
@@ -247,7 +248,7 @@ begin
         {push the Field}
         if _fieldlen > 0 then
         begin
-            _extractedField := Copy(_template, _prefixPos, _fieldlen);
+            _extractedField := UTF8Copy(_template, _prefixPos, _fieldlen);
 
             if not myFields.exists(_extractedField) then
                 myFields.put(_extractedField, _extractedField);
@@ -270,7 +271,7 @@ begin
     if myReplacedText = '' then
     begin
 	    for i := 0 to myDoc.Count - 1 do
-	        myReplacedText := Concat(myReplacedText, TStringObject(myDoc.Items[i]).Value);
+	        myReplacedText := myReplacedText + TStringObject(myDoc.Items[i]).Value;
 	end;
     Result := myReplacedText;
 end;

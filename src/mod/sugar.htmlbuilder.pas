@@ -497,12 +497,15 @@ type
     THtmlStyleList = class(THtmlStyleListBase)
 	private
 		myfilePath: string;
+		myindent: string;
 		mywebPath: string;
 		mydocumentName: string;
 		procedure setfilePath(const _filePath: string);
+		procedure Setindent(const _value: string);
 		procedure setwebPath(const _webPath: string);
 		procedure setdocumentName(const _documentName: string);
 	public
+        property indent: string read myindent write Setindent;
         property filePath: string read myfilePath write setfilePath;
         property webPath: string read mywebPath write setwebPath;
         property documentName: string read mydocumentName write setdocumentName;
@@ -574,6 +577,7 @@ type
         myCurrentSelector: string;
         {combinators for the current selector}
         myAdjacent: string;
+		myindent: string;
         mySibling: string;
         myChild: string;
         myDecendent: string;
@@ -598,10 +602,12 @@ type
 		function getFilePath: string;
 		procedure setFilePath(const _filePath: string); virtual;
 		function getWebPath: string;
+		procedure Setindent(const _value: string);
 		procedure setWebPath(const _webPath: string); virtual;
 		procedure setisCached(const _isCached: boolean);
 
     public
+        property indent: string read myindent write Setindent;
         property filePath: string read getFilePath write setFilePath;
         property webPath: string read getWebPath write setWebPath;
         property documentName: string read mydocumentName write setDocumentName;
@@ -786,6 +792,7 @@ type
         function extractStyleText(_css_snippet: string): string; virtual;
         function formatCSSInternal(_styleText: string): string; virtual;
     public
+        indent : string;
         constructor Create;
         destructor Destroy; override;
         function getStyleText: string; virtual;
@@ -1625,6 +1632,9 @@ type
     THtmlSummary = class;
     THtmlTemplate = class;
     THtmlFragment = class;
+    THtmlImg = class;
+    THtmlImageBase64 = class;
+
 
     { THtmlCollection }
     {TODO: Rewrite this class to use GenericHashObjectList}
@@ -1684,6 +1694,8 @@ type
         function emphasis(_text: string): TEmphasis;
 
         { TODO : img tag }
+        function img(src: string): THtmlImg;
+        function imgBase64(_file: string): THtmlImageBase64;
         { TODO : video tag, audio tag }
         { TODO : file uploads }
 
@@ -2610,9 +2622,9 @@ type
         property alt: string read getAlt write setAlt;
     end;
 
-	{ THtmlEmbeddedImg }
+	{ THtmlImageBase64 }
 
-    THtmlEmbeddedImg = class(THtmlImg)
+    THtmlImageBase64 = class(THtmlImg)
     private
         mySourceFile: string;
         function getSrc: string; override;
@@ -2671,6 +2683,9 @@ function el(_tag: string): THtmlElement;
 function el(_tag: string; _elClass: THtmlElementClass): THtmlElement;
 
 function NewHtmlBuilderObject(_source: TObject): TObject;
+
+function imgAsBase64(_filePath: string): string;
+function imgEmbedding(_mime: string; _base64: string): string;
 
 const
     {HTML Entities }
@@ -2772,6 +2787,19 @@ begin
             raise Exception.Create('NewHtmlBuilderObject: does not create ' +
                 _source.ClassName);
     end;
+end;
+
+function imgAsBase64(_filePath: string): string;
+begin
+    Result:= '';
+    if fileExists(_filePath) then
+        //Result := Format('data:%s;%s,%s',[getMimeTypeFor(_filePath), 'base64', FileToBase64(_filePath)])
+        Result := imgEmbedding(getMimeTypeFor(_filePath), FileToBase64(_filePath));
+end;
+
+function imgEmbedding(_mime: string; _base64: string): string;
+begin
+    Result := Format('data:%s;%s,%s',[_mime, 'base64', _base64]);
 end;
 
 { TCSSRules }
@@ -2935,8 +2963,20 @@ begin
 end;
 
 function TCSSStyleBase.formatCSSInternal(_styleText: string): string;
+var
+	_formatedStyle, _s: String;
 begin
-    Result := Format('%s {%s%s}', [mySelector, sLineBreak, _styleText]);
+    _formatedStyle := '';
+    for _s in _styleText.split(sLineBreak) do begin
+        if _s.IsEmpty then continue;
+        if not _formatedStyle.isEmpty then
+            _formatedStyle := _formatedStyle + sLineBreak;
+        _formatedStyle := _formatedStyle + indent + DEFAULT_INDENT + _s;
+	end;
+    Result := Format('%0:s {%1:s%2:s%3:s}', [indent + mySelector,   {0}
+                                             sLineBreak,            {1}
+                                             _formatedStyle,        {2}
+                                             sLineBreak + indent]); {3}
 end;
 
 constructor TCSSStyleBase.Create;
@@ -2968,20 +3008,20 @@ begin
     Result:= Format('@%s {' + sLineBreak + '%s}'   + sLineBreak, [Name,  myRule.getStyleText]);
 end;
 
-{ THtmlEmbeddedImg }
+{ THtmlImageBase64 }
 
-function THtmlEmbeddedImg.getSrc: string;
+function THtmlImageBase64.getSrc: string;
 begin
     result:= mySourceFile;
 end;
 
-procedure THtmlEmbeddedImg.setSrc(const _src: string);
+procedure THtmlImageBase64.setSrc(const _src: string);
 begin
     mySourceFile := _src;
-    if FileExists(_src) then
-        inherited setSrc(Format('data:%s;%s,%s',[getMimeTypeFor(_src), 'base64', FileToBase64(_src)]))
+    if FileExists(mySourceFile) then
+        inherited setSrc(imgAsBase64(mySourceFile))
     else
-        inherited setSrc('File not found: '+ _src);
+        inherited setSrc('File not found: '+ mySourceFile);
 end;
 
 { THTMLStyleElement }
@@ -3907,6 +3947,12 @@ begin
         Items[i].filePath:= myFilePath;
 end;
 
+procedure THtmlStyleList.Setindent(const _value: string);
+begin
+	if myindent=_value then Exit;
+	myindent:=_value;
+end;
+
 procedure THtmlStyleList.setwebPath(const _webPath: string);
 var
 	i: Integer;
@@ -3953,6 +3999,7 @@ begin
     for i := 0 to Count - 1 do
     begin
         _style := Items[i];
+        _style.indent := indent + DEFAULT_INDENT;
         Result := Result + _style.cssInternal + sLineBreak;
     end;
 end;
@@ -4221,6 +4268,9 @@ begin
 
     if Result.filePath <> filePath then
         Result.filePath:= filePath;
+
+    if Result.indent.isEmpty then
+        Result.indent := indent;
 end;
 
 procedure THtmlStyleSelector.onCreateStyleObject(_style: TObject);
@@ -4250,6 +4300,13 @@ end;
 function THtmlStyleSelector.getWebPath: string;
 begin
     Result:= myWebPath;
+end;
+
+procedure THtmlStyleSelector.Setindent(const _value: string);
+begin
+	if myindent=_value then Exit;
+	myindent:=_value;
+    myStyles.indent := _value;
 end;
 
 procedure THtmlStyleSelector.setFilePath(const _filePath: string);
@@ -8880,7 +8937,7 @@ begin
 
     {define the styles and the scripts in these }
     myScripts := TJavaScripts.Create;
-    myStyles := THtmlStyleSheet.Create;
+    myStyles  := THtmlStyleSheet.Create;
 
     tag := 'html';
     Name:='document'; {default name}
@@ -9005,13 +9062,10 @@ function THtmlDoc.render(_indent: string): string;
 var
     _styleTag, _script: THtmlElement;
 begin
-
     indent := _indent;
-
  // First put the header
     Result := HTML_DOC_HEADER + sLineBreak;
     try
-
         {Create a default element for style}
         _styleTag := FHtmlHead.get(PAGE_STYLE_ID);
         if not assigned(_styleTag) then
@@ -9019,7 +9073,8 @@ begin
             _styleTag:= FHtmlHead.add(THtmlStyleElement.Create);
             _styleTag.setID(PAGE_STYLE_ID);
 		end;
-        _styleTag.Text := myStyles.styledef ;
+        myStyles.indent := _styleTag.indent + DEFAULT_INDENT;
+        _styleTag.Text  := myStyles.styledef ;
 
     except
         on e:exception do
@@ -9710,6 +9765,21 @@ function THtmlCollection.emphasis(_text: string): TEmphasis;
 begin
     Result:= TEmphasis(add(TEmphasis.Create));
     Result.Text:= _text;
+end;
+
+function THtmlCollection.img(src: string): THtmlImg;
+begin
+    Result:= THtmlImg.Create;
+    Add(Result);
+    Result.src:=src;
+end;
+
+function THtmlCollection.imgBase64(_file: string): THtmlImageBase64;
+begin
+    Result:= THtmlImageBase64.Create;
+    Add(Result);
+    Result.src:=_file
+
 end;
 
 function THtmlCollection.template: THtmlTemplate;

@@ -20,7 +20,7 @@ uses
     sugar.jscharts, sugar.htmlpage, assets, bulma, semanticui, webui, 
     sugar.fmkvdisplay, sugar.markdownhelper, sugar.tagUI, sugar.toast, 
     sugar.uistyles, sugar.animateui, sugar.dragui, sugar.register, 
-    sugar.repositionui, LazarusPackageIntf;
+    sugar.repositionui, git.api, LazarusPackageIntf;
 
 implementation
 

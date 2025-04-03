@@ -28,6 +28,7 @@ function sanitizeFileName(_varName: string; _extension: string = '.txt'): string
 
 function getFileContent(const _filename: string; _touch: boolean = false): string;
 function saveFileContent(const _filename: string; _content: string): integer;
+procedure touch(const _fileName: string); // Creates an empty file
 
 {returns the mime type for this file}
 function getMimeTypeFor(_fileName: string): string;
@@ -244,17 +245,27 @@ function appendPath(_paths: array of string; _delim: string): string;
 var
     _i, _count: integer;
     _tmpPath: string;
+
+    function otherSeparator: string;
+    begin
+        case _delim of
+            '/': Result := '\';
+            '\': Result := '/';
+		end;
+	end;
+
 begin
     Result := '';
     _count := Length(_paths);
+
     for _i := 0 to pred(_count) do
     begin
-
-
-        if (Result.Length > 0) and Result.EndsWith(_delim) then
+        if (Result.Length > 0) and Result.EndsWith('/') or Result.EndsWith('\') then
             Result := Result.Remove(Result.Length - 1, 1);
 
         _tmpPath := _paths[_i];
+        _tmpPath := _tmpPath.Replace(otherSeparator, _delim);
+
         if not _tmpPath.isEmpty then
         begin
 	        if _i =  0 then
@@ -263,8 +274,10 @@ begin
                 Check for drive letter in case of windows.
                 Don't append the directory separator}
 			end
-            else if (not _tmpPath.StartsWith(_delim)) then
+            else begin
+                if not (_tmpPath.StartsWith(_delim)) then
                 _tmpPath := _delim + _tmpPath;
+			end;
 
             Result := Result + _tmpPath;
 	    end;
@@ -337,6 +350,11 @@ begin
     {$ELSE}
     TThreadFileWriter.put(_filename, _content);
     {$ENDIF}
+end;
+
+procedure touch(const _fileName: string);
+begin
+    getFileContent(_fileName, true);
 end;
 
 function getMimeTypeFor(_fileName: string): string;
@@ -516,7 +534,7 @@ begin
     Result := nil;
     if not _text.isEmpty then
     begin
-        Result := StrAlloc(_text.Length + 1);
+        Result := StrAlloc(Succ(_text.Length));
         StrPCopy(Result, _text);
     end;
 end;
@@ -1365,7 +1383,6 @@ var
     begin
         Result := faDirectory = (_finfo.Attr and faDirectory);
     end;
-
 begin
     Result := TStringList.Create;
     if _recursive then
@@ -1375,7 +1392,7 @@ begin
             repeat
 
                 case FInfo.Name of
-                    '.', '..': continue;
+                    '.', '..': continue; // ignore folders
 				end;
 
 				_path := _dir + {\}DirectorySeparator + FInfo.Name;

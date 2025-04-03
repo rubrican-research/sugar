@@ -214,13 +214,17 @@
         <Filename Value="mod\sugar.repositionui.pas"/>
         <UnitName Value="sugar.repositionui"/>
       </Item>
+      <Item>
+        <Filename Value="mod\git.api.pas"/>
+        <UnitName Value="git.api"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
-        <PackageName Value="rhl_package"/>
+        <PackageName Value="MarkdownEngine"/>
       </Item>
       <Item>
-        <PackageName Value="fpc_markdown"/>
+        <PackageName Value="rhl_package"/>
       </Item>
       <Item>
         <PackageName Value="LCLBase"/>
