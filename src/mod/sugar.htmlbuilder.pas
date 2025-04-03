@@ -1989,7 +1989,8 @@ type
         constructor Create; override;
         {PAGE HEADER DESCRIPTIONS}
         function base(_baseURL: string): THtmlHead;
-        function charset(_charset: string = 'utf-8'): THtmlHead;
+        function charset(_charset: string = 'utf-8'): THtmlHead; overload;
+        function charsetShort(_charset: string = 'utf-8'): THtmlHead; overload;
         function title(_title: string): THtmlHead;
         function author(_author: string): THtmlHead;
         function description(_descr: string): THtmlHead;
@@ -1998,7 +1999,8 @@ type
         function stylesheet(_css_source: string): THtmlStyleSheetLink; // with href
         function style(_text: string): THtmlHead; //embed the setClass text
         function font(_fontsource: string): THtmlHead;
-        function meta(_name: string = ''; _content: string = ''): THTMLMetaTag;
+        function meta(_name: string; _content: string = ''): THTMLMetaTag; overload;
+        function meta: THTMLMetaTag; overload;
         {OTHERS}
         function pre(_code: string): THtmlHead; reintroduce; // put in blank pre
         function favicon(_favicon_uri: string): THtmlHead;
@@ -9195,14 +9197,20 @@ begin
     inherited Create;
     suppressID:= true;
     tag := 'head';
-    charset('utf-8');
+    charsetShort('utf-8');
+    viewPort.content:='width=device-width, initial-scale=1';
 end;
 
 function THtmlHead.meta(_name: string; _content: string): THTMLMetaTag;
 begin
-    Result := THtmlMetaTag(add(THtmlMetaTag.Create));
-    Result.TagName := _name;
+    Result := meta();
+    Result.tagName := _name;
     Result.content := _content;
+end;
+
+function THtmlHead.meta: THTMLMetaTag;
+begin
+    Result := THtmlMetaTag(add(THtmlMetaTag.Create));
 end;
 
 function THtmlHead.title(_title: string): THtmlHead;
@@ -9309,9 +9317,21 @@ end;
 
 function THtmlHead.charset(_charset: string): THtmlHead;
 begin
+    {<meta http-equiv="content-type" content="text/html; charset=utf-8">}
     Result := Self;
-    meta('charset',_charset);
-    //add(THtmlMetaTag.Create).setAttr('charset', _charset);
+    with meta() do begin
+        http_equiv:= 'content-type';
+        content := format('text/html; charset=%s',[_charset])
+	end;
+end;
+
+function THtmlHead.charsetShort(_charset: string): THtmlHead;
+begin
+    {<meta charset="utf-8">}
+    Result := Self;
+    with meta() do begin
+        setAttr('charset', _charset);
+	end;
 end;
 
 { TParagraph }
@@ -9899,7 +9919,8 @@ end;
 
 function THtmlElement.getCharSet: string;
 begin
-    Result := FAttributes.Values['charset'];
+    //Result := FAttributes.Values['charset'];
+    Result := getAttr('charset');
 end;
 
 function THtmlElement.getID: string;
@@ -9909,7 +9930,8 @@ end;
 
 procedure THtmlElement.setFCharSet(AValue: string);
 begin
-    FAttributes.Values['charset'] := AValue;
+    //FAttributes.Values['charset'] := AValue;
+    setAttr('charset', AValue);
 end;
 
 procedure THtmlElement.setFCSSClass(AValue: string);
