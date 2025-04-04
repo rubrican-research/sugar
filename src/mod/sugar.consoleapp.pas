@@ -14,9 +14,9 @@ type
 
     RbConsoleApplication = class(TObject)
     protected
-        myLoop: boolean;
+        myRunning: boolean;
     public
-        function doLoop(): boolean;
+        function isRunning(): boolean;
         procedure preRun; virtual; {prep for launch}
         procedure Run; virtual;
         procedure postRun; virtual; {wrap up}
@@ -46,14 +46,14 @@ begin
 end;
 
 { RbConsoleApplication : COMMON}
-function RbConsoleApplication.doLoop(): boolean;
+function RbConsoleApplication.isRunning(): boolean;
 begin
-    Result:= myLoop;
+    Result:= myRunning;
 end;
 
 function RbConsoleApplication.start: integer;
 begin
-    myLoop:= true;
+    myRunning:= true;
     Result:= 1;
     try
         preRun;
@@ -77,10 +77,10 @@ procedure RbConsoleApplication.Run;
 var
     c: string[64];
 begin
-    while doLoop() do begin
+    while isRunning() do begin
         readLn(c);
         case lowercase(c) of
-            'quit': myLoop:=false;
+            'quit': myRunning:=false;
 		end;
 	end;
 end;
