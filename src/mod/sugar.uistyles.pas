@@ -11,7 +11,8 @@ type
 	{ TUIStyle }
 
     TUIStyle = class
-        name  : string;
+        name  : string;  // name of the style
+        comment: string; // for inline documentation
         align : TAlign;
         alignment: TAlignment;
         autoSize: boolean;

@@ -9612,7 +9612,8 @@ end;
 function THtmlCollection.script(t: string): THtmlScript;
 begin
     Result := THTMLScript(add(THTMLScript.Create));
-    Result.Text := t.Replace(sLineBreak, '');
+    Result.Text := t;
+    // Result.Text := t.Replace(sLineBreak, '');
 end;
 
 function THtmlCollection.scriptCDN(_source: string): THtmlScript;

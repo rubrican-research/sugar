@@ -218,6 +218,14 @@
         <Filename Value="mod\git.api.pas"/>
         <UnitName Value="git.api"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.htmlbuilder.truthtable.pas"/>
+        <UnitName Value="sugar.htmlbuilder.truthtable"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.url.pas"/>
+        <UnitName Value="sugar.url"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

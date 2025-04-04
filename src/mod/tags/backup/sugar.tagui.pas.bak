@@ -12,6 +12,8 @@ const
 
 type
 
+
+
 	{ TTagControl }
 
     TTagControl = class(TPanel)

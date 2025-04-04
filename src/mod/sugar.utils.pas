@@ -69,6 +69,7 @@ function genSalt(_size: word = 18; _strength: word = 4): ansistring;
 
 {raise an exception}
 procedure trip(const _msg: string);
+procedure DoNothing; inline;
 
 {Base64 encoding functions}
 {Returns the content of a file as Base64 encoded string}
@@ -223,6 +224,11 @@ function findIndex(const _search: TStringArray; constref _source: TStrings): TAr
 function GetFileVersion(const aExeFile: String): String;
 
 function loremIpsum(_len: shortint = 0): string;
+
+function samestring(s1, s2: string): boolean;
+function yesno(const _val: boolean): string;
+function truefalse(const _val: boolean): string;
+function sanitzeFileName(_varName: string; _extension: string): string;
 
 
 implementation
@@ -625,6 +631,11 @@ end;
 procedure trip(const _msg: string);
 begin
     raise Exception.Create(_msg);
+end;
+
+procedure DoNothing;
+begin
+  ; {Really. Do nothing.}
 end;
 
 
@@ -1567,6 +1578,66 @@ begin
         Result := Copy(S, 0, _len);
 end;
 
+
+function samestring(s1, s2: string): boolean;
+var
+    i: integer;
+begin
+    s1 := s1.Replace(sLineBreak, '');
+    s2 := s2.Replace(sLineBreak, '');
+    Result := s1.Length = s1.Length;
+    if Result then
+    begin
+        for i := 1 to s1.Length do
+        begin
+            Result := s1[i] = s2[i];
+            if not Result then
+                break;
+        end;
+    end;
+end;
+
+function yesno(const _val: boolean): string;
+begin
+    case _val of
+        True: Result := 'Yes';
+        False: Result := 'No';
+    end;
+end;
+
+function truefalse(const _val: boolean): string;
+begin
+    case _val of
+        True: Result := 'True';
+        False: Result := 'False';
+    end;
+end;
+
+function sanitzeFileName(_varName: string; _extension: string): string;
+var
+    i: integer;
+begin
+    Result := '';
+    {Replace invalid characters in one pass}
+    for i := 1 to _varName.Length do
+    begin
+        case _varName[i] of
+            ' ', ':', '.',
+            DirectorySeparator: Result := Result + '-';
+            else
+                Result := Result + _varName[i];
+        end;
+    end;
+
+    if _extension.IsEmpty then
+        exit;
+
+    {else}
+    if not _extension.StartsWith('.') then
+        Result := Result + '.';
+
+    Result := Result + _extension;
+end;
 
 
 initialization
