@@ -626,7 +626,6 @@ begin
         _colNo := 0;
         inc(_rowNo);
 	end;
-
 	Result:= _tbl;
 end;
 
@@ -639,6 +638,7 @@ var
   _msgClass: string = '';
 begin
     Result := _form;
+    if _message.isEmpty then exit;
     case _msgType of
         msgInfo:    _msgClass := 'info';
         msgWarning: _msgClass := 'warning';

@@ -638,6 +638,8 @@ var
   _msgClass: string = '';
 begin
     Result := _form;
+    if _message.isEmpty then exit;
+
     case _msgType of
         msgInfo:    _msgClass := 'info';
         msgWarning: _msgClass := 'warning';
