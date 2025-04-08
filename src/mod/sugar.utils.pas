@@ -239,7 +239,7 @@ uses
      , machoreader {needed for reading MACH-O executables}
      , fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
-     math, base64, LazStringUtils, DateUtils, sugar.logger, LazUTF8;
+     math, base64, LazStringUtils, DateUtils, sugar.logger, sugar.threadwriter, LazUTF8;
 
 	{nsort, MarkdownUtils,}
 
