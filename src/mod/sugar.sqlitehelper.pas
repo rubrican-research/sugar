@@ -711,7 +711,7 @@ begin
     {$ELSEIFDEF UNIX}
     Result := ExpandFileName('sqlite3.so');
     if not fileExists(Result) then
-        Result :=
+        Result := 'sqlite3.so';
     {$ELSEIFDEF DARWIN}
 
     {$ENDIF}

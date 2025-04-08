@@ -34,7 +34,7 @@ uses
     {$IFDEF UNIX}
     BaseUnix,
     {$ENDIF}
-    sugar.utils, fpmimetypes;
+    sugar.utils, sugar.logger,  fpmimetypes;
 var
     myApplication: RbConsoleApplication = nil;
 
@@ -108,14 +108,14 @@ procedure DoSig(sig: cint); cdecl;
 begin
     myExitCode:= 0;
     case sig of
-        SIGTERM: rbutils.Log('Shutdown Request -->');
-        SIGINT:  rbutils.Log('Signal: Ctrl+C');
-        SIGQUIT: rbutils.Log('Signal: Quit');
-        SIGKILL: rbutils.Log('Signal: KILL');
-        SIGABRT: rbutils.Log('Signal: Abort');
+        SIGTERM: Log('Shutdown Request -->');
+        SIGINT:  Log('Signal: Ctrl+C');
+        SIGQUIT: Log('Signal: Quit');
+        SIGKILL: Log('Signal: KILL');
+        SIGABRT: Log('Signal: Abort');
         SIGUSR1:
         begin
-          rbutils.Log('Signal to Restart');
+          Log('Signal to Restart');
           myExitCode := 11;
           ExitCode   := 11;
 		end;
