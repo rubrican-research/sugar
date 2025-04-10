@@ -226,16 +226,20 @@
         <Filename Value="mod\sugar.url.pas"/>
         <UnitName Value="sugar.url"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.inifiles.pas"/>
+        <UnitName Value="sugar.inifiles"/>
+      </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
       <Item>
         <PackageName Value="MarkdownEngine"/>
       </Item>
       <Item>
         <PackageName Value="rhl_package"/>
-      </Item>
-      <Item>
-        <PackageName Value="LCLBase"/>
       </Item>
       <Item>
         <PackageName Value="FCL"/>

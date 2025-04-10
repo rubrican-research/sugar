@@ -165,6 +165,7 @@ function hasDataChanged(_prev: real; _current: real; _tolerancePercentage: real 
 
 function number(_s: string): integer;
 function float(_s: string): extended;
+function decimalFloat(_value: extended; _format: string = '###0.0##'): string; // always returns the float with a "." as the decimal separator
 
 {initializes variables}
 function initStr(const _val: string; _default: string): string;
@@ -410,7 +411,7 @@ begin
             '''', '(', ')', '*', '+', ',', '/',
             '-', '.', '<', '>', '\', '^', '_', '`',
             '{', '|', '}', '~', ';', '=', '?',
-            '@', '[', ']':
+            '[', ']':
                 Result := '%' + Ord(_url[i]).ToHexString(2) + Result;
             #13: ; // Result := '%0A'+ Result;
             #10: Result := '%0A'+ Result;
@@ -1286,6 +1287,15 @@ begin
         Result:= 0;
 	end;
 
+end;
+
+function decimalFloat(_value: extended; _format: string): string;
+var
+    _formatSettings: TFormatSettings;
+begin
+    _formatSettings := FormatSettings;
+    _formatSettings.DecimalSeparator:='.';
+    Result := FormatFloat(_format, _value, _formatSettings);
 end;
 
 function initStr(const _val: string; _default: string): string;

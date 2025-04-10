@@ -2738,53 +2738,60 @@ begin
     Result := nil;
     case _source.ClassName of
         {htmlbuilder classes}
-        'TJavaScript': Result := TJavaScript.Create;
-        'TJavaScripts': Result := TJavaScripts.Create;
-        'THtmlStyleList': Result := THtmlStyleList.Create;
+        'TJavaScript'       : Result := TJavaScript.Create;
+        'TJavaScripts'      : Result := TJavaScripts.Create;
+        'THtmlStyleList'    : Result := THtmlStyleList.Create;
         'THtmlStyleSelector': Result := THtmlStyleSelector.Create;
-        'THtmlStyleSheet': Result := THtmlStyleSheet.Create;
-        'THtmlStyle': Result := THtmlStyle.Create;
-        'THTMLElementBase': Result := THTMLElementBase.Create;
-        'THtmlElement': Result := THtmlElement.Create;
-        'THeading': Result := THeading.Create;
-        'THeading1': Result := THeading1.Create;
-        'THeading2': Result := THeading2.Create;
-        'THeading3': Result := THeading3.Create;
-        'THeading4': Result := THeading4.Create;
-        'THeading5': Result := THeading5.Create;
-        'THeading6': Result := THeading6.Create;
-        'THeading7': Result := THeading7.Create;
-        'TParagraph': Result := TParagraph.Create;
-        'THtmlDiv': Result := THtmlDiv.Create;
-        'THtmlSection': Result := THtmlSection.Create;
-        'THtmlTable': Result := THtmlTable.Create;
+        'THtmlStyleSheet'   : Result := THtmlStyleSheet.Create;
+        'THtmlStyle'        : Result := THtmlStyle.Create;
+        'THTMLElementBase'  : Result := THTMLElementBase.Create;
+        'THtmlElement'      : Result := THtmlElement.Create;
+        'THeading'          : Result := THeading.Create;
+        'THeading1'         : Result := THeading1.Create;
+        'THeading2'         : Result := THeading2.Create;
+        'THeading3'         : Result := THeading3.Create;
+        'THeading4'         : Result := THeading4.Create;
+        'THeading5'         : Result := THeading5.Create;
+        'THeading6'         : Result := THeading6.Create;
+        'THeading7'         : Result := THeading7.Create;
+        'TParagraph'        : Result := TParagraph.Create;
+        'THtmlDiv'          : Result := THtmlDiv.Create;
+        'THtmlSection'      : Result := THtmlSection.Create;
+        'THtmlTable'        : Result := THtmlTable.Create;
         'THtmlUnorderedList': Result := THtmlUnorderedList.Create;
-        'THtmlOrderedList': Result := THtmlOrderedList.Create;
-        'THtmlScript': Result := THtmlScript.Create;
-        'THTMLMetaTag': Result := THTMLMetaTag.Create;
-        'THtmlViewPort': Result := THtmlViewPort.Create;
-        'THtmlForm': Result := THtmlForm.Create;
-        'THtmlInput': Result := THtmlInput.Create;
-        'THtmlLabel': Result := THtmlLabel.Create;
-        'THtmlLink': Result := THtmlLink.Create;
-        'THtmlAnchor': Result := THtmlAnchor.Create;
-        'THtmlNavbar': Result := THtmlNavbar.Create;
-        'THtmlMenu': Result := THtmlMenu.Create;
-        'THtmlAlert': Result := THtmlAlert.Create;
-        'THtmlButton': Result := THtmlButton.Create;
-        'THtmlEditBox': Result := THtmlEditBox.Create;
-        'THtmlFieldSet': Result := THtmlFieldSet.Create;
-        'THtmlLegend': Result := THtmlLegend.Create;
-        'THtmlCheckBox': Result := THtmlCheckBox.Create;
-        'THtmlRadioButton': Result := THtmlRadioButton.Create;
-        'THtmlTextArea': Result := THtmlTextArea.Create;
-        'THtmlSelect': Result := THtmlSelect.Create;
-        'THtmlTagless': Result := THtmlTagless.Create;
-        'THtmlHead': Result := THtmlHead.Create;
-        'THtmlBody': Result := THtmlBody.Create;
+        'THtmlOrderedList'  : Result := THtmlOrderedList.Create;
+        'THtmlScript'       : Result := THtmlScript.Create;
+        'THTMLMetaTag'      : Result := THTMLMetaTag.Create;
+        'THtmlViewPort'     : Result := THtmlViewPort.Create;
+        'THtmlForm'         : Result := THtmlForm.Create;
+        'THtmlInput'        : Result := THtmlInput.Create;
+        'THtmlLabel'        : Result := THtmlLabel.Create;
+        'THtmlLink'         : Result := THtmlLink.Create;
+        'THtmlAnchor'       : Result := THtmlAnchor.Create;
+        'THtmlNavbar'       : Result := THtmlNavbar.Create;
+        'THtmlMenu'         : Result := THtmlMenu.Create;
+        'THtmlAlert'        : Result := THtmlAlert.Create;
+        'THtmlButton'       : Result := THtmlButton.Create;
+        'THtmlEditBox'      : Result := THtmlEditBox.Create;
+        'THtmlFieldSet'     : Result := THtmlFieldSet.Create;
+        'THtmlLegend'       : Result := THtmlLegend.Create;
+        'THtmlCheckBox'     : Result := THtmlCheckBox.Create;
+        'THtmlRadioButton'  : Result := THtmlRadioButton.Create;
+        'THtmlTextArea'     : Result := THtmlTextArea.Create;
+        'THtmlSelect'       : Result := THtmlSelect.Create;
+        'THtmlTagless'      : Result := THtmlTagless.Create;
+        'THtmlHead'         : Result := THtmlHead.Create;
+        'THtmlBody'         : Result := THtmlBody.Create;
         'THtmlStyleSheetLink': Result := THtmlStyleSheetLink.Create;
-        'THtmlCollection': Result := THtmlCollection.Create;
-        'THtmlITag': Result := THtmlInterestingText.Create;
+        'THtmlCollection'   : Result := THtmlCollection.Create;
+        'THtmlITag'         : Result := THtmlInterestingText.Create;
+        'THtmlDialog'       : Result := THtmlDialog.Create;
+        'THtmlDetails'      : Result := THtmlDetails.Create;
+        'THtmlSummary'      : Result := THtmlSummary.Create;
+        'THtmlTemplate'     : Result := THtmlTemplate.Create;
+        'THtmlFragment'     : Result := THtmlFragment.Create;
+        'THtmlImg'          : Result := THtmlImg.Create;
+        'THtmlImageBase64'  : Result := THtmlImageBase64.Create;
         else
             raise Exception.Create('NewHtmlBuilderObject: does not create ' +
                 _source.ClassName);
@@ -7669,7 +7676,10 @@ var
     _content: string;
     swidth: string;
     sUserScalable: string;
+    _formatSettings: TFormatSettings;
 begin
+    _formatSettings := FormatSettings;
+    _formatSettings.DecimalSeparator:='.';
     {<meta setName="viewport"
       content="width=device-width,
                 initial-scale=1.0,
@@ -7696,7 +7706,7 @@ begin
         [sWidth, myInitialScale, sUserScalable]);}
 
     {minimum definition}
-    _content := Format('width=%s, initial-scale=%.1f', [sWidth, myInitialScale]);
+    _content := Format('width=%s, initial-scale=%s', [sWidth, FormatFloat('0.0', myInitialScale, _formatSettings)]);
 
     self.tagName := 'viewport';
     self.content := _content;
