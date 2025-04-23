@@ -230,6 +230,22 @@
         <Filename Value="mod\sugar.inifiles.pas"/>
         <UnitName Value="sugar.inifiles"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.contactinfo.pas"/>
+        <UnitName Value="sugar.contactInfo"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.gender.pas"/>
+        <UnitName Value="sugar.gender"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.languages.pas"/>
+        <UnitName Value="sugar.languages"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.maps.pas"/>
+        <UnitName Value="sugar.maps"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

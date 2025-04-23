@@ -8,7 +8,7 @@ uses
     Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, StdCtrls, fgl;
 
 const
-    __around = 7;
+    BORDER_SPACING_AROUND = 7;
 
 type
 
@@ -132,7 +132,7 @@ begin
     with tagLabel do begin
         Align  := alClient;
         layout := tlCenter;
-        BorderSpacing.Around := __around;
+        BorderSpacing.Around := BORDER_SPACING_AROUND;
         AutoSize := True;
         WordWrap := True;
 	end;
@@ -143,12 +143,11 @@ begin
     with closeLabel do begin
         Align  := alRight;
         layout := tlTop;
-        BorderSpacing.Around := __around;
+        BorderSpacing.Around := BORDER_SPACING_AROUND;
         Caption := '🗙';
         OnClick := @DoOnCloseClick;
 	end;
     insertControl(closeLabel);
-
 end;
 
 constructor TTagControl.Create(TheOwner: TComponent);

@@ -21,7 +21,8 @@ uses
     sugar.fmkvdisplay, sugar.markdownhelper, sugar.tagUI, sugar.toast, 
     sugar.uistyles, sugar.animateui, sugar.dragui, sugar.register, 
     sugar.repositionui, git.api, sugar.htmlbuilder.truthtable, sugar.url, 
-    sugar.inifiles, LazarusPackageIntf;
+    sugar.inifiles, sugar.contactInfo, sugar.gender, sugar.languages, 
+    sugar.maps, LazarusPackageIntf;
 
 implementation
 
