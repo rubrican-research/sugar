@@ -12,7 +12,7 @@ unit sugar.sqlitehelper;
 interface
 
 uses
-	 Classes, SysUtils, Controls, Forms, Dialogs, SQLDBLib, SQLDB, SQLite3Conn, fpjson;
+	 Classes, SysUtils, Controls, Forms, Dialogs, SQLDBLib, SQLDB, sqlite3dyn, SQLite3Conn, fpjson;
 
 const
 	 DEFAULT_DB_FILE = 'myDB.db';
@@ -705,13 +705,13 @@ end;
 function TDBModule.getSQLite3LibraryPath(): string;
 begin
 	{$IFDEF windows}
-	 Result := ExpandFileName('sqlite3.dll');
+	 Result := ExpandFileName(sqlite3dyn.SQLiteDefaultLibrary);
 	{$ELSE}
 
     {$ELSEIFDEF UNIX}
-    Result := ExpandFileName('sqlite3.so');
+    Result := ExpandFileName(sqlite3dyn.SQLiteDefaultLibrary);
     if not fileExists(Result) then
-        Result := 'sqlite3.so';
+        Result := sqlite3dyn.SQLiteDefaultLibrary;
     {$ELSEIFDEF DARWIN}
 
     {$ENDIF}
