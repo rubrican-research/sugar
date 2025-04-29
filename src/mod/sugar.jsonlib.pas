@@ -70,22 +70,29 @@ type
 	 function parseJSON(const _json: string): TJSONData;
 	 {Loads a file, parses it and returns JSONData}
 	 function loadJSON(const _file: string): TJSONData;
-	 {Copies a JSON Object. Source -> Destination. Returns True if successful}
+
+     procedure CopyJSONValue(constref _source, _dest: TJSONData; var Success: boolean);
+     function copyJSONMembers(constref _target, _source: TJSONObject): TJSONObject;
+     {Copies a JSON Object. Source -> Destination. Returns True if successful}
 	 function copyJSONObject(constref _source, _dest: TJSONObject; _clearFirst: boolean = false): boolean;
 	 {Copies a JSON Array Source -> Destination. Returns True if successful}
 	 function copyJSONArray(constref _source, _dest: TJSONArray; _clearFirst: boolean = false): boolean;
 
-	 function copyJSONMembers(constref _target, _source: TJSONObject): TJSONObject;
 	 function initJSONArray(_num: integer; _val: string): TJSONArray;
 
 	 {Takes a JSON object and initializes it to default values. Particularly useful
 	 when you want to re-initialize an object i.e. clear all the data but keep the structure}
 	 function clearCloneJSON(constref _obj: TJSONData; _clone: boolean = true): TJSONData;
 
+     function makeMemberName: string;
+     function newJSONRandomObj(_addObj: boolean = true): TJSONObject;
+     function newJSONRandomArray(_addObj: boolean = true): TJSONArray;
+
+
 
 implementation
 uses
-     jsonparser, jsonscanner, sugar.utils;
+     jsonparser, jsonscanner, sugar.utils, Math;
 
 { TJSONUnquotedString }
 
@@ -254,253 +261,39 @@ begin
     end;
 end;
 
-function copyJSONObject(constref _source, _dest: TJSONObject; _clearFirst: boolean
-	): boolean;
-var
-    i: integer;
-    _name: string;
-    _currSource, _currDest: TJSONData;
-    _j: TJSONData;
+procedure CopyJSONValue(constref _source, _dest: TJSONData; var Success: boolean);
 begin
-    Result := True;
-    //--> log('');
-    //--> log('enter copyJSONObject -->');
-    //--> log(_source.formatJSON());
+    Success := True;
 
-    if _clearFirst then
-        clearCloneJSON(_dest, false);
+    case _source.JSONType of
+        jtUnknown:
+            ; // Don't do anything
 
-    if _source.Count = 0 then
-    begin
-        {Empty JSON Object}
-        //--> log('Source is empty object. Exit');
-        exit;
-	end;
-
-	for i := 0 to pred(_source.Count) do
-    begin
-        _name := _source.Names[i];
-        _currSource := _source.Items[i];
-        //log('copyJSONObject is looking at %s', [_name]);
-
-        if Assigned(_dest.find(_name)) then
-            _currDest := _dest.Elements[_name]
-        else
+        jtNumber:
         begin
-             //--> log(' --> adding ' + _name);
-            _dest.Add(_name, _currSource.clone);
-
-            //case _currSource.JSONType of
-	           //	jtUnknown: {don't do anything};
-            //
-	           //	jtNumber: _dest.Add(_name, _currSource.AsString);
-            //
-	           //	jtString: _dest.Add(_name, _currSource.AsString);
-            //
-	           //	jtBoolean: _dest.Add(_name, _currSource.AsBoolean);
-            //
-	           //	jtNull: {don't do anything};
-            //
-	           //	jtArray:    _dest.Add(_name, TJSONArray(_currSource).Clone);
-            //
-	           // {recursive call}
-	           //	jtObject:   _dest.Add(_name, TJSONObject(_currSource).Clone);
-            //end;
-
-            continue;
-		end;
-
-        {Check if destination contains the element}
-        Result := Assigned(_currDest);
-        if not Result then
-        begin
-            trip('copyJSONObject: _currDest is not assigned: ' + _name);
-            //--> log('copyJSONObject: _currDest is not assigned: ' + _name);
-            break;
+            if _source is TJSONFloatNumber then
+                _dest.AsFloat := _source.AsFloat
+            else
+                _dest.AsInteger := _source.AsInteger;
         end;
 
-        {check if source and destination types are same}
-        Result := (_currSource.JSONType = _currDest.JSONType);
-        if not Result then
+        jtString:
+            _dest.AsString := _source.AsString;
+
+        jtBoolean:
+            _dest.AsBoolean := _source.AsBoolean;
+
+        jtNull:
+            ; // Don't do anything
+
+        jtArray:
         begin
+            Success := copyJSONArray(TJSONArray(_source), TJSONArray(_dest));
+        end;
 
-            if (_currSource.JSONType = jtString) and (_currDest.JSONType in [jtArray, jtObject]) then
-            begin
-                //--> log('     --> source is string, dest is array or object');
-                try
-                    _j:= GetJSON(_currSource.AsString);
-                    if Assigned(_j) then
-                    begin
-                        if (_j.JSONType = jtArray) and (_currDest.JSONType = jtArray) then
-                        begin
-                            Result:= copyJSONArray(TJSONArray(_j), TJSONArray(_currDest));
-                            if Result then
-                            begin
-                                //--> log('     --> copied array from string');
-                                continue;
-                            end
-                            else
-                                //--> log('     --> copy Array failed()');
-
-						end
-                        else if (_j.JSONType = jtObject) then
-                        begin
-                            Result:= copyJSONObject(TJSONObject(_j), TJSONObject(_j));
-                            if Result then
-                            begin
-                                //--> log('     --> copied object from string');
-                                continue;
-                            end
-                            else
-                                //--> log('     --> copy Object failed()');
-						end
-						else
-                        begin
-                            Result:= false;
-                        end;
-					end;
-
-				finally
-                    _j.Free;
-				end;
-			end
-            else
-                Result:= (_currSource.JSONType = jtString); {If it is a string then it can be converted}
-
-            if not Result then
-            begin
-	            //--> log('copyJSONObject: Source and destination JSONTypes are not the same for field <' + _name + '>' + sLinebreak + 'source type=' + JSONTypeName(_currSource.JSONType) + ' dest type=' + JSONTypeName(_currDest.JSONType));
-
-	            trip('copyJSONObject: Source and destination JSONTypes are not the same for field <'
-	                + _name + '>' + sLinebreak + 'source type=' +
-	                JSONTypeName(_currSource.JSONType) + ' dest type=' +
-	                JSONTypeName(_currDest.JSONType));
-
-	            break;
-			end;
-		end;
-
-
-
+        jtObject:
         begin
-
-	        {Copy the data here}
-	        //--> log('copyJSONObject is assigning ' + _name);
-	        case _currSource.JSONType of
-	            jtUnknown: {don't do anything};
-
-	            jtNumber: _currDest.AsString:= _currSource.AsString;
-
-	            jtString: _currDest.AsString := _currSource.AsString;
-
-	            jtBoolean: _currDest.AsBoolean := _currSource.AsBoolean;
-
-	            jtNull: {don't do anything};
-
-	            jtArray: begin
-	                Result := copyJSONArray(TJSONArray(_currSource), TJSONArray(_currDest));
-	                if not Result then {either copyJSONArray or copyJSONObject has failed}
-	                begin
-	                    //--> log('      --> copyJSONArray failed');
-	        		end;
-
-				end;
-
-	            {recursive call}
-	            jtObject:
-	            begin
-	                Result := copyJSONObject(TJSONObject(_currSource), TJSONObject(_currDest));
-	                if not Result then {either copyJSONArray or copyJSONObject has failed}
-	                begin
-	                    //--> log('     --> copyJSONObject has failed}');
-	                end;
-				end;
-			end;
-
-
-	        if not Result then {either copyJSONArray or copyJSONObject has failed}
-	        begin
-	            //--> log('{either copyJSONArray or copyJSONObject has failed}');
-	            break;
-			end;
-
-	        {All is well here}
-	        Result := True;
-
-		end;
-	end;
-end;
-
-{Only copy values if both arrays have same number of items}
-function copyJSONArray(constref _source, _dest: TJSONArray; _clearFirst: boolean
-	): boolean;
-var
-    i: integer;
-    _currSource, _currDest: TJSONData;
-begin
-    Result := True;
-    //--> log('enter copyJSONArray --->');
-    if assigned(_source) and assigned(_dest) and (_source.JSONType = jtArray) and (_dest.JSONType = jtArray) then
-    begin
-        //{Check if we ought to just add the source Data to the destination}
-        //if _dest.Count = 0 then
-        //begin
-        //    _dest.Add(_source.Clone);
-        //    Result:= True;
-        //    exit;
-        //{================  EXIT =================}
-        //end;
-
-        if _clearFirst then _dest.Clear;
-        for i := 0 to pred(_source.Count) do
-        begin
-            //--> log('copying %d of %d', [succ(i), _source.Count ]);
-            _currSource := _source.Items[i];
-
-
-            {if source has more then add to the array}
-            if i >= _dest.Count then
-            begin
-                //--> log('adding %s', [_currSource.FormatJSON()]);
-                _dest.Add(_currSource.clone);
-                continue;
-			end;
-
-            {check if source and destination types are same}
-            _currDest := _dest.Items[i];
-            Result := (_currSource.JSONType = _currDest.JSONType);
-
-            if not Result then
-            begin
-                //--> log('copyJSONArray: Source and destination JSONTypes are not the same ' + sLinebreak + 'source type=' + JSONTypeName(_currSource.JSONType) + ' dest type=' + JSONTypeName(_currDest.JSONType));
-                break;
-                {================  EXIT HERE =================}
-            end;
-
-            case _currSource.JSONType of
-                jtUnknown: {don't do anything};
-
-                jtNumber: _currDest.AsInteger := _currSource.AsInteger;
-
-                jtString: _currDest.AsString := _currSource.AsString;
-
-                jtBoolean: _currDest.AsBoolean := _currSource.AsBoolean;
-
-                jtNull: {don't do anything};
-
-                {recursive call}
-                jtArray:
-                begin
-                    //--> log('   --> Recursive call to copyJSONArray() ->');
-                    Result:= copyJSONArray(TJSONArray(_currSource), TJSONArray(_currDest));
-				end;
-
-                jtObject:
-                begin
-                    //--> log('   --> calling copyJSONObject with %s', [_currSource.FormatJSON()]);
-                    Result:= copyJSONObject(TJSONObject(_currSource), TJSONObject(_currDest));
-				end;
-			end;
+            Success := copyJSONObject(TJSONObject(_source), TJSONObject(_dest));
         end;
     end;
 end;
@@ -509,22 +302,188 @@ function copyJSONMembers(constref _target, _source: TJSONObject): TJSONObject;
 var
     member: TJSONEnum;
     jsource, jdest: TJSONData;
+    copySuccess: boolean;
 begin
+    Result := _target;
+
+    if not (Assigned(_target) and Assigned(_source)) then
+        Exit;
+
     for member in _target do
     begin
-        jsource := _source.find(member.key);
-        jdest   := _target.Find(member.key);
-        if assigned(jsource) then
+        jsource := _source.Find(member.key);
+        jdest := _target.Find(member.key);
+
+        if Assigned(jsource) and Assigned(jdest) then
         begin
-	        if jsource.JSONType = jtArray then
-	            copyJSONArray(TJSONArray(jSource), TJSONArray(jdest))
-	        else if jsource.JSONType = jtObject then
-	            copyJSONObject(TJSONObject(jSource), TJSONObject(jdest))
-	        else
-	            jdest.AsString:= jsource.AsString;
-		end;
-	end;
-    Result:= _target;
+            if jsource.JSONType = jdest.JSONType then
+            begin
+                CopyJSONValue(jsource, jdest, copySuccess);
+                // We continue even if one member fails, but could log this failure
+            end
+            else if (jsource.JSONType in [jtString, jtNumber, jtBoolean]) and
+                (jdest.JSONType in [jtString, jtNumber, jtBoolean]) then
+            begin
+                // Handle compatible primitive types
+                try
+                    jdest.AsString := jsource.AsString;
+                except
+                    // Handle conversion error, but continue with other members
+                end;
+            end;
+        end;
+    end;
+end;
+
+
+function copyJSONObject(constref _source, _dest: TJSONObject; _clearFirst: boolean = False): boolean;
+var
+    i: integer;
+    _name: string;
+    _currSource, _currDest: TJSONData;
+    _j: TJSONData;
+begin
+    Result := True;
+
+    if not Assigned(_source) or not Assigned(_dest) then
+    begin
+        Result := False;
+        Exit;
+    end;
+
+    if _clearFirst then
+        clearCloneJSON(_dest, False);
+
+    if _source.Count = 0 then
+    begin
+        // Empty JSON Object, nothing to copy
+        Exit;
+    end;
+
+    for i := 0 to pred(_source.Count) do
+    begin
+        _name := _source.Names[i];
+        _currSource := _source.Items[i];
+
+        // If the destination doesn't have this element, add it
+        if not Assigned(_dest.Find(_name)) then
+        begin
+            _dest.Add(_name, _currSource.Clone);
+            Continue;
+        end;
+
+        // Get the existing destination element
+        _currDest := _dest.Elements[_name];
+        if not Assigned(_currDest) then
+        begin
+            Result := False;
+            Exit;
+        end;
+
+        // Handle type compatibility
+        if (_currSource.JSONType = _currDest.JSONType) then
+        begin
+            // Same types, direct copy
+            CopyJSONValue(_currSource, _currDest, Result);
+            if not Result then
+                Exit;
+        end
+        else if (_currSource.JSONType = jtString) and
+            (_currDest.JSONType in [jtArray, jtObject]) then
+        begin
+            // Try to parse string as JSON
+            _j := nil;
+            try
+                try
+                    _j := GetJSON(_currSource.AsString);
+                    if not Assigned(_j) then
+                    begin
+                        Result := False;
+                        Exit;
+                    end;
+
+                    // Handle parsed JSON type
+                    if (_j.JSONType = jtArray) and (_currDest.JSONType = jtArray) then
+                    begin
+                        Result := copyJSONArray(TJSONArray(_j), TJSONArray(_currDest));
+                        if not Result then
+                            Exit;
+                    end
+                    else if (_j.JSONType = jtObject) and (_currDest.JSONType = jtObject) then
+                    begin
+                        // Fixed: Copy from parsed object to destination (not to itself)
+                        Result := copyJSONObject(TJSONObject(_j), TJSONObject(_currDest));
+                        if not Result then
+                            Exit;
+                    end
+                    else
+                    begin
+                        Result := False;
+                        Exit;
+                    end;
+                except
+                    Result := False;
+                    Exit;
+                end;
+            finally
+                FreeAndNil(_j);
+            end;
+        end
+        else
+        begin
+            // Incompatible types
+            Result := False;
+            Exit;
+        end;
+    end;
+end;
+
+{Only copy values if both arrays have same number of items}
+function copyJSONArray(constref _source, _dest: TJSONArray;
+    _clearFirst: boolean = False): boolean;
+var
+    i: integer;
+    _currSource, _currDest: TJSONData;
+begin
+    Result := False;
+
+    if not (Assigned(_source) and Assigned(_dest)) then
+        Exit;
+
+    if (_source.JSONType <> jtArray) or (_dest.JSONType <> jtArray) then
+        Exit;
+
+    Result := True;
+
+    if _clearFirst then
+        _dest.Clear;
+
+    for i := 0 to pred(_source.Count) do
+    begin
+        _currSource := _source.Items[i];
+
+        // If source has more items than destination, add new items
+        if i >= _dest.Count then
+        begin
+            _dest.Add(_currSource.Clone);
+            Continue;
+        end;
+
+        // Get current destination item
+        _currDest := _dest.Items[i];
+
+        // Check type compatibility
+        if (_currSource.JSONType <> _currDest.JSONType) then
+        begin
+            Result := False;
+            Exit;
+        end;
+
+        // Copy values based on type
+        CopyJSONValue(_currSource, _currDest, Result);
+        if not Result then
+            Exit;
+    end;
 end;
 
 function initJSONArray(_num: integer; _val: string): TJSONArray;
@@ -558,6 +517,53 @@ begin
                 clearCloneJSON(TJSONObject(Result).Items[json.KeyNum], false); {Clear but don't clone}
 		end;
     end;
+end;
+
+
+function newJSONRandomArray(_addObj: boolean = true): TJSONArray;
+var
+    _numMembers: integer;
+    _type, i: integer;
+begin
+    Result := TJSONArray.Create;
+    _numMembers := Random(20);
+    for i := 0 to pred(_numMembers) do begin
+        _type := random(5);
+        case _type of
+            0:  {Integer}Result.add(Random(1000));
+            1:  {Float}  Result.add(Random(1000) + Random());
+            2:  {String} Result.add(genRandomKey(Max(12, Random(120))));
+            3:  {object} if _addObj then Result.add(newJSONRandomObj(false));
+            4:  {array}  if _addObj then Result.add(newJSONRandomArray(false));
+		end;
+	end;
+end;
+
+function makeMemberName: string;
+begin
+    Result := '';
+    while Result.isEmpty do begin
+        Result := genRandomKey(Max(4, Random(12)))
+	end;
+end;
+
+function newJSONRandomObj(_addObj: boolean = true): TJSONObject;
+var
+    _numMembers: integer;
+    _type, i: integer;
+begin
+    Result := TJSONObject.Create;
+    _numMembers := Random(20);
+    for i := 0 to pred(_numMembers) do begin
+        _type := random(5);
+        case _type of
+            0:  {Integer}Result.add(makeMemberName, Random(1000));
+            1:  {Float}  Result.add(makeMemberName, Random(1000) + Random());
+            2:  {String} Result.add(makeMemberName, genRandomKey(Max(12, Random(120))));
+            3:  {object} if _addObj then Result.add(makeMemberName, newJSONRandomObj(false));
+            4:  {array}  if _addObj then Result.add(makeMemberName, newJSONRandomArray(false));
+		end;
+	end;
 end;
 
 end.

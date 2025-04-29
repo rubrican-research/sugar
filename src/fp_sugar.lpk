@@ -3,7 +3,8 @@
   <Package Version="5">
     <PathDelim Value="\"/>
     <Name Value="fp_sugar"/>
-    <Type Value="RunAndDesignTime"/>
+    <Type Value="RunTimeOnly"/>
+    <Author Value="Rubrican Research (https://github.com/rubrican-research)"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
@@ -13,6 +14,29 @@
         <UnitOutputDirectory Value="..\lib\3.x\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
+    <Description Value="(Syntax) Sugar libraries for FPC/Lazarus to make coding in Object Pascal a lot faster and easier. This is work in progress. The package is working well. I rely on these for all my Lazarus dev work. Documentation is still to be done. Also, I would like to refactor some parts to iron out kinks in the developer experience. But overall, I find that I&apos;ve been very productive with these libraries."/>
+    <License Value="MIT License
+
+Copyright (c) 2024 Stanley Stephen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE."/>
+    <Version Major="1"/>
     <Files>
       <Item>
         <Filename Value="mod\sugar.utils.pas"/>
@@ -246,16 +270,20 @@
         <Filename Value="mod\sugar.maps.pas"/>
         <UnitName Value="sugar.maps"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.securesalt.pas"/>
+        <UnitName Value="sugar.securesalt"/>
+      </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="rhl_package"/>
+      </Item>
       <Item>
         <PackageName Value="LCL"/>
       </Item>
       <Item>
         <PackageName Value="MarkdownEngine"/>
-      </Item>
-      <Item>
-        <PackageName Value="rhl_package"/>
       </Item>
       <Item>
         <PackageName Value="FCL"/>

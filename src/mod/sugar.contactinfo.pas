@@ -30,6 +30,7 @@ type
 		function getChanged: boolean;
 		function getcreatedOn: TDateTime;
 		function getID: string;
+		function getIsActive: boolean;
 		function getNotes: string;
 		function getstatus: NContactStatus;
 		function getupdatedOn: TDateTime;
@@ -53,6 +54,7 @@ type
         property updatedOn : TDateTime read getupdatedOn write setupdatedOn;
         property enabled    : boolean read getEnabled write setEnabled;
         property status    : NContactStatus read getstatus write setstatus;
+        property isActive : boolean read getIsActive;
         property hasChanged: boolean read getChanged;
 
     public
@@ -267,6 +269,11 @@ end;
 function TContactInfo.getID: string;
 begin
     Result := strings['ID'];
+end;
+
+function TContactInfo.getIsActive: boolean;
+begin
+    Result := status = cinfoActive;
 end;
 
 function TContactInfo.getNotes: string;

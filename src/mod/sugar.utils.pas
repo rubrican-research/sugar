@@ -49,7 +49,10 @@ function stringArrayToJSON(const _source: TStringArray): TJSONArray;
 function JSONToStringArray(const _source: TJSONArray): TStringArray;
 function getPChar(const _text: string): PChar; {allocates memory, returns pChar}
 
+
 {Hashing}
+{algorithm: rhlPBKDF2}
+{parameters: password, salt, number of iterations, total size of hash}
 function genHash(p, s: ansistring; i: integer = 13; size: integer = 196): ansistring;
 function genHashUTF8(p, s: ansistring; i: integer = 13;
     size: integer = 196): RawByteString;
@@ -581,7 +584,7 @@ const
     keySpecialChars = '!$()@[~]';
 
     keySpecialChars2Len = 14;
-    keySpecialChars2 = '^&*=+-_<>?:;|\';
+    keySpecialChars2 = '^&*=+-_<>?:;|`';
 var
     i: integer;
     x: integer;
@@ -610,11 +613,11 @@ begin
 
         i := Random(_strength);
         case i of
-            0: AppendStr(Result, keyNumbers[randomIndex(keyNumbersLen)]);
-            1: AppendStr(Result, keySmallLetters[randomIndex(keySmallLettersLen)]);
-            2: AppendStr(Result, keyCapLetters[randomIndex(keyCapLettersLen)]);
-            3: AppendStr(Result, keySpecialChars[randomIndex(keySpecialCharsLen)]);
-            4: AppendStr(Result, keySpecialChars2[randomIndex(keySpecialChars2Len)]);
+            0:  Result := Result + keyNumbers[randomIndex(keyNumbersLen)];
+            1:  Result := Result + keySmallLetters[randomIndex(keySmallLettersLen)];
+            2:  Result := Result + keyCapLetters[randomIndex(keyCapLettersLen)];
+            3:  Result := Result + keySpecialChars[randomIndex(keySpecialCharsLen)];
+            4:  Result := Result + keySpecialChars2[randomIndex(keySpecialChars2Len)];
         end;
     end;
 end;

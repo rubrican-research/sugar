@@ -22,14 +22,8 @@ uses
     sugar.uistyles, sugar.animateui, sugar.dragui, sugar.register, 
     sugar.repositionui, git.api, sugar.htmlbuilder.truthtable, sugar.url, 
     sugar.inifiles, sugar.contactInfo, sugar.gender, sugar.languages, 
-    sugar.maps, LazarusPackageIntf;
+    sugar.maps, sugar.securesalt;
 
 implementation
 
-procedure Register;
-begin
-end;
-
-initialization
-  RegisterPackage('fp_sugar', @Register);
 end.
