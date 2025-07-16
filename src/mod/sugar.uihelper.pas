@@ -22,6 +22,7 @@ type
 		procedure setonHoverColor(const _value: TColor);
 		procedure setonHoverFont(const _value: TFont);
     protected
+        myControl : TControl;
         prevOnMouseEnter: TNotifyEvent;
         prevOnMouseLeave: TNotifyEvent;
         myonHoverFont: TFont;
@@ -48,6 +49,7 @@ type
 	private
 		myprevParentResize: TNotifyEvent;
 		mySize: currency;
+
 		procedure setprevParentResize(const _value: TNotifyEvent);
 		procedure setSize(const _value: currency);
 	published
@@ -169,12 +171,14 @@ type
     procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte);  overload; // resizes the grid according to the percentages in the array
 
     function getCurrentWord(_memo: TMemo): string;
+    procedure positionAbove(constref _anchor: TControl; constref _child: TControl);
     procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
 
-    {Aligns the _control in its parent. }
-    procedure alignVCenter(constref _child: TControl; _heightPercent: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
-    procedure alignHCenter(constref _child: TControl; _widthPercent: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
-    procedure alignCenter(constref _child: TControl; _widthPercent: currency = 0.7; _heightPercent: currency = 0.7);  // Aligns the panel to the center of the container. Preserves the width of the panel
+    {Aligns the _control in its parent as a percentage of the parent's width when the size value is less than 1.
+    When the value is greater than 1, then it the size is fixed to the value supplied }
+    procedure alignVCenter(constref _child: TControl; _height: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
+    procedure alignHCenter(constref _child: TControl; _width: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
+    procedure alignCenter(constref _child: TControl; _width: currency = 0.7; _height: currency = 0.7);  // Aligns the panel to the center of the container. Preserves the width of the panel
 
 
 //type
@@ -206,6 +210,9 @@ type
     //function gridHeaderToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToCSV(_grid: TStringGrid; _delimiter: string = ','): string;
     function gridToKV(_grid: TStringGrid; _delimiter: string = '='; _keyCol: integer = 0; _valCol: integer = 1): string;
+    function setRowCount(constref _stringGrid: TStringGrid; const _rowCount: integer): TStringGrid;
+    procedure gridColumnAutosize(constref _grid: TStringGrid);
+
 
     {Returns the height of the window bar}
     function windowBarHeight(_form: TForm) : integer;
@@ -288,6 +295,16 @@ var
 	_lbl: TLabel;
     _pnl: TPanel;
 begin
+
+    {Initialize the CURRENT font settings}
+    myDefaultColor := myControl.Color;
+    myDefaultFont.Assign(myControl.Font);
+    myonHoverColor := clHighlight;
+    myOnHoverFont.Assign(myDefaultFont);
+    myOnHoverFont.Color := myonHoverColor;
+    myOnHoverFont.Style := myOnHoverFont.Style + [fsUnderline];
+
+
     if Sender is TPanel then
     begin
         _pnl := Sender as TPanel;
@@ -355,18 +372,10 @@ end;
 constructor TOnHover.Create(_control: TControl);
 begin
     inherited Create;
+    myControl     := _control;
     myDefaultFont := TFont.Create;
     myOnHoverFont := TFont.Create;
-
     _control.FPOAttachObserver(self);
-    myDefaultColor := _control.Color;
-    myonHoverColor := clSkyBlue;
-
-    myDefaultFont.Assign(_control.Font);
-
-    myOnHoverFont.Assign(myDefaultFont);
-    myOnHoverFont.Color := clHighlight;
-    myOnHoverFont.Style := myOnHoverFont.Style + [fsUnderline];
 
 end;
 
@@ -401,18 +410,32 @@ end;
 
 procedure TOnAlign.OnResize(Sender: TObject);
 begin
-    if assigned(prevParentResize) then prevParentResize(parent);
+    try
+    if assigned(prevParentResize) then
+        prevParentResize(parent);
+
+	except
+        On E: Exception do begin
+            Log('TOnAlign.OnResize:: Exception -> %s', [E.Message]);
+		end;
+	end;
 end;
 
 
 constructor TOnAlign.Create(constref _child: TControl; _size: currency);
 begin
     inherited Create;
+
+    child           := nil;
+    parent          := nil;
+    prevParentResize:= nil;
+
     if not assigned(_child) then begin
-        child           := nil;
-        parent          := nil;
-        prevParentResize:= nil;
-        exit;
+        Trip(ClassName + '.Create() --> child not assigned!!!');
+    end;
+
+    if not assigned(_child.parent) then begin
+        Trip(ClassName + '.Create() --> exit parent not assigned!!!');
     end;
 
     child := _child;
@@ -427,13 +450,17 @@ begin
 		    end
             else
                 prevParentResize := nil;
+
             parent.OnResize  := @OnResize;
+            parent.OnResize(parent); // init
         end
 		else
             prevParentResize := nil;
     end
 	else
         parent := nil;
+
+    Log2('TOnAlign.Create() done');
 
 end;
 
@@ -443,7 +470,10 @@ begin
     case Operation of
     	ooChange: ;
         ooFree: begin
-            log('TOnAlign.FPOObservedChanged -- ooFree');
+            log2('TOnAlign.FPOObservedChanged -- ooFree');
+            if assigned(parent) then
+                if parent.OnResize = @OnResize then
+                    parent.OnResize := prevParentResize;
             Free; // Destroy this object
 		end;
         ooAddItem: ;
@@ -459,15 +489,26 @@ var
 	_width: Integer;
 begin
     inherited;
-    if size < 1 then
-        _width := Floor(parent.Width * size)
+    if not (assigned(child) and assigned(parent)) then exit;
+
+    if (size <= 0) or (Parent.Width <= 0) then
+        Exit;
+
+    if size > 1 then
+        _width := Min(Round(size), Parent.Width)
     else
-        _width := Min(Round(size), parent.Width);
+        _width := Floor(Parent.Width * size);
 
-    Child.Width := _width;
-    Child.Left  := Floor((parent.Width - Child.Width) / 2);
-    Child.Invalidate;
-
+    if child.Align in [alNone, alCustom] then  begin
+	    Child.Width := _width;
+	    Child.Left  := (Parent.Width - Child.Width) div 2;
+	    Child.Invalidate;
+	end
+    else begin
+        Child.BorderSpacing.Left  := (Parent.Width - _width) div 2;
+        Child.BorderSpacing.Right := Child.BorderSpacing.Left;
+        Child.Invalidate;
+	end;
 end;
 
 { TOnVAlign }
@@ -477,16 +518,28 @@ procedure TOnVAlign.OnResize(Sender: TObject);
 var
 	_height: Integer;
 begin
-
     inherited;
-    if size < 1 then
-        _height := Floor(Parent.height * size)
-    else
-        _height := Min(Round(size), Parent.height);
+    if not (assigned(child) and assigned(parent)) then exit;
 
-    Child.Height := _height;
-    Child.Top    := Floor((Parent.Height - Child.Height) / 2);
-    Child.Invalidate;
+    // Validate inputs
+    if (size <= 0) or (Parent.Height <= 0) then
+        Exit;
+
+    if size > 1 then
+        _height := Min(Round(size), Parent.Height)
+    else
+        _height := Floor(Parent.Height * size);
+
+    if child.Align in [alNone, alCustom] then  begin
+        Child.Height := _height;
+        Child.Top    := (Parent.Height - Child.Height) div 2;
+        Child.Invalidate;
+	end
+    else begin
+        Child.BorderSpacing.Top     := (Parent.Height- _height) div 2;
+        Child.BorderSpacing.Bottom  := Child.BorderSpacing.Top;
+        Child.Invalidate;
+	end;
 end;
 
 { TMouseWizard }
@@ -923,8 +976,7 @@ const
   TERM_DELIM = '|';
   DELIM = '•';
 var
-    _index  : TStringIndexMap;
-    _rows   : TListOfTStrings;
+    _rows   : TListOfTStrings;     // Maps of sort-term to STring Grid row object. This is used to reconstruct the sorted string grid.
 	_r, _col: Integer;
     _sorted : TStringArray;
 	_term, s: String;
@@ -935,7 +987,6 @@ begin
 
     if sg.FixedRows = sg.RowCount then exit; // No rows to sort.
 
-    _index  := TStringIndexMap.Create();
     _rows   := TListOfTStrings.Create(true);
 
     try
@@ -952,13 +1003,11 @@ begin
 			end;
             // Append row number to the
 			_term := Format('%s' + TERM_DELIM + '%d',[_term, _r]);
-
-            _index.idx[_term] := _r;
             _rows.add(_term, clone(sg.rows[_r]));
-
 		end;
 
-        _sorted := sortList(_index.getNames(DELIM), DELIM);
+
+        _sorted := sortList(_rows.getNames(DELIM), DELIM);
 
 
         case _order of
@@ -981,7 +1030,6 @@ begin
         sg.EndUpdate;
 
 	finally
-        _index.Free;
         _rows.Free;
 	end;
 end;
@@ -1015,33 +1063,58 @@ begin
     Result := strBetween(_memo.Lines.Strings[_line], _col, __WHITESPACE, __WHITESPACE, _startPos, _endPos);
 end;
 
+procedure positionAbove(constref _anchor: TControl; constref _child: TControl);
+var
+	_t, _anchorTop: Integer;
+begin
+    _anchorTop := Min(0, _anchor.Top - _anchor.BorderSpacing.Around - _anchor.BorderSpacing.Top);
+    if _anchorTop = 0 then begin
+        _child.Top  := _child.BorderSpacing.Around + _child.BorderSpacing.Top;
+        _anchor.Top := _anchor.BorderSpacing.Around + _anchor.BorderSpacing.Top + 1;
+	end
+    else begin
+        _t := _anchor.Top;
+        _anchor.Top := _t + 1;
+        _child.Top  := _t;
+	end;
+
+    _child.Left  := _anchor.Left;
+    _child.Width := _anchor.Width;
+
+    if assigned(_child.Parent) then
+        _child.Height:= _child.Parent.Height - _child.Top;
+
+end;
+
 procedure positionBelow(constref _anchor: TControl; constref _child: TControl);
 begin
     _child.Top   := _anchor.Top + _anchor.Height + _child.BorderSpacing.Around + _child.BorderSpacing.Top;
     _child.Left  := _anchor.Left;
     _child.Width := _anchor.Width;
+
     if assigned(_child.Parent) then
         _child.Height:= _child.Parent.Height - _child.Top;
 end;
 
 
 
-procedure alignVCenter(constref _child: TControl; _heightPercent: currency);
+procedure alignVCenter(constref _child: TControl; _height: currency);
 begin
-    TOnVAlign.Create(_child, _heightPercent);
+    TOnVAlign.Create(_child, _height);
 end;
 
-procedure alignHCenter(constref _child: TControl; _widthPercent: currency);
+procedure alignHCenter(constref _child: TControl; _width: currency);
 begin
-    TOnHAlign.Create(_child, _widthPercent);
+    TOnHAlign.Create(_child, _width);
 end;
 
-procedure alignCenter(constref _child: TControl; _widthPercent: currency;
-	_heightPercent: currency);
+procedure alignCenter(constref _child: TControl; _width: currency;
+	_height: currency);
 begin
-    TOnVAlign.Create(_child, _widthPercent);
-    TOnHAlign.Create(_child, _heightPercent);
+    TOnVAlign.Create(_child, _width);
+    TOnHAlign.Create(_child, _height);
 end;
+
 
 procedure activateHint(_ctr: TControl);
 var
@@ -1110,6 +1183,23 @@ begin
         Result := Result
                     + sLineBreak
                     + format(__F ,[Trim(_grid.Cells[_keyCol, r]), _delimiter, Trim(_grid.Cells[_valCol, r])]);
+	end;
+end;
+
+function setRowCount(constref _stringGrid: TStringGrid; const _rowCount: integer
+	): TStringGrid;
+begin
+    Result := _stringGrid;
+    _stringGrid.RowCount := _rowCount;
+    _stringGrid.Height :=   (succ(_rowCount) * _stringGrid.DefaultRowHeight);
+end;
+
+procedure gridColumnAutosize(constref _grid: TStringGrid);
+var
+	i: Integer;
+begin
+    for i := 0 to pred(_grid.ColCount) do begin
+        _grid.AutoSizeColumn(i);
 	end;
 end;
 

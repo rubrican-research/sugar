@@ -26,42 +26,6 @@
     </RunParams>
     <RequiredPackages>
       <Item>
-        <PackageName Value="JvNetLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvNetLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvTimeFrameworkLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvTimeFrameworkLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvStdCtrlsLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvStdCtrlsLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvJansLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvJansLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvCtrlsLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvCtrlsLazD"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvAppFrmLazR"/>
-      </Item>
-      <Item>
-        <PackageName Value="JvAppFrmLazD"/>
-      </Item>
-      <Item>
         <PackageName Value="fp_sugar"/>
       </Item>
       <Item>

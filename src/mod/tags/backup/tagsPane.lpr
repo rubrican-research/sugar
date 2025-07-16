@@ -10,8 +10,7 @@ uses
     athreads,
     {$ENDIF}
     Interfaces, // this includes the LCL widgetset
-    Forms, main, frameTags
-    { you can add units after this };
+    Forms, main, frame.TagControl;
 
 {$R *.res}
 

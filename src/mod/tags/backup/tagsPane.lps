@@ -9,7 +9,8 @@
         <Filename Value="tagsPane.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="25"/>
+        <CursorPos X="76" Y="24"/>
+        <UsageCount Value="51"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -18,10 +19,9 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="9"/>
-        <CursorPos X="5" Y="49"/>
-        <UsageCount Value="25"/>
+        <TopLine Value="11"/>
+        <CursorPos X="54" Y="41"/>
+        <UsageCount Value="51"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
@@ -31,10 +31,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="sugar.tagUI"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="205"/>
-        <CursorPos X="9" Y="236"/>
-        <UsageCount Value="22"/>
+        <TopLine Value="152"/>
+        <CursorPos X="5" Y="165"/>
+        <UsageCount Value="35"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
@@ -43,29 +44,28 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="21"/>
         <CursorPos X="53" Y="108"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="..\sugar.uihelper.pas"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="417"/>
-        <CursorPos X="35" Y="449"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="234"/>
+        <CursorPos X="17" Y="244"/>
+        <UsageCount Value="25"/>
       </Unit>
       <Unit>
         <Filename Value="..\sugar.logger.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="132"/>
         <CursorPos Y="154"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\include\wincontrol.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="6347"/>
         <CursorPos X="3" Y="6349"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\stdctrls.pp"/>
@@ -73,7 +73,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1638"/>
         <CursorPos X="14" Y="1658"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\graphics.pp"/>
@@ -81,7 +81,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="51"/>
         <CursorPos X="3" Y="73"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\extctrls.pp"/>
@@ -89,7 +89,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1090"/>
         <CursorPos X="22" Y="1096"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\controls.pp"/>
@@ -97,14 +97,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos X="12" Y="87"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2824"/>
         <CursorPos Y="2846"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\forms.pp"/>
@@ -112,7 +112,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="882"/>
         <CursorPos X="14" Y="902"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\components\lazutils\graphtype.pp"/>
@@ -120,21 +120,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="26"/>
         <CursorPos X="3" Y="48"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\fpc\3.2.2\source\rtl\objpas\fgl.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1817"/>
         <CursorPos Y="1839"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\include\custompanel.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="143"/>
         <CursorPos X="2" Y="171"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\themes.pas"/>
@@ -142,7 +142,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="623"/>
         <CursorPos X="3" Y="537"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\lcl\interfacebase.pp"/>
@@ -150,21 +150,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="14" Y="180"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\BGRABitmap\bgrabitmap\bgralclbitmap.pas"/>
         <UnitName Value="BGRALCLBitmap"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="14" Y="17"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\ct4laz\pl_components\pl_graphics32\source\GR32.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5959"/>
         <CursorPos X="8" Y="5982"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\components\lazdebuggers\cmdlinedebuggerbase\debuginstructions.pas"/>
@@ -172,7 +172,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="148"/>
         <CursorPos X="29" Y="169"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\components\tachart\tachartaxis.pas"/>
@@ -180,7 +180,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="436"/>
         <CursorPos X="41" Y="458"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\components\tachart\tagraph.pas"/>
@@ -188,14 +188,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="621"/>
         <CursorPos X="84" Y="643"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\Rhl\rhlSipHash.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="63"/>
         <CursorPos X="5" Y="86"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\BGRABitmap\bgrabitmap\bgradefaultbitmap.pas"/>
@@ -203,36 +203,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="47"/>
         <CursorPos X="14" Y="76"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\BGRABitmap\bgrabitmap\bgracustombitmap.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="741"/>
         <CursorPos X="16" Y="761"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\laz_conf\3.6\onlinepackagemanager\packages\BGRABitmap\bgrabitmap\part3d.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="281"/>
         <CursorPos X="16" Y="303"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="..\sugar.collections.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="748"/>
         <CursorPos X="48" Y="763"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="24"/>
       </Unit>
       <Unit>
         <Filename Value="..\..\..\..\imaginglib\Source\JpegLib\imjmemmgr.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1158"/>
         <CursorPos X="5" Y="1208"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
@@ -240,136 +239,180 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="663"/>
         <CursorPos X="5" Y="685"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
         <Filename Value="R:\Apps\Lazarus\3.6\fpc\3.2.2\source\packages\rtl-objpas\src\inc\variants.pp"/>
         <UnitName Value="Variants"/>
         <EditorIndex Value="-1"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\4.0.0\fpc\3.2.2\source\rtl\objpas\fgl.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="366"/>
+        <CursorPos X="14" Y="384"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\4.0.0\lcl\extctrls.pp"/>
+        <UnitName Value="ExtCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1161"/>
+        <CursorPos X="14" Y="1181"/>
+        <UsageCount Value="19"/>
+      </Unit>
+      <Unit>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <ComponentName Value="TagControl"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="frame.TagControl"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="107"/>
+        <CursorPos X="5" Y="121"/>
+        <UsageCount Value="38"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\4.0.0\lcl\include\control.inc"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="2827"/>
+        <CursorPos Y="2846"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="R:\Apps\Lazarus\4.0.0\lcl\forms.pp"/>
+        <UnitName Value="Forms"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="1303"/>
+        <CursorPos X="27" Y="1323"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
       <Position>
-        <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="191" TopLine="186"/>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="118" TopLine="98"/>
+      </Position>
+      <Position>
+        <Filename Value="R:\Apps\Lazarus\4.0.0\lcl\include\control.inc"/>
+        <Caret Line="616" TopLine="596"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="149" TopLine="129"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="118" TopLine="98"/>
       </Position>
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="69" Column="27" TopLine="50"/>
+        <Caret Line="149" TopLine="135"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="117" Column="31" TopLine="98"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="62" Column="18" TopLine="43"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="104" Column="22" TopLine="99"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="39" TopLine="39"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="144" Column="27" TopLine="135"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="47" Column="19" TopLine="19"/>
+      </Position>
+      <Position>
+        <Filename Value="main.pas"/>
+        <Caret Line="41" Column="54" TopLine="11"/>
       </Position>
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="231" Column="48" TopLine="219"/>
+        <Caret Line="37" Column="41" TopLine="17"/>
       </Position>
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="226" Column="5" TopLine="204"/>
+        <Caret Line="165" Column="5" TopLine="136"/>
       </Position>
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="226" Column="5" TopLine="204"/>
+        <Caret Line="39" Column="19" TopLine="20"/>
+      </Position>
+      <Position>
+        <Filename Value="frame.tagcontrol.pas"/>
+        <Caret Line="222" Column="4" TopLine="210"/>
       </Position>
       <Position>
         <Filename Value="sugar.tagui.pas"/>
-        <Caret Line="219" Column="52" TopLine="204"/>
+        <Caret Line="28" Column="25" TopLine="13"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="22" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="88" Column="38" TopLine="75"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="71" Column="85" TopLine="57"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="24" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="87" Column="43" TopLine="63"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="99" Column="25" TopLine="69"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="24" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="37" Column="33" TopLine="9"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="25" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="143" Column="42" TopLine="141"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="24" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="147" Column="35" TopLine="141"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="37" Column="53" TopLine="36"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="22" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="150" Column="15" TopLine="136"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="141" Column="34" TopLine="132"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="22" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="29" Column="19" TopLine="18"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="100" Column="24" TopLine="97"/>
       </Position>
       <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="22" TopLine="6"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="23" TopLine="6"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="22" TopLine="6"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="24" TopLine="6"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="47" Column="5" TopLine="10"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="46" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="47" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="46" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="47" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="48" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="47" Column="5" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="main.pas"/>
-        <Caret Line="48" Column="5" TopLine="9"/>
+        <Filename Value="sugar.tagui.pas"/>
+        <Caret Line="40" Column="19" TopLine="22"/>
       </Position>
     </JumpHistory>
     <RunParams>

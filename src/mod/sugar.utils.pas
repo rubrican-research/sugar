@@ -1378,23 +1378,6 @@ begin
     Result := getFilePaths(_dir, [_filter], false);
 end;
 
-//function getFiles(_dir: string; _filter: string): TStrings;
-//var
-//  fInfo: TSearchRec;
-//  found: boolean;
-//begin
-//  Result := TStringList.Create;
-//
-//  found := FindFirst(_dir + {\}DirectorySeparator + _filter, faAnyFile, fInfo) = 0;
-//  if found then begin
-//    repeat
-//      Result.Add(_dir + {\}DirectorySeparator + FInfo.Name);
-//    until FindNext(fInfo) <> 0;
-//  end;
-//  FindClose(fInfo);
-//end;
-
-
 function getFilePaths(_dir: string; _filterArr: TStringArray;
     _recursive: boolean = true): TStrings;
 var

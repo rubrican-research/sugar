@@ -274,6 +274,14 @@ SOFTWARE."/>
         <Filename Value="mod\sugar.securesalt.pas"/>
         <UnitName Value="sugar.securesalt"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.framelist.pas"/>
+        <UnitName Value="sugar.framelist"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\tags\frame.tagcontrol.pas"/>
+        <UnitName Value="frame.TagControl"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

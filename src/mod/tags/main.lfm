@@ -14,8 +14,8 @@ object Form1: TForm1
   AutoScroll = True
   Caption = 'Form1'
   Color = clWindow
-  OnCreate = FormCreate
   SnapOptions.SnapToMonitor = True
   SnapOptions.SnapToForms = True
-  LCLVersion = '3.6.0.0'
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
 end

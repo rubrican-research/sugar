@@ -1817,9 +1817,10 @@ end;
 
 function RbModel.insertSQL: string;
 begin
-    if myInsertSQL.isEmpty then
+    if myInsertSQL.isEmpty then begin
         Result:= QBInserter.sql
-    else
+	end
+	else
         Result:= myInsertSQL;
 end;
 

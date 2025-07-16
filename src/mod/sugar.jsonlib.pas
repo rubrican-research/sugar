@@ -232,7 +232,6 @@ end;
 
 function parseJSON(const _json: string): TJSONData;
 begin
-
 	with TJSONParser.Create(_json, [joUTF8]) do
     begin
         try

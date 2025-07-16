@@ -52,9 +52,9 @@ type
         property notes     : string read getNotes write setNotes;
         property createdOn : TDateTime read getcreatedOn write setcreatedOn;
         property updatedOn : TDateTime read getupdatedOn write setupdatedOn;
-        property enabled    : boolean read getEnabled write setEnabled;
+        property enabled   : boolean read getEnabled write setEnabled;
         property status    : NContactStatus read getstatus write setstatus;
-        property isActive : boolean read getIsActive;
+        property isActive  : boolean read getIsActive;
         property hasChanged: boolean read getChanged;
 
     public

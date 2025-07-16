@@ -5,49 +5,9 @@ unit sugar.tagUI;
 interface
 
 uses
-    Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, StdCtrls, fgl;
-
-const
-    BORDER_SPACING_AROUND = 7;
+    Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, StdCtrls,  frame.TagControl;
 
 type
-
-	{ TTagControl }
-
-    TTagControl = class(TPanel)
-    private
-		mybgColor: TColor;
-		mycolor: TColor;
-		myOnClose: TNotifyEvent;
-		myOnCloseQuery: TCloseQueryEvent;
-		mytextColor: TColor;
-        tagLabel: TLabel;
-        closeLabel: TLabel;
-		function getText: string;
-		procedure setOnClose(const _value: TNotifyEvent);
-		procedure setOnCloseQuery(const _value: TCloseQueryEvent);
-		procedure setText(const _value: string);
-		procedure settextColor(const _value: TColor);
-    protected
-        procedure DoOnCloseClick(Sender: TObject);
-        procedure init;
-    public
-        constructor Create(TheOwner: TComponent); override;
-        destructor Destroy; override;
-
-        property text: string read getText write setText;
-        property textColor: TColor read mytextColor write settextColor;
-        property onClose: TNotifyEvent read myOnClose write setOnClose;
-        property OnCloseQuery: TCloseQueryEvent read myOnCloseQuery write setOnCloseQuery;
-
-	end;
-
-    TTagControlClass = class of TTagControl;
-
-    TTagControlList = class(specialize TFPGMapObject<string,  TTagControl>)
-
-	end;
-
 	{ TTagsEditor }
 
     TTagsEditor = class(TFrame)
@@ -58,11 +18,27 @@ type
 			Shift: TShiftState);
 		procedure ListBox1Exit(Sender: TObject);
     private
+		mybackgroundColor: TColor;
+		myborderColor: TColor;
+		myiconColor: TColor;
+		mytextColor: TColor;
         tagControlClass : TTagControlClass;
         myTags: TTagControlList;
+		function Gettag(_text: string): TTagControl;
         function newTag: TTagControl;
         procedure onCloseTag(Sender: TObject);
+		procedure SetbackgroundColor(const _value: TColor);
+		procedure SetborderColor(const _value: TColor);
+		procedure SeticonColor(const _value: TColor);
+		procedure SettextColor(const _value: TColor);
         procedure showSelection;
+        procedure showTagList;
+
+        procedure markForDelete(_tagControl: TTagControl);
+        procedure asyncDelete(_tagControlPtr: PtrInt);
+
+        // Handler for tag text changes. This needs to rename the index;
+        procedure OnTagTextChange(Sender: TObject);
     public
         procedure addTags(_tags: TStringArray);
         procedure addTags(_tags: string);
@@ -70,6 +46,12 @@ type
     public
         constructor Create(TheOwner: TComponent); override;
         destructor Destroy; override;
+    public
+        property tag[_text: string] : TTagControl read Gettag;
+        property textColor      : TColor read mytextColor write SettextColor;
+        property borderColor    : TColor read myborderColor write SetborderColor;
+        property iconColor      : TColor read myiconColor write SeticonColor;
+        property backgroundColor: TColor read mybackgroundColor write SetbackgroundColor;
     end;
 
 implementation
@@ -79,106 +61,14 @@ implementation
 uses
    LCLType, sugar.utils, sugar.uihelper;
 
-{ TTagControl }
-
-function TTagControl.getText: string;
-begin
-    Result := tagLabel.Caption;
-end;
-
-
-procedure TTagControl.setOnClose(const _value: TNotifyEvent);
-begin
-	if myonClose=_value then Exit;
-	myonClose:=_value;
-end;
-
-procedure TTagControl.setOnCloseQuery(const _value: TCloseQueryEvent);
-begin
-	if myOnCloseQuery=_value then Exit;
-	myOnCloseQuery:=_value;
-end;
-
-procedure TTagControl.setText(const _value: string);
-begin
-    tagLabel.Caption := _value;
-end;
-
-procedure TTagControl.settextColor(const _value: TColor);
-begin
-	if mytextColor=_value then Exit;
-	mytextColor:=_value;
-    tagLabel.Font.Color:= _value;
-end;
-
-procedure TTagControl.DoOnCloseClick(Sender: TObject);
-var
-    _canClose: boolean = true;
-begin
-    if assigned(myOnCloseQuery) then
-        myOnCloseQuery(Self, _canClose);
-
-    if assigned(myOnClose) then begin
-        if _canClose then begin
-            myOnClose(Self);
-        end;
-	end;
-end;
-
-procedure TTagControl.init;
-begin
-    tagLabel := TLabel.Create(Self);
-
-    with tagLabel do begin
-        Align  := alClient;
-        layout := tlCenter;
-        BorderSpacing.Around := BORDER_SPACING_AROUND;
-        AutoSize := True;
-        WordWrap := True;
-	end;
-    InsertControl(tagLabel);
-
-	closeLabel := TLabel.Create(Self);
-    setHover(closeLabel);
-    with closeLabel do begin
-        Align  := alRight;
-        layout := tlTop;
-        BorderSpacing.Around := BORDER_SPACING_AROUND;
-        Caption := '🗙';
-        OnClick := @DoOnCloseClick;
-	end;
-    insertControl(closeLabel);
-end;
-
-constructor TTagControl.Create(TheOwner: TComponent);
-begin
-	inherited Create(TheOwner);
-    //AutoSize := True;
-    Name := '';
-    Caption := '';
-    AutoSize := True;
-    BorderStyle:= bsSingle;
-    BevelColor:=clSkyBlue;
-    BevelOuter:= bvNone;
-    BevelInner:= bvNone;
-    BorderWidth:=0;
-    BorderSpacing.Right := 3;
-    BorderSpacing.Bottom:= 3;
-    init;
-end;
-
-destructor TTagControl.Destroy;
-begin
-	inherited Destroy;
-end;
-
 { TTagsEditor }
 
 procedure TTagsEditor.Edit1KeyDown(Sender: TObject; var Key: Word;
 	Shift: TShiftState);
 begin
-    if Key = VK_RETURN then addTags(Edit1.Text);
-    showSelection;
+    if Key = VK_RETURN then
+        addTags(Edit1.Text);
+    // showSelection;
 end;
 
 procedure TTagsEditor.ListBox1Exit(Sender: TObject);
@@ -192,13 +82,49 @@ begin
         Result := tagControlClass.Create(Self)
     else
         Result := TTagControl.Create(Self);
+    Result.OnTagTextChange  := @OnTagTextChange;
+    Result.textColor        := textColor;
+    Result.borderColor      := borderColor;
+    Result.iconColor        := iconColor;
+    Result.backgroundColor  := backgroundColor;
 
     Result.onClose:= @onCloseTag;
+end;
+
+function TTagsEditor.Gettag(_text: string): TTagControl;
+begin
+    Result := myTags.KeyData[_text];
 end;
 
 procedure TTagsEditor.onCloseTag(Sender: TObject);
 begin
     TTagControl(Sender).Visible := false;
+    markForDelete(TTagControl(Sender));
+end;
+
+procedure TTagsEditor.SetbackgroundColor(const _value: TColor);
+begin
+	if mybackgroundColor=_value then Exit;
+	mybackgroundColor:=_value;
+end;
+
+procedure TTagsEditor.SetborderColor(const _value: TColor);
+begin
+	if myborderColor=_value then Exit;
+	myborderColor:=_value;
+end;
+
+procedure TTagsEditor.SeticonColor(const _value: TColor);
+begin
+	if myiconColor=_value then Exit;
+	myiconColor:=_value;
+end;
+
+
+procedure TTagsEditor.SettextColor(const _value: TColor);
+begin
+	if mytextColor=_value then Exit;
+	mytextColor:=_value;
 end;
 
 procedure TTagsEditor.showSelection;
@@ -213,6 +139,55 @@ begin
     ListBox1.Visible := True;
 end;
 
+procedure TTagsEditor.showTagList;
+var
+	i: Integer;
+begin
+    Edit1.Text := '';
+    for i := 0 to pred(myTags.Count) do begin
+        if Edit1.Text <> '' then
+           Edit1.Text := Edit1.Text + ' ';
+        Edit1.Text := Edit1.Text + myTags.Data[i].text;
+    end;
+end;
+
+procedure TTagsEditor.markForDelete(_tagControl: TTagControl);
+begin
+    Application.QueueAsyncCall(@asyncDelete, PtrInt(_tagControl));
+end;
+
+procedure TTagsEditor.asyncDelete(_tagControlPtr: PtrInt);
+var
+	_tagControl: TTagControl;
+begin
+    _tagControl := TTagControl(_tagControlPtr);
+    myTags.Delete(myTags.IndexOfData(_tagControl));
+    showTagList;
+end;
+
+procedure TTagsEditor.OnTagTextChange(Sender: TObject);
+var
+	_tagControl: TTagControl;
+	i: Integer;
+begin
+    if Sender is TTagControl then
+        _tagControl := TTagControl(Sender)
+    else
+        exit;
+
+    i := myTags.IndexOfData(_tagControl);
+
+    if i > -1 then begin
+        myTags.Keys[i] := _tagControl.text;
+        showTagList;
+	end;
+
+    //else
+    //    raise Exception.Create('TTagsEditor.OnTagTextChange:: Unable to find TagControl for ' + _tagControl.Text);
+
+
+end;
+
 procedure TTagsEditor.addTags(_tags: TStringArray);
 var
 	_word: String;
@@ -224,7 +199,6 @@ begin
         if _i = -1 then begin
 	        _tagControl := newTag;
 	        _tagControl.text:= _word;
-            _tagControl.textColor := clSkyBlue;
 	        myTags[_word] := _tagControl;
 	        pnlTags.InsertControl(_tagControl);
 		end
@@ -254,6 +228,12 @@ end;
 constructor TTagsEditor.Create(TheOwner: TComponent);
 begin
 	inherited Create(TheOwner);
+
+    textColor        := clDefault;
+    borderColor      := clSkyBlue;
+    iconColor        := clSilver;
+    backgroundColor  := clDefault;
+
     tagControlClass:= TTagControl;
     myTags := TTagControlList.Create(True);
 end;
