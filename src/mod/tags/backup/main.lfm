@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 425
+  Left = 1229
   Height = 362
-  Top = 102
+  Top = 340
   Width = 476
   HorzScrollBar.Increment = 1
   HorzScrollBar.Page = 1
@@ -14,8 +14,8 @@ object Form1: TForm1
   AutoScroll = True
   Caption = 'Form1'
   Color = clWindow
-  OnCreate = FormCreate
   SnapOptions.SnapToMonitor = True
   SnapOptions.SnapToForms = True
-  LCLVersion = '3.6.0.0'
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
 end

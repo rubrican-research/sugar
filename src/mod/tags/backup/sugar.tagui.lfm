@@ -1,53 +1,139 @@
 object TagsEditor: TTagsEditor
   Left = 0
-  Height = 135
+  Height = 208
   Top = 0
   Width = 345
   HorzScrollBar.Page = 1
   VertScrollBar.Page = 1
+  Align = alRight
   AutoScroll = True
   AutoSize = True
-  ClientHeight = 135
+  ClientHeight = 208
   ClientWidth = 345
   TabOrder = 0
-  DesignLeft = 1308
-  DesignTop = 107
-  object Edit1: TEdit
-    Left = 0
-    Height = 23
-    Top = 0
-    Width = 345
-    Align = alTop
-    TabOrder = 0
-    Text = 'One two three four'
-    OnKeyDown = Edit1KeyDown
-  end
+  DesignLeft = 1005
+  DesignTop = 94
   object pnlTags: TFlowPanel
-    Left = 0
-    Height = 109
-    Top = 26
-    Width = 345
+    Left = 7
+    Height = 128
+    Top = 42
+    Width = 331
     Align = alClient
     AutoSize = True
     BevelOuter = bvNone
     BorderSpacing.Top = 3
+    BorderSpacing.Around = 7
     Color = clWindow
     ControlList = <>
     FlowLayout = tlTop
     FlowStyle = fsLeftRightTopBottom
     ParentColor = False
-    TabOrder = 1
+    TabOrder = 0
   end
-  object ListBox1: TListBox
-    Left = 232
-    Height = 80
-    Top = 26
-    Width = 108
-    Anchors = [akLeft, akRight]
-    BorderSpacing.Around = 3
-    ItemHeight = 0
+  object pnlAdd: TPanel
+    Left = 7
+    Height = 24
+    Top = 177
+    Width = 331
+    Align = alBottom
+    BorderSpacing.Around = 7
+    BevelOuter = bvNone
+    ClientHeight = 24
+    ClientWidth = 331
+    TabOrder = 1
+    object edtTagText: TComboBox
+      Left = 0
+      Height = 23
+      Top = 0
+      Width = 331
+      Align = alClient
+      AutoComplete = True
+      AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+      ItemHeight = 15
+      Sorted = True
+      TabOrder = 0
+      OnEditingDone = edtTagTextEditingDone
+      OnSelect = edtTagTextEditingDone
+    end
+  end
+  object pblCaption: TPanel
+    Left = 7
+    Height = 25
+    Top = 7
+    Width = 331
+    Align = alTop
+    BorderSpacing.Around = 7
+    BevelOuter = bvNone
+    ClientHeight = 25
+    ClientWidth = 331
     TabOrder = 2
-    Visible = False
-    OnExit = ListBox1Exit
+    OnMouseEnter = OnToolActive
+    object Label1: TLabel
+      Left = 0
+      Height = 25
+      Top = 0
+      Width = 34
+      Align = alLeft
+      Caption = 'Label1'
+      Font.Color = clHighlight
+      Layout = tlCenter
+      ParentFont = False
+      OnMouseEnter = OnToolActive
+    end
+    object pnlTools: TPanel
+      Left = 216
+      Height = 25
+      Top = 0
+      Width = 115
+      Align = alRight
+      BevelOuter = bvNone
+      ClientHeight = 25
+      ClientWidth = 115
+      TabOrder = 0
+      OnMouseEnter = OnToolActive
+      object btnClear: TSpeedButton
+        Left = 23
+        Height = 25
+        Top = 0
+        Width = 23
+        Align = alRight
+        Caption = '🗙'
+        OnClick = btnClearClick
+      end
+      object btnCopy: TSpeedButton
+        Left = 46
+        Height = 25
+        Top = 0
+        Width = 23
+        Align = alRight
+        Caption = '⧉'
+        OnClick = btnCopyClick
+      end
+      object btnEdit: TSpeedButton
+        Left = 69
+        Height = 25
+        Top = 0
+        Width = 23
+        Align = alRight
+        Caption = '✎'
+        OnClick = btnEditClick
+      end
+      object btnAddTags: TSpeedButton
+        Left = 92
+        Height = 25
+        Top = 0
+        Width = 23
+        Align = alRight
+        Caption = '+'
+        OnClick = btnAddTagsClick
+      end
+    end
+  end
+  object idleTimer: TIdleTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = idleTimerTimer
+    Left = 53
+    Top = 81
   end
 end

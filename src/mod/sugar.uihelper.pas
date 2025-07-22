@@ -26,7 +26,9 @@ type
         prevOnMouseEnter: TNotifyEvent;
         prevOnMouseLeave: TNotifyEvent;
         myonHoverFont: TFont;
+        myUseOnHoverFont: boolean;
         myDefaultFont : TFont;
+        procedure assignPrevEventHandlers(_control: TControl);
     public
         procedure OnMouseEnter(Sender: TObject);
         procedure OnMouseLeave(Sender: TObject);
@@ -35,8 +37,6 @@ type
 			Operation: TFPObservedOperation; Data: Pointer);
         destructor Destroy; override;
         constructor Create(_control: TControl); overload;
-        constructor Create(_label: TLabel); overload;
-        constructor Create(_panel: TPanel); overload;
 
     public
         property onHoverFont: TFont read myonHoverFont write setonHoverFont;
@@ -143,8 +143,8 @@ type
     procedure uiState(_arrc: array of TControl; _s: TUIState; _hint: string = '');
 
 
-    procedure setHover(constref _lbl: TLabel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clSkyBlue ); overload;
-    procedure setHover(constref _pnl: TPanel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clSkyBlue ); overload;
+    procedure setHover(constref _lbl: TLabel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clHighlight); overload;
+    procedure setHover(constref _pnl: TPanel; constref _hoverFont: TFont = nil; _hoverColor:TColor = clHighlight); overload;
     procedure uiShake(constref _c: TControl);
 
     // extracts a real value from the edit box. if it is not a real value, it returns the default value
@@ -286,42 +286,85 @@ end;
 
 procedure TOnHover.setonHoverFont(const _value: TFont);
 begin
-	if myonHoverFont=_value then Exit;
-	myonHoverFont:=_value;
+
+    if assigned(_value) then begin
+        myOnHoverFont.Assign(_value);
+        myUseOnHoverFont := true;
+	end
+    else
+        myUseOnHoverFont := false;
+
+end;
+
+procedure TOnHover.assignPrevEventHandlers(_control: TControl);
+begin
+    if (_control is TLabel) then
+    begin
+        prevOnMouseEnter:= TLabel(_control).OnMouseEnter;
+        prevOnMouseLeave:= TLabel(_control).OnMouseLeave;
+        exit;
+	end;
+
+    if  (_control is TPanel) then begin
+        prevOnMouseEnter:= TPanel(_control).OnMouseEnter;
+        prevOnMouseLeave:= TPanel(_control).OnMouseLeave;
+        exit;
+    end;
+
+    if  (_control is TEdit) then begin
+        prevOnMouseEnter:= TEdit(_control).OnMouseEnter;
+        prevOnMouseLeave:= TEdit(_control).OnMouseLeave;
+        exit;
+    end;
+
 end;
 
 procedure TOnHover.OnMouseEnter(Sender: TObject);
 var
 	_lbl: TLabel;
     _pnl: TPanel;
+    _hoverFont : TFont;
 begin
 
     {Initialize the CURRENT font settings}
     myDefaultColor := myControl.Color;
     myDefaultFont.Assign(myControl.Font);
-    myonHoverColor := clHighlight;
-    myOnHoverFont.Assign(myDefaultFont);
-    myOnHoverFont.Color := myonHoverColor;
-    myOnHoverFont.Style := myOnHoverFont.Style + [fsUnderline];
 
+    _hoverFont := TFont.Create;
+    try
+	    case myUseOnHoverFont of
+	    	True    : begin
+	            _hoverFont.Assign(myonHoverFont);
+			end;
 
-    if Sender is TPanel then
-    begin
-        _pnl := Sender as TPanel;
-        _pnl.Color:= myOnHoverColor;
-	end
-    else if Sender is TLabel then begin
-        _lbl := Sender as TLabel;
-        _lbl.Font.Assign(myonHoverFont);
-	end;
-
-    if Sender is TControl then begin
-        with Sender as TControl do begin
-            Cursor:= crHandPoint;
+	        False   : begin
+	            _hoverFont.Assign(myDefaultFont);
+	            _hoverFont.Color := myonHoverColor;
+	            _hoverFont.Style := myOnHoverFont.Style + [fsUnderline];
+			end;
 	    end;
+
+	    if Sender is TPanel then
+	    begin
+	        _pnl := Sender as TPanel;
+	        _pnl.Color:= myOnHoverColor;
+		end
+	    else if Sender is TLabel then begin
+	        _lbl := Sender as TLabel;
+	        _lbl.Font.Assign(_hoverFont);
+		end;
+
+	    if Sender is TControl then begin
+            TControl(Sender).Cursor:= crHandPoint;
+		end;
+
+	    if assigned(prevOnMouseEnter) then prevOnMouseEnter(Sender);
+
+	finally
+        _hoverFont.Free;
 	end;
 
-    if assigned(prevOnMouseEnter) then prevOnMouseEnter(Sender);
+
 
 end;
 
@@ -375,23 +418,16 @@ begin
     myControl     := _control;
     myDefaultFont := TFont.Create;
     myOnHoverFont := TFont.Create;
+    myonHoverColor:= clHighlight;
+    myUseOnHoverFont := false;
+
+    assignPrevEventHandlers(_control);
+
+
+
     _control.FPOAttachObserver(self);
-
 end;
 
-constructor TOnHover.Create(_label: TLabel);
-begin
-    Create(TControl(_label));
-    prevOnMouseEnter:= _label.OnMouseEnter;
-    prevOnMouseLeave:= _label.OnMouseLeave;
-end;
-
-constructor TOnHover.Create(_panel: TPanel);
-begin
-    Create(TControl(_panel));
-    prevOnMouseEnter:= _panel.OnMouseEnter;
-    prevOnMouseLeave:= _panel.OnMouseLeave;
-end;
 
 { TOnAlign }
 

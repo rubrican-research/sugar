@@ -20,6 +20,7 @@ type
 
 const
       __ILLEGAL_CHARS             = [':', '/', '\', '?', '*', '<', '>', '|', '"'] ; // set
+      __WHITESPACE_CHARS          = [#10, #13, ' ', ',', '.', ';', ':', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!'];
       __WHITESPACE : TStringArray = (#10, #13, ' ', ',', '.', ';', ':', '"', '''', '<', '>', '(', ')', '[', ']', '{', '}', '!'); // array
 
 function appendPath(_paths: array of string; _delim: string = DirectorySeparator): string;

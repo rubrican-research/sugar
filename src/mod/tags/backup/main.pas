@@ -36,11 +36,14 @@ var
 begin
     for i := 0 to 3 do begin
 	    te := TTagsEditor.Create(Self);
+        te.Caption:= 'Tag Editor ' + i.ToString;
         te.Name := '';
 	    te.Align:= alTop;
         te.BorderSpacing.Around:=10;
 	    InsertControl(te);
 	end;
+    te.selectFrom(['Baby', 'Stan', 'Happy', 'Stance', 'Gucci', 'Beads']);
+    te.alwaysAddNewTags:=true;
 end;
 
 initialization
