@@ -145,6 +145,9 @@ type
         builder: BuilderProc;
     end;
 
+    THtmlPageGenerator = function: string;
+    TWebpageFactory    = function: RbWebPage;
+
 function scriptObj(_jsPath: string=''): THtmlScript;
 
 implementation
