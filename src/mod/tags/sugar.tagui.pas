@@ -512,6 +512,8 @@ begin
     AutoHideTools := False;
     alwaysAddNewTags := True;
 
+
+
 end;
 
 destructor TTagsEditor.Destroy;

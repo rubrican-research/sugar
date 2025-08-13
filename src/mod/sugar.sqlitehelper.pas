@@ -12,11 +12,13 @@ unit sugar.sqlitehelper;
 interface
 
 uses
-	 Classes, SysUtils, Controls, Forms, Dialogs, SQLDBLib, SQLDB, sqlite3dyn, SQLite3Conn, fpjson;
+	 Classes, SysUtils, Controls, Forms, Dialogs,
+     SQLDBLib, SQLDB, sqlite3dyn, SQLite3Conn, fpjson,
+     fgl;
 
 const
 	 DEFAULT_DB_FILE = 'myDB.db';
-	 SEQUENCE_TABLE	= '_seq';
+	 SEQUENCE_TABLE	 = '_seq';
 
 	 MIN_SQLITE_BIG_INT = -9223372036854775808;
 	 NUM_FLAGS = 100;
@@ -31,8 +33,8 @@ const
 
 type
 
-	 { TDBModule }
-	 TScriptFunc	 = function: string;
+	 { TSQLiteDBModule }
+	 TScriptFunc   = function: string;
 	 TScriptMethod = function: string of object;
 
 	TDBOpenState = (
@@ -51,7 +53,11 @@ type
         dtsMemory
     );
 
-	 TDBModule = class(TDataModule)
+    TSQLiteDBModule = class;
+
+	{ TSQLiteDBModuleList }
+
+	 TSQLiteDBModule = class(TDataModule)
 			 libloader  : TSQLDBLibraryLoader;
 			 myDB       : TSQLite3Connection;
 			 transaction: TSQLTransaction;
@@ -177,13 +183,13 @@ type
       	TDBStore = class
         protected
 			tbl: string;
-			dm:	TDBModule;
+			dm:	TSQLiteDBModule;
 			function getTableCreateScript(_kvTable: string): string; virtual;
 			function noInitException: Exception; virtual;
         public
             // Returns the exception message that is raised when the DBStore is not initialized;
             function noInitExceptionMsg: string; virtual;
-        	constructor Create(_tbl: string; _dm: TDBModule); virtual;
+        	constructor Create(_tbl: string; _dm: TSQLiteDBModule); virtual;
 			function makeTable(_tbl: string): integer; virtual;
 
 			function exists(_key: string): boolean;
@@ -205,7 +211,7 @@ type
         protected
 			function getTableCreateScript(_kvTable: string): string; override;
 		public
-			constructor Create(_tbl: string; _dm: TDBModule); override;
+			constructor Create(_tbl: string; _dm: TSQLiteDBModule); override;
 			function get(_key: string): string;
 			function put(_key: string; _val: string): integer; // Return -2 if tbl is empty
 
@@ -223,7 +229,7 @@ type
         protected
 			function getTableCreateScript(_kvTable: string): string; override;
 		public
-			constructor Create(_tbl: string; _dm: TDBModule); override;
+			constructor Create(_tbl: string; _dm: TSQLiteDBModule); override;
 			function get(_key: string): string;
 			function put(_key: string; _val: string): integer; // Return -2 if tbl is empty
 
@@ -239,7 +245,7 @@ type
 
 	 public
 			//KV Tables
-	    function kv(_tbl: string): TDBModule.TDBKeyValueStore;
+	    function kv(_tbl: string): TSQLiteDBModule.TDBKeyValueStore;
 
 	 public
 		property DbFile: string read FDbFile write SetDbFile;
@@ -250,10 +256,6 @@ type
 		property openMode: TDBOpenState read myDbOpenState;
 	 end;
 
-{Creates a new TDBModule object}
-function newSqliteDB(_dbFile: string; _dbFolder: string;
-	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TDBModule;
-
 { function sqliteDB(): V2
     This function instantiates a TDBModule object with the parameters supplied, ready for use.
     Internally, this unit maintains a hash list of the instantiated TDBModules and returns the object
@@ -263,13 +265,17 @@ function newSqliteDB(_dbFile: string; _dbFolder: string;
     NOTE: _dbFile parameter has a default value. So calling the function without any parameters
     returns an object that is instantiated to use a efault DB file in the folder where the exe is stored.
 }
+function sqliteDB ( const _dbFile: string = DEFAULT_DB_FILE;
+                    const _dbFolder: string = '';
+                    constref _initScriptFunc: TScriptFunc = nil;
+                    constref _upgradeScriptFunc: TScriptFunc = nil): TSQLiteDBModule;
 
-function sqliteDB (  _dbFile: string = DEFAULT_DB_FILE;
-                    _dbFolder: string = '';
-                    _initScriptFunc: TScriptFunc = nil;
-                    _upgradeScriptFunc: TScriptFunc = nil): TDBModule;
+function sqliteMemDB(const _dbfile: string; // alias
+                    constref _initScriptFunc: TScriptFunc = nil;
+                    constref _upgradeScriptFunc: TScriptFunc = nil): TSQLiteDBModule;
 
-function sqliteDBFree(_dbFile: string): boolean;
+
+function sqliteDBFree(const _dbFile: string): boolean;
 
 
 implementation
@@ -279,7 +285,7 @@ uses
 	 sugar.utils, sugar.collections; //, uDefs;
 
 type
-	TDBModuleListBase = specialize GenericHashObjectList<TDBModule>;
+	TDBModuleListBase = specialize GenericHashObjectList<TSQLiteDBModule>;
 
 	TDBModuleList = class(TDBModuleListBase)
 
@@ -289,23 +295,23 @@ var
 	 myDBModules: TDBModuleList;
 
 function newSqliteDB(_dbFile: string; _dbFolder: string;
-	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TDBModule;
+	_initScriptFunc: TScriptFunc; _upgradeScriptFunc: TScriptFunc): TSQLiteDBModule;
 begin
-	Result := TDBModule.Create(nil);
+	Result := TSQLiteDBModule.Create(nil);
 	Result.DbFile := _dbFile;
 	Result.DbFolder := _dbFolder;
 	Result.initScriptFunc := _initScriptFunc;
-	Result.upgradeScript := _upgradeScriptFunc;
-
+	Result.upgradeScript  := _upgradeScriptFunc;
 end;
 
-function sqliteDB(_dbFile: string; _dbFolder: string; _initScriptFunc: TScriptFunc;
-	 _upgradeScriptFunc: TScriptFunc): TDBModule;
+function sqliteDB(const _dbFile: string; const _dbFolder: string; constref
+	_initScriptFunc: TScriptFunc; constref _upgradeScriptFunc: TScriptFunc
+	): TSQLiteDBModule;
 begin
 	Result := myDBModules.find(_dbFile);
 	 if not Assigned(Result) then
 	 begin
-	 	 Result := newSqliteDB(_dbFile, _dbFolder, _initScriptFunc, _upgradeScriptFunc);
+	 	Result := newSqliteDB(_dbFile, _dbFolder, _initScriptFunc, _upgradeScriptFunc);
 		Result.initDB;
 		myDBModules.add(_dbfile, Result);
 	 end;
@@ -316,80 +322,100 @@ begin
 
 end;
 
-function sqliteDBFree(_dbFile: string): boolean;
+function sqliteMemDB(const _dbfile: string; constref
+	_initScriptFunc: TScriptFunc; constref _upgradeScriptFunc: TScriptFunc
+	): TSQLiteDBModule;
+begin
+    Result := myDBModules.find(_dbFile);
+    if not assigned(Result) then begin
+        Result := TSQLiteDBModule.Create(nil);
+	    Result.DbFolder := '';
+	    Result.initScriptFunc := _initScriptFunc;
+	    Result.upgradeScript  := _upgradeScriptFunc;
+        if Result.openMemDB(_dbFile ) then begin
+            myDBModules.Add(_dbFile, Result);
+		end
+        else begin
+            Result.Free;
+            raise Exception.Create(Format('sqliteMemDB:: memDB for "%s" failed.', [_dbFile]));
+		end;
+	end;
+end;
+
+function sqliteDBFree(const _dbFile: string): boolean;
 begin
     Result:= myDBModules.delete(_dbFile);
 end;
 
-{ TDBModule.TDBKJSONStore }
+{ TSQLiteDBModule.TDBKJSONStore }
 
-function TDBModule.TDBKJSONStore.getTableCreateScript(_kvTable: string): string;
+function TSQLiteDBModule.TDBKJSONStore.getTableCreateScript(_kvTable: string): string;
 begin
 
 end;
 
-constructor TDBModule.TDBKJSONStore.Create(_tbl: string; _dm: TDBModule);
+constructor TSQLiteDBModule.TDBKJSONStore.Create(_tbl: string; _dm: TSQLiteDBModule);
 begin
 	 inherited Create(_tbl, _dm);
 end;
 
-function TDBModule.TDBKJSONStore.get(_key: string): string;
+function TSQLiteDBModule.TDBKJSONStore.get(_key: string): string;
 begin
 
 end;
 
-function TDBModule.TDBKJSONStore.put(_key: string; _val: string): integer;
+function TSQLiteDBModule.TDBKJSONStore.put(_key: string; _val: string): integer;
 begin
 
 end;
 
-function TDBModule.TDBKJSONStore.findKeysFor(_val: TJSONData): TStringArray;
+function TSQLiteDBModule.TDBKJSONStore.findKeysFor(_val: TJSONData): TStringArray;
 begin
 
 end;
 
-function TDBModule.TDBKJSONStore.findFirstKeyFor(_val: TJSONData): string;
+function TSQLiteDBModule.TDBKJSONStore.findFirstKeyFor(_val: TJSONData): string;
 begin
 
 end;
 
-function TDBModule.TDBKJSONStore.findKeysFor(_path: string; _val: TJSONData
+function TSQLiteDBModule.TDBKJSONStore.findKeysFor(_path: string; _val: TJSONData
 	 ): TStringArray;
 begin
 
 end;
 
-function TDBModule.TDBKJSONStore.findFirstKeyFor(_path: string; _val: TJSONData
+function TSQLiteDBModule.TDBKJSONStore.findFirstKeyFor(_path: string; _val: TJSONData
 	 ): string;
 begin
 
 end;
 
-{ TDBModule.TDBStore }
+{ TSQLiteDBModule.TDBStore }
 
-function TDBModule.TDBStore.getTableCreateScript(_kvTable: string): string;
+function TSQLiteDBModule.TDBStore.getTableCreateScript(_kvTable: string): string;
 begin
      Result:= '';
 end;
 
-function TDBModule.TDBStore.noInitException: Exception;
+function TSQLiteDBModule.TDBStore.noInitException: Exception;
 begin
 	Result := Exception.Create(noInitExceptionMsg());
 end;
 
-function TDBModule.TDBStore.noInitExceptionMsg: string;
+function TSQLiteDBModule.TDBStore.noInitExceptionMsg: string;
 begin
 	Result:= ClassName + ' is not initialized';
 end;
 
-constructor TDBModule.TDBStore.Create(_tbl: string; _dm: TDBModule);
+constructor TSQLiteDBModule.TDBStore.Create(_tbl: string; _dm: TSQLiteDBModule);
 begin
     inherited Create;
    dm := _dm;
    if not _tbl.IsEmpty then makeTable(_tbl);
 end;
 
-function TDBModule.TDBStore.makeTable(_tbl: string): integer;
+function TSQLiteDBModule.TDBStore.makeTable(_tbl: string): integer;
 begin
 	Result := dm.execSQL(getTableCreateScript(_tbl));
 	case Result of
@@ -398,7 +424,7 @@ begin
 	 end;
 end;
 
-function TDBModule.TDBStore.exists(_key: string): boolean;
+function TSQLiteDBModule.TDBStore.exists(_key: string): boolean;
 begin
 	 if tbl.isEmpty then
 	begin
@@ -408,18 +434,18 @@ begin
 	 Result := dm.Exists(tbl, format('k = "%s"', [_key]));
 end;
 
-function TDBModule.TDBStore.findKeysFor(_val: string; _limit: integer
+function TSQLiteDBModule.TDBStore.findKeysFor(_val: string; _limit: integer
 	): TStringArray;
 begin
      Result := [];
 end;
 
-function TDBModule.TDBStore.findFirstKeyFor(_val: string): string;
+function TSQLiteDBModule.TDBStore.findFirstKeyFor(_val: string): string;
 begin
      Result:= '';
 end;
 
-function TDBModule.TDBStore.renKey(_oldKey: string; _newKey: string): integer;
+function TSQLiteDBModule.TDBStore.renKey(_oldKey: string; _newKey: string): integer;
 const
 	 Q = 'UPDATE %0:s SET k = :newkey WHERE k= :oldkey; ';
 var
@@ -443,7 +469,7 @@ begin
 	 end;
 end;
 
-function TDBModule.TDBStore.del(_key: string): integer;
+function TSQLiteDBModule.TDBStore.del(_key: string): integer;
 const
 	 Q = 'DELETE FROM %0:s WHERE k= :key;';
 var
@@ -466,7 +492,7 @@ begin
 	 end;
 end;
 
-function TDBModule.TDBStore.deleteStore: integer;
+function TSQLiteDBModule.TDBStore.deleteStore: integer;
 const
 	 Q = 'DROP TABLE IF EXISTS %0:s;';
 var
@@ -474,22 +500,21 @@ var
 begin
 	if tbl.isEmpty then
 	begin
-			Result := -2;
+		Result := -2;
 		raise noInitException;
 	end;
-
 	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
-		Result := dm.execSQL(_qry);
-		tbl		:= '';
-	 finally
-	 	 _qry.Free;
-	 end;
+	_qry	 := dm.newQuery();
+	try
+		_qry.SQL.Text := Format(Q, [tbl]);
+	    Result := dm.execSQL(_qry);
+	    tbl		:= '';
+	finally
+		_qry.Free;
+	end;
 end;
 
-function TDBModule.TDBStore.Clear: integer;
+function TSQLiteDBModule.TDBStore.Clear: integer;
 const
 	 Q = 'DELETE FROM %0:s;';
 var
@@ -497,26 +522,26 @@ var
 begin
 	if tbl.isEmpty then
 	begin
-			Result := -2;
+	    Result := -2;
 		raise noInitException;
 	end;
 
 	Result := 0;
-	 _qry	 := dm.newQuery();
-	 try
-	 	 _qry.SQL.Text := Format(Q, [tbl]);
-		Result := dm.execSQL(_qry);
-		tbl		:= '';
-	 finally
-	 	 _qry.Free;
-	 end;
+	_qry	 := dm.newQuery();
+	try
+		_qry.SQL.Text := Format(Q, [tbl]);
+	    Result := dm.execSQL(_qry);
+	    tbl		:= '';
+	finally
+		_qry.Free;
+	end;
 end;
 
-{ TDBModule.TDBKeyValueStore }
+{ TSQLiteDBModule.TDBKeyValueStore }
 
 
 
-function TDBModule.TDBKeyValueStore.getTableCreateScript(_kvTable: string): string;
+function TSQLiteDBModule.TDBKeyValueStore.getTableCreateScript(_kvTable: string): string;
 const
 	 Q = 'CREATE TABLE IF NOT EXISTS %0:s ( ' + sLinebreak
         	+ '	 k char(256) primary key,' + sLinebreak
@@ -529,38 +554,36 @@ begin
 end;
 
 
-constructor TDBModule.TDBKeyValueStore.Create(_tbl: string; _dm: TDBModule);
+constructor TSQLiteDBModule.TDBKeyValueStore.Create(_tbl: string; _dm: TSQLiteDBModule);
 begin
     inherited Create(_tbl, _dm);
 end;
 
-function TDBModule.TDBKeyValueStore.get(_key: string): string;
+function TSQLiteDBModule.TDBKeyValueStore.get(_key: string): string;
 const
 	 Q = 'SELECT v from %s WHERE k = "%s"';
 var
 	 _qry: TSQLQuery;
 begin
-
-	 if tbl.IsEmpty then
+    if tbl.IsEmpty then
 	begin
 		Result := 'Empty';
 		raise noInitException;
 	end;
-
 	Result := '';
-	 _qry	 := dm.newQuery();
-	 try
-			 _qry.SQL.Text := Format(Q, [tbl, _key]);
-			 _qry.Open;
-			 _qry.First;
-			 if not _qry.Fields[0].IsNull then
-					Result := _qry.Fields[0].AsString;
-	 finally
+	_qry	 := dm.newQuery();
+	try
+	    _qry.SQL.Text := Format(Q, [tbl, _key]);
+		_qry.Open;
+		_qry.First;
+		if not _qry.Fields[0].IsNull then
+		    Result := _qry.Fields[0].AsString;
+	finally
 			 _qry.Free;
-	 end;
+	end;
 end;
 
-function TDBModule.TDBKeyValueStore.put(_key: string; _val: string): integer;
+function TSQLiteDBModule.TDBKeyValueStore.put(_key: string; _val: string): integer;
 const
 	 Q = 'INSERT INTO %0:s (k,v) VALUES (:k, :v) ON CONFLICT (k) DO UPDATE SET v = excluded.v WHERE k=excluded.k;';
 var
@@ -586,7 +609,7 @@ end;
 
 
 
-function TDBModule.TDBKeyValueStore.findKeysFor(_val: string; _limit: integer
+function TSQLiteDBModule.TDBKeyValueStore.findKeysFor(_val: string; _limit: integer
 	): TStringArray;
 const
 	 Q = 'SELECT k from %s WHERE v = :val ORDER BY K ASC %s';
@@ -640,7 +663,7 @@ begin
 	 end;
 end;
 
-function TDBModule.TDBKeyValueStore.findFirstKeyFor(_val: string): string;
+function TSQLiteDBModule.TDBKeyValueStore.findFirstKeyFor(_val: string): string;
 var
 	_keys: TStringArray;
 begin
@@ -650,9 +673,9 @@ begin
 end;
 
 
-{ TDBModule }
+{ TSQLiteDBModule }
 
-procedure TDBModule.DataModuleCreate(Sender: TObject);
+procedure TSQLiteDBModule.DataModuleCreate(Sender: TObject);
 begin
      {$IFDEF WINDOWS}
 	 libLoader.ConnectionType := 'SQLite3';
@@ -680,7 +703,7 @@ begin
 	 myDbOpenState      := dbopenExclusive;
 end;
 
-procedure TDBModule.SetDbFile(const _DbFile: string);
+procedure TSQLiteDBModule.SetDbFile(const _DbFile: string);
 begin
 	 if FDbFile = _DbFile then	Exit;
 	if not DB.Connected then
@@ -691,7 +714,7 @@ begin
 			[getDBFileName()]));
 end;
 
-procedure TDBModule.SetDbFolder(const _DbFolder: string);
+procedure TSQLiteDBModule.SetDbFolder(const _DbFolder: string);
 begin
 	 if FDbFolder = _DbFolder then Exit;
 	if not DB.Connected then
@@ -702,7 +725,7 @@ begin
 			[getDBFileName()]));
 end;
 
-function TDBModule.getSQLite3LibraryPath(): string;
+function TSQLiteDBModule.getSQLite3LibraryPath(): string;
 begin
 	{$IFDEF windows}
 	 Result := ExpandFileName(sqlite3dyn.SQLiteDefaultLibrary);
@@ -718,41 +741,37 @@ begin
 
 end;
 
-function TDBModule.getDBFileName(): string;
+function TSQLiteDBModule.getDBFileName(): string;
 begin
-	 if DbFile.IsEmpty then
-			 DbFile := DEFAULT_DB_FILE;
-
-	 if DbFolder.IsEmpty then
-			 DbFolder := ExpandFileName('');
-
+	 if DbFile.IsEmpty then DbFile := DEFAULT_DB_FILE;
+	 if DbFolder.IsEmpty then DbFolder := ExpandFileName('');
 	 Result := appendPath([dbFolder, DbFile]);
 end;
 
-procedure TDBModule.SetinitScriptFunc(const _value: TScriptFunc);
+procedure TSQLiteDBModule.SetinitScriptFunc(const _value: TScriptFunc);
 begin
 	 if myinitScriptFunc = _value then Exit;
 	 myinitScriptFunc := _value;
 end;
 
-procedure TDBModule.SetupgradeScript(const _value: TScriptFunc);
+procedure TSQLiteDBModule.SetupgradeScript(const _value: TScriptFunc);
 begin
 	 if myupgradeScript = _value then Exit;
 	 myupgradeScript := _value;
 end;
 
-procedure TDBModule.setuseSequences(const _useSequences: boolean);
+procedure TSQLiteDBModule.setuseSequences(const _useSequences: boolean);
 begin
 	 if myuseSequences = _useSequences then Exit;
 	 myuseSequences := _useSequences;
 end;
 
-constructor TDBModule.Create;
+constructor TSQLiteDBModule.Create;
 begin
 	Create(nil);
 end;
 
-function TDBModule.initDB(_openState: TDBOpenState): boolean;
+function TSQLiteDBModule.initDB(_openState: TDBOpenState): boolean;
 var
 	_DBInitScript: string;
 
@@ -875,29 +894,29 @@ begin
 
     if myDB.Connected then myDB.Connected := False;
 
-	 myDB.DatabaseName := getDBFileName();		{Gets the file name that was set}
+	myDB.DatabaseName := getDBFileName();		{Gets the file name that was set}
 
-	 { Does the DB File exist? }
-	 if not fileExists(myDB.DatabaseName) then
-	 begin
-			{ Make the DB File }
-	 	 myDB.CreateDB;
-			_DBInitScript := getDBInitScript();
-			if not _DBInitScript.isEmpty then
-				 Result := runScript(_DBInitScript);
-	 end;
+	{ Does the DB File exist? }
+	if not fileExists(myDB.DatabaseName) then
+	begin
+	    { Make the DB File }
+	 	myDB.CreateDB;
+		_DBInitScript := getDBInitScript();
+		if not _DBInitScript.isEmpty then
+		    Result := runScript(_DBInitScript);
+	end;
 
-	 { Connect to the DB }
+	{ Connect to the DB }
 	if Result then
-	 begin
-	 	 try
+    begin
+	    try
 			DbActive;
-			except
+		except
 			if isExclusive(myDB) then
 				myDbOpenState := dbopenLocked // The database is locked so we cannot open it
 			//else
 			//	myDbOpenState := dbopenForbidden;
-			end;
+		end;
 
 		case myDbOpenState of
 				 dbopenForbidden: ;
@@ -906,47 +925,50 @@ begin
 				 dbopenShared:      openShared;
 				 dbopenExclusive:   openExclusive;
 		end;
-
-	 end;
+	end;
 end;
 
-function TDBModule.openMemDB(_dbFile: string; _openState: TDBOpenState
+function TSQLiteDBModule.openMemDB(_dbFile: string; _openState: TDBOpenState
 	): boolean;
 begin
     {This section is duplicated in OpenDB()}
-  	 DbFile	 := _dbFile;
-	 DbFolder := '';
+  	DbFile	 := _dbFile;
+	DbFolder := '';
 
-	 if isTransactionActive then
-	 begin
-	 	 DB.EndTransaction;
-		 DB.CloseDataSets;
-	 end;
-     {duplicate end}
-
+	if isTransactionActive then
+	begin
+	    myDB.EndTransaction;
+	    myDB.CloseDataSets;
+	end;
+    {duplicate end}
     result:= initMemDB(_openState);
 end;
 
-function TDBModule.initMemDB(_openState: TDBOpenState): boolean;
+function TSQLiteDBModule.initMemDB(_openState: TDBOpenState): boolean;
+var
+	_DBInitScript: String;
 begin
+    Result := false;
     myDbOpenState:= _openState;
-
     if myDB.Connected then myDB.Connected := False;
-
     with myDB do
     begin
       OpenFlags := [sofReadWrite, sofCreate, sofURI];
       DatabaseName := format('file:%s?mode=memory',[DbFile]);
     end;
 
+    _DBInitScript := getDBInitScript();
+	if not _DBInitScript.isEmpty then
+	    Result := runScript(_DBInitScript);
+
 end;
 
-procedure TDBModule.doUpgradeDB;
+procedure TSQLiteDBModule.doUpgradeDB;
 begin
 
 end;
 
-function TDBModule.dropDB: boolean;
+function TSQLiteDBModule.dropDB: boolean;
 begin
 	 if DB.Connected then
 	 begin
@@ -959,7 +981,7 @@ begin
 	 Result := DeleteFile(getDBFileName());
 end;
 
-procedure TDBModule.makeDatabase;
+procedure TSQLiteDBModule.makeDatabase;
 var
 	 _shouldInitDB: boolean = True;
 	 mr: TModalResult;
@@ -981,7 +1003,7 @@ begin
 	 end;
 end;
 
-function TDBModule.openDB(_dbFile: string; _dbFolder: string;
+function TSQLiteDBModule.openDB(_dbFile: string; _dbFolder: string;
 	 _openState: TDBOpenState): boolean;
 begin
 	 DbFile	  := _dbFile;
@@ -995,7 +1017,7 @@ begin
 	 Result := initDB(_openState);
 end;
 
-function TDBModule.runScript(_script: string): boolean;
+function TSQLiteDBModule.runScript(_script: string): boolean;
 var
 	 scripts: TSQLScript;
 begin
@@ -1029,18 +1051,18 @@ begin
 	 end;
 end;
 
-function TDBModule.DB: TSQLConnection;
+function TSQLiteDBModule.DB: TSQLConnection;
 begin
 	 Result := myDB;
 end;
 
 
-function TDBModule.isTransactionActive: boolean;
+function TSQLiteDBModule.isTransactionActive: boolean;
 begin
 	 Result := myDB.Transaction.Active;
 end;
 
-function TDBModule.startTransaction: boolean;
+function TSQLiteDBModule.startTransaction: boolean;
 const
 	 NUM_TRIES = 3;
 var
@@ -1064,14 +1086,14 @@ begin
 end;
 
 
-function TDBModule.safeStartTransaction: boolean;
+function TSQLiteDBModule.safeStartTransaction: boolean;
 begin
 	 Result := True;
 	 if not isTransactionActive then
 			 Result := startTransaction;
 end;
 
-function TDBModule.commit: boolean;
+function TSQLiteDBModule.commit: boolean;
 begin
 	 try
 			 myDB.Transaction.Commit;
@@ -1081,7 +1103,7 @@ begin
 	 end;
 end;
 
-function TDBModule.commitRetaining: boolean;
+function TSQLiteDBModule.commitRetaining: boolean;
 begin
 	 try
 			 myDB.Transaction.CommitRetaining;
@@ -1092,7 +1114,7 @@ begin
 
 end;
 
-function TDBModule.rollback: boolean;
+function TSQLiteDBModule.rollback: boolean;
 begin
 	 try
 			 myDB.Transaction.RollbackRetaining;
@@ -1102,7 +1124,7 @@ begin
 	 end;
 end;
 
-function TDBModule.rollbackRetaining: boolean;
+function TSQLiteDBModule.rollbackRetaining: boolean;
 begin
 	 try
 			 myDB.Transaction.RollbackRetaining;
@@ -1112,7 +1134,7 @@ begin
 	 end;
 end;
 
-function TDBModule.endTransaction: boolean;
+function TSQLiteDBModule.endTransaction: boolean;
 begin
 	 try
 			 myDB.Transaction.EndTransaction;
@@ -1122,14 +1144,14 @@ begin
 	 end;
 end;
 
-function TDBModule.newQuery: TSQLQuery;
+function TSQLiteDBModule.newQuery: TSQLQuery;
 begin
 	 Result := TSQLQuery.Create(myDB);
      Result.DataBase := TSQLConnection(myDB);
 	 Result.Transaction := transaction;
 end;
 
-function TDBModule.DbActive: TSQLConnection;
+function TSQLiteDBModule.DbActive: TSQLConnection;
 begin
 	 Result := Db;
 	 if not Result.Connected then
@@ -1142,7 +1164,7 @@ begin
 	 end;
 end;
 
-function TDBModule.newIDFor(_tableName: string): int64;
+function TSQLiteDBModule.newIDFor(_tableName: string): int64;
 var
 	 _useNewTransaction: boolean;
 begin
@@ -1182,14 +1204,14 @@ begin
 	 end;
 end;
 
-function TDBModule.getSequenceTableCreateScript: string;
+function TSQLiteDBModule.getSequenceTableCreateScript: string;
 begin
 	 Result := format('CREATE TABLE IF NOT EXISTS %s (' + sLinebreak +
 			 '   name CHAR(127) UNIQUE,' + sLinebreak + '  curr_id BIGINT' +
 			 sLinebreak + ');', [SEQUENCE_TABLE]);
 end;
 
-function TDBModule.getSequenceUpsertScript: string;
+function TSQLiteDBModule.getSequenceUpsertScript: string;
 begin
 	 Result := format('INSERT INTO %s ' + sLinebreak + '(name, curr_id) ' +
 			 sLinebreak + 'VALUES (:name, :start_id) ' + sLinebreak +
@@ -1198,21 +1220,21 @@ begin
 
 end;
 
-function TDBModule.getSequenceSelectScript: string;
+function TSQLiteDBModule.getSequenceSelectScript: string;
 begin
 	 Result := format('SELECT CAST(curr_id as BIGINT) as ID from %s WHERE name = :name',
 			 [SEQUENCE_TABLE]);
 end;
 
 
-function TDBModule.getDBInitScript: string;
+function TSQLiteDBModule.getDBInitScript: string;
 begin
 	 Result := getSequenceTableCreateScript() + sLineBreak;
 	 if assigned(myinitScriptFunc) then
 			 Result := Result + initScriptFunc();
 end;
 
-function TDBModule.getDBUpgradeScript: string;
+function TSQLiteDBModule.getDBUpgradeScript: string;
 begin
 	 if assigned(myupgradeScript) then
 			 Result := myupgradeScript()
@@ -1220,7 +1242,7 @@ begin
 			 Result := '';
 end;
 
-function TDBModule.qExists(_tbl: string; _key: string): TSQLQuery;
+function TSQLiteDBModule.qExists(_tbl: string; _key: string): TSQLQuery;
 begin
 	 Result := newQuery;
 	 with Result do
@@ -1229,7 +1251,7 @@ begin
 	 end;
 end;
 
-function TDBModule.exists(_tbl: string; _key: string; _value: string): boolean;
+function TSQLiteDBModule.exists(_tbl: string; _key: string; _value: string): boolean;
 begin
 	 with qExists(_tbl, _key) do
 	 begin
@@ -1253,7 +1275,7 @@ begin
 	 end;
 end;
 
-function TDBModule.exists(_tbl: string; _key: string; _value: int64): boolean;
+function TSQLiteDBModule.exists(_tbl: string; _key: string; _value: int64): boolean;
 begin
 	 with qExists(_tbl, _key) do
 	 begin
@@ -1277,7 +1299,7 @@ begin
 	 end;
 end;
 
-function TDBModule.exists(_tbl: string; _key: string; _value: boolean): boolean;
+function TSQLiteDBModule.exists(_tbl: string; _key: string; _value: boolean): boolean;
 begin
 	 with qExists(_tbl, _key) do
 	 begin
@@ -1301,7 +1323,7 @@ begin
 	 end;
 end;
 
-function TDBModule.exists(_tbl: string; _key: string; _value: double): boolean;
+function TSQLiteDBModule.exists(_tbl: string; _key: string; _value: double): boolean;
 begin
 	 with qExists(_tbl, _key) do
 	 begin
@@ -1325,7 +1347,7 @@ begin
 	 end;
 end;
 
-function TDBModule.exists(_tbl: string; _where: string): boolean;
+function TSQLiteDBModule.exists(_tbl: string; _where: string): boolean;
 begin
 	 with newQuery do
 	 begin
@@ -1346,7 +1368,7 @@ begin
 	 end;
 end;
 
-function TDBModule.qPut(_tbl: string; _id: int64; _fld: string;
+function TSQLiteDBModule.qPut(_tbl: string; _id: int64; _fld: string;
 	 _idFieldName: string): TSQLQuery;
 begin
 	 Result := newQuery;
@@ -1355,7 +1377,7 @@ begin
 	 Result.Params[1].AsLargeInt := _id;
 end;
 
-function TDBModule.put(_tbl: string; _id: int64; _fld: string; _value: string): boolean;
+function TSQLiteDBModule.put(_tbl: string; _id: int64; _fld: string; _value: string): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1373,7 +1395,7 @@ begin
 	 end;
 end;
 
-function TDBModule.put(_tbl: string; _id: int64; _fld: string; _value: int64): boolean;
+function TSQLiteDBModule.put(_tbl: string; _id: int64; _fld: string; _value: int64): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1391,7 +1413,7 @@ begin
 	 end;
 end;
 
-function TDBModule.put(_tbl: string; _id: int64; _fld: string; _value: boolean): boolean;
+function TSQLiteDBModule.put(_tbl: string; _id: int64; _fld: string; _value: boolean): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1409,7 +1431,7 @@ begin
 	 end;
 end;
 
-function TDBModule.put(_tbl: string; _id: int64; _fld: string; _value: double): boolean;
+function TSQLiteDBModule.put(_tbl: string; _id: int64; _fld: string; _value: double): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1427,12 +1449,12 @@ begin
 	 end;
 end;
 
-function TDBModule.put(_tbl: string; _id: int64; _json: TJSONObject): boolean;
+function TSQLiteDBModule.put(_tbl: string; _id: int64; _json: TJSONObject): boolean;
 begin
 	 Result := False;
 end;
 
-function TDBModule.qDelete(_tbl: string; _id: int64; _idFieldName: string): TSQLQuery;
+function TSQLiteDBModule.qDelete(_tbl: string; _id: int64; _idFieldName: string): TSQLQuery;
 begin
 	 Result := newQuery;
 	 Result.SQL.Text := format('DELETE FROM %0:s WHERE %1:s=:%1:s',
@@ -1440,7 +1462,7 @@ begin
 	 Result.params[0].AsLargeInt := _id;
 end;
 
-function TDBModule.Delete(_tbl: string; _id: int64): boolean;
+function TSQLiteDBModule.Delete(_tbl: string; _id: int64): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1453,7 +1475,7 @@ begin
 	 end;
 end;
 
-function TDBModule.qselect(_tbl: string; _id: int64; _fld: string;
+function TSQLiteDBModule.qselect(_tbl: string; _id: int64; _fld: string;
 	 _idFieldName: string): TSQLQuery;
 begin
 	 Result := newQuery;
@@ -1462,7 +1484,7 @@ begin
 	 Result.params[0].AsLargeInt := _id;
 end;
 
-function TDBModule.select_str(_tbl: string; _id: int64; _fld: string): string;
+function TSQLiteDBModule.select_str(_tbl: string; _id: int64; _fld: string): string;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1481,7 +1503,7 @@ begin
 	 end;
 end;
 
-function TDBModule.select_int(_tbl: string; _id: int64; _fld: string): int64;
+function TSQLiteDBModule.select_int(_tbl: string; _id: int64; _fld: string): int64;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1500,7 +1522,7 @@ begin
 	 end;
 end;
 
-function TDBModule.select_bool(_tbl: string; _id: int64; _fld: string): boolean;
+function TSQLiteDBModule.select_bool(_tbl: string; _id: int64; _fld: string): boolean;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1519,7 +1541,7 @@ begin
 	 end;
 end;
 
-function TDBModule.select_real(_tbl: string; _id: int64; _fld: string): double;
+function TSQLiteDBModule.select_real(_tbl: string; _id: int64; _fld: string): double;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1538,7 +1560,7 @@ begin
 	 end;
 end;
 
-function TDBModule.getSQLiteLastID(): int64;
+function TSQLiteDBModule.getSQLiteLastID(): int64;
 const
 	 Q = 'select last_insert_rowid()';
 var
@@ -1554,7 +1576,7 @@ begin
 	 end;
 end;
 
-function TDBModule.execSQL(_sql: string; out _err: string): integer;
+function TSQLiteDBModule.execSQL(_sql: string; out _err: string): integer;
 var
 	 _qry: TSQLQuery;
 begin
@@ -1568,7 +1590,7 @@ begin
 	 end;
 end;
 
-function TDBModule.execSQL(_sql: string): integer;
+function TSQLiteDBModule.execSQL(_sql: string): integer;
 var
 	_err: string;
 begin
@@ -1576,7 +1598,7 @@ begin
 	 Result := execSQL(_sql, _err);
 end;
 
-function TDBModule.execSQL(var _qry: TSQLQuery; out _err: string): integer;
+function TSQLiteDBModule.execSQL(var _qry: TSQLQuery; out _err: string): integer;
 begin
 	 Result := 0;
 	if safeStartTransaction then
@@ -1597,7 +1619,7 @@ begin
 
 end;
 
-function TDBModule.execSQL(var _qry: TSQLQuery): integer;
+function TSQLiteDBModule.execSQL(var _qry: TSQLQuery): integer;
 var
 	_err: string;
 begin
@@ -1606,9 +1628,9 @@ begin
 end;
 
 
-function TDBModule.kv(_tbl: string): TDBModule.TDBKeyValueStore;
+function TSQLiteDBModule.kv(_tbl: string): TSQLiteDBModule.TDBKeyValueStore;
 begin
-	 Result := TDBModule.TDBKeyValueStore.Create(_tbl, self);
+	 Result := TSQLiteDBModule.TDBKeyValueStore.Create(_tbl, self);
 end;
 
 initialization

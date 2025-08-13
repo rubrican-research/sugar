@@ -22,7 +22,8 @@ uses
     sugar.uistyles, sugar.animateui, sugar.dragui, sugar.register, 
     sugar.repositionui, git.api, sugar.htmlbuilder.truthtable, sugar.url, 
     sugar.inifiles, sugar.contactInfo, sugar.gender, sugar.languages, 
-    sugar.maps, sugar.securesalt, sugar.framelist, frame.TagControl;
+    sugar.maps, sugar.securesalt, sugar.framelist, frame.TagControl, 
+    sugar.ulid, sugar.safeJson;
 
 implementation
 

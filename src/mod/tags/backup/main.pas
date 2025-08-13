@@ -43,7 +43,7 @@ begin
 	    InsertControl(te);
 	end;
     te.selectFrom(['Baby', 'Stan', 'Happy', 'Stance', 'Gucci', 'Beads']);
-    te.alwaysAddNewTags:=true;
+    te.alwaysAddNewTags := true;
 end;
 
 initialization

@@ -11,7 +11,7 @@ unit sugar.utils;
 interface
 
 uses
-     Classes, SysUtils, fpjson, sugar.collections, sugar.profiler;
+     Classes, SysUtils, fpjson, fileinfo, sugar.collections, sugar.profiler;
 type
     TArrInt   = array of Integer;
     TArrInt64 = array of int64;
@@ -226,7 +226,11 @@ function clone(constref _s: TStrings): TStrings;
 function findIndex(constref _search: TStrings; constref _source: TStrings): TArrInt; overload;
 function findIndex(const _search: TStringArray; constref _source: TStrings): TArrInt; overload;
 
+function GetFileVersionInfo(const aExeFile: String): TFileVersionInfo;
+function GetFileInfo(const aExeFile: String): TStrings;
 function GetFileVersion(const aExeFile: String): String;
+function GetApplicationVersionTitle(const aExeFile: String): String;
+
 
 function loremIpsum(_len: shortint = 0): string;
 
@@ -236,13 +240,17 @@ function truefalse(const _val: boolean): string;
 function sanitzeFileName(_varName: string; _extension: string): string;
 
 
+function genUUID(const _nobrace: boolean = true): string;
+
+function isValidURI(const _uri: string): boolean;
+
 implementation
 uses
-     fileinfo
-     , winpeimagereader {need this for reading exe info}
-     , elfreader {needed for reading ELF executables}
-     , machoreader {needed for reading MACH-O executables}
-     , fpmimetypes, variants, strutils, jsonparser, FileUtil,
+     URIParser,
+     winpeimagereader, {need this for reading exe info}
+     elfreader, {needed for reading ELF executables}
+     machoreader, {needed for reading MACH-O executables}
+     fpmimetypes, variants, strutils, jsonparser, FileUtil,
      LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
      math, base64, LazStringUtils, DateUtils, sugar.logger, sugar.threadwriter, LazUTF8;
 
@@ -335,7 +343,7 @@ begin
     if FileExists(_filename) then
         with TStringList.Create do
         begin
-            LoadFromFile(_filename);
+            LoadFromFile(_filename, TEncoding.UTF8);
             Result := Text;
             Free;
         end
@@ -1508,43 +1516,62 @@ begin
 	end;
 end;
 
-
-function GetFileVersion(const aExeFile: String): String;
-var
-  FileVerInfo: TFileVersionInfo;
+function GetFileVersionInfo(const aExeFile: String): TFileVersionInfo;
 begin
-    Result := '?';
+    Result := TFileVersionInfo.Create(nil);
+    Result.Enabled := true;
     if not FileExists(aExeFile) then begin
         Exit;
     end;
+    Result.FileName:= aExeFile; // Because enabled is true, this will read the info.
+end;
 
-    FileVerInfo:=TFileVersionInfo.Create(nil);
-    FileVerInfo.FileName:= aExeFile;
+function GetFileVersion(const aExeFile: String): String;
+var
+	_fileInfo: TFileVersionInfo;
+begin
+    _fileInfo := GetFileVersionInfo(aExeFile);
     try
-        FileVerInfo.ReadFileInfo;
-        Result := FileVerInfo.VersionStrings.Values['FileVersion'];
+        Result := _fileInfo.VersionStrings.Values['FileVersion'];
     finally
-        FileVerInfo.Free;
+        _fileInfo.Free;
     end;
+end;
 
-    //begin
-    //  FileVerInfo:=TFileVersionInfo.Create(nil);
-    //  try
-    //    FileVerInfo.ReadFileInfo;
-    //    writeln('Company: ',FileVerInfo.VersionStrings.Values['CompanyName']);
-    //    writeln('File description: ',FileVerInfo.VersionStrings.Values['FileDescription']);
-    //    writeln('File version: ',FileVerInfo.VersionStrings.Values['FileVersion']);
-    //    writeln('Internal name: ',FileVerInfo.VersionStrings.Values['InternalName']);
-    //    writeln('Legal copyright: ',FileVerInfo.VersionStrings.Values['LegalCopyright']);
-    //    writeln('Original filename: ',FileVerInfo.VersionStrings.Values['OriginalFilename']);
-    //    writeln('Product name: ',FileVerInfo.VersionStrings.Values['ProductName']);
-    //    writeln('Product version: ',FileVerInfo.VersionStrings.Values['ProductVersion']);
-    //  finally
-    //    FileVerInfo.Free;
-    //  end;
-    //end.
+function GetApplicationVersionTitle(const aExeFile: String): String;
+var
+	v: TStrings;
+begin
+    v := getFileInfo(aExeFile);
+    try
+        Result := Format('%s :: %s', [v.Values['ProductName'], v.Values['FileVersion']])
+	finally
+        v.Free;
+	end;
+end;
 
+function GetFileInfo(const aExeFile: String): TStrings;
+var
+	_fileInfo: TFileVersionInfo;
+begin
+    Result := TStringList.Create;
+    _fileInfo := GetFileVersionInfo(aExeFile);
+    try
+        Result.Assign(_fileInfo.VersionStrings);
 
+        // OTHER VALUES
+        //    writeln('Company: ',          Result.VersionStrings.Values['CompanyName']);
+        //    writeln('File description: ', Result.VersionStrings.Values['FileDescription']);
+        //    writeln('File version: ',     Result.VersionStrings.Values['FileVersion']);
+        //    writeln('Internal name: ',    Result.VersionStrings.Values['InternalName']);
+        //    writeln('Legal copyright: ',  Result.VersionStrings.Values['LegalCopyright']);
+        //    writeln('Original filename: ',Result.VersionStrings.Values['OriginalFilename']);
+        //    writeln('Product name: ',     Result.VersionStrings.Values['ProductName']);
+        //    writeln('Product version: ',  Result.VersionStrings.Values['ProductVersion']);
+
+    finally
+        _fileInfo.Free;
+    end;
 end;
 
 function loremIpsum(_len: shortint): string;
@@ -1636,6 +1663,34 @@ begin
     Result := Result + _extension;
 end;
 
+function genUUID(const _nobrace: boolean): string;
+var
+    G: TGUID;
+	l: SizeInt;
+begin
+    if CreateGUID(G) = 0 then begin // S_OK
+        Result := GUIDToString(G);
+    end
+    else
+        raise Exception.Create('genUUID:: failed.');
+
+    if _nobrace then begin
+        l := Length(Result);
+        if l > 0 then
+            Result := copy(Result, 2, l-2);
+    end;
+
+end;
+
+function isValidURI(const _uri: string): boolean;
+begin
+    try
+        ParseURI(_uri);
+        Result := True;
+    except
+        Result := False;
+    end;
+end;
 
 initialization
     randomize;

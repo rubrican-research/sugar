@@ -136,7 +136,43 @@ type
        function move(constref _control: TControl; X: integer; Y: integer): TPoint;
 
     end;
+    TOnCheckDragOver = procedure (Sender, Target: TTreeNode;  var Accept: Boolean) of object;
+    {TTreeViewReorder}
+    // Reorder items in a tree view by drag and drop
+    TTreeViewReorder = class(TObject, IFPObserver)
+    private
+	    mydestNode: TTreeNode;
+		mydragging: boolean;
+		myOnCheckDragOver: TOnCheckDragOver;
+		mysourceNode: TTreeNode;
+        myTreeView: TTreeView;
+        myOriginalTreeViewDragOver: TDragOverEvent;
+        myOriginalTreeViewEndDrag: TEndDragEvent;
+        myOriginalTreeViewSelectionChanged: TNotifyEvent;
+	    procedure SetdestNode(const _value: TTreeNode);
+	    procedure Setdragging(const _value: boolean);
+		procedure setOnCheckDragOver(const _value: TOnCheckDragOver);
+	    procedure SetsourceNode(const _value: TTreeNode);
+    protected
+	   	procedure FPOObservedChanged(ASender: TObject;
+	   		Operation: TFPObservedOperation; Data: Pointer);
+        procedure OnDragOver(Sender, Source: TObject; X, Y: Integer;
+      			State: TDragState; var Accept: Boolean);
+        procedure OnEndDrag(Sender, Target: TObject; X, Y: Integer);
+        procedure OnSelectionChanged(Sender: TObject);
+    public
+        constructor Create(constref _treeview: TTreeView);
+        destructor Destroy; override;
+        procedure releaseTreeView;
 
+    protected
+        property treeView: TTreeView read myTreeView;
+        property dragging: boolean read mydragging write Setdragging;
+        property sourceNode: TTreeNode read mysourceNode write SetsourceNode;
+        property destNode: TTreeNode read mydestNode write SetdestNode;
+    public
+         property OnCheckDragOver: TOnCheckDragOver read myOnCheckDragOver write setOnCheckDragOver;
+    end;
 
     // Sets the font color depending on the UIState
     procedure uiState(_c: TControl; _s: TUIState; _hint: string = '');
@@ -180,6 +216,7 @@ type
     procedure alignHCenter(constref _child: TControl; _width: currency = 0.7); // Aligns the panel to the center of the container. Preserves the width of the panel
     procedure alignCenter(constref _child: TControl; _width: currency = 0.7; _height: currency = 0.7);  // Aligns the panel to the center of the container. Preserves the width of the panel
 
+    function enableReorder(constref _treeView: TTreeView): TTreeViewReorder;
 
 //type
 //    {Fields}
@@ -810,6 +847,123 @@ begin
     containerVOffset  := 0;
 end;
 
+{ TTreeViewReorder }
+
+procedure TTreeViewReorder.SetdestNode(const _value: TTreeNode);
+begin
+	if mydestNode=_value then Exit;
+	mydestNode:=_value;
+end;
+
+procedure TTreeViewReorder.Setdragging(const _value: boolean);
+begin
+	if mydragging=_value then Exit;
+	mydragging:=_value;
+end;
+
+procedure TTreeViewReorder.setOnCheckDragOver(const _value: TOnCheckDragOver);
+begin
+	if myOnCheckDragOver=_value then Exit;
+	myOnCheckDragOver:=_value;
+end;
+
+procedure TTreeViewReorder.SetsourceNode(const _value: TTreeNode);
+begin
+	if mysourceNode=_value then Exit;
+	mysourceNode:=_value;
+end;
+
+procedure TTreeViewReorder.FPOObservedChanged(ASender: TObject;
+	Operation: TFPObservedOperation; Data: Pointer);
+begin
+    case Operation of
+    	ooChange    : ;
+        ooFree      : Free;
+        ooAddItem   : ;
+        ooDeleteItem: ;
+        ooCustom    : ;
+    end;
+end;
+
+procedure TTreeViewReorder.OnDragOver(Sender, Source: TObject; X, Y: Integer;
+	State: TDragState; var Accept: Boolean);
+begin
+    if assigned(myOriginalTreeViewDragOver) then
+        myOriginalTreeViewDragOver(Sender, Source, X, Y, State, Accept);
+
+    if not Accept then exit; // If the original event rejects the drag over then respect that
+
+    if not dragging then dragging := true;
+
+    if not assigned(sourceNode) then sourceNode := TreeView.Selected;
+
+    if not assigned(sourceNode) then begin // if source still not available
+        dragging    := false;
+        sourceNode  := nil;
+        destNode    := nil;
+        exit;
+    end;
+
+    destNode   := TreeView.GetNodeAt(X,Y);
+    if assigned(destNode) then begin
+        if ptrInt(destNode) <> ptrInt(sourceNode) then  begin
+            if assigned(OnCheckDragOver) then
+                OnCheckDragOver(sourceNode, destNode, Accept);
+                if Accept then
+                    sourceNode.MoveTo(destNode, TNodeAttachMode.naInsert);
+		end;
+	end;
+
+end;
+
+procedure TTreeViewReorder.OnEndDrag(Sender, Target: TObject; X, Y: Integer);
+begin
+    if dragging then begin
+        dragging  := false;
+        sourceNode:= nil;
+        destNode  := nil;
+    end;
+    if assigned(myOriginalTreeViewEndDrag) then
+        myOriginalTreeViewEndDrag(Sender, Target, X, Y);
+end;
+
+procedure TTreeViewReorder.OnSelectionChanged(Sender: TObject);
+begin
+    sourceNode := TreeView.selected;
+    if assigned(myOriginalTreeViewSelectionChanged) then
+        myOriginalTreeViewSelectionChanged(Sender);
+end;
+
+constructor TTreeViewReorder.Create(constref _treeview: TTreeView);
+begin
+    inherited Create;
+    myTreeView := _treeview;
+    myTreeView.FPOAttachObserver(self);
+
+    myOriginalTreeViewDragOver:= TreeView.OnDragOver;
+    myOriginalTreeViewEndDrag:= TreeView.OnEndDrag;
+    myOriginalTreeViewSelectionChanged:= TreeView.OnSelectionChanged;
+
+    TreeView.OnDragOver := @OnDragOver;
+    TreeView.OnEndDrag  := @OnEndDrag;
+    TreeView.OnSelectionChanged := @OnSelectionChanged;
+    TreeView.DragMode := dmAutomatic;
+end;
+
+destructor TTreeViewReorder.Destroy;
+begin
+    releaseTreeView;
+	inherited Destroy;
+end;
+
+procedure TTreeViewReorder.releaseTreeView;
+begin
+    TreeView.OnDragOver := myOriginalTreeViewDragOver;
+    TreeView.OnEndDrag  := myOriginalTreeViewEndDrag;
+    TreeView.OnSelectionChanged := myOriginalTreeViewSelectionChanged;
+    myTreeView := nil;
+end;
+
 procedure uiState(_c: TControl; _s: TUIState; _hint: string);
 begin
     //_c.Font.Style := _c.Font.Style - [fsBold];
@@ -1070,7 +1224,6 @@ begin
 	end;
 end;
 
-
 procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte
 	);
 const
@@ -1081,11 +1234,13 @@ var
 	_col: TGridColumn;
 	_width, _i: Integer;
 begin
+
     _colCount := Min(Length(_arrWidths), _grid.ColCount); // To loop over only the colums that are available.
     _width := _grid.Width - __GRID_BUFFER - GetSystemMetrics(SM_CXVSCROLL); // to prevent the scroll bar from showing;
     for _i := 0 to pred(_colCount) do begin
-        _col := _grid.Columns.Items[_i];
-        _col.Width:= trunc(_width * (_arrWidths[_i]/100));
+        //_col := _grid.Columns.Items[_i];
+        //_col.Width:= trunc(_width * (_arrWidths[_i]/100));
+        _grid.ColWidths[_i] := trunc(_width * (_arrWidths[_i]/100));
 	end;
 end;
 
@@ -1149,6 +1304,11 @@ procedure alignCenter(constref _child: TControl; _width: currency;
 begin
     TOnVAlign.Create(_child, _width);
     TOnHAlign.Create(_child, _height);
+end;
+
+function enableReorder(constref _treeView: TTreeView): TTreeViewReorder;
+begin
+    Result := TTreeViewReorder.Create(_treeView); // Will automatically free :: IFPObserver
 end;
 
 
@@ -1236,6 +1396,7 @@ var
 begin
     for i := 0 to pred(_grid.ColCount) do begin
         _grid.AutoSizeColumn(i);
+        _grid.Columns.Items[i].Width:= _grid.Columns.Items[i].Width + 10;
 	end;
 end;
 

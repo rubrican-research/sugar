@@ -1621,8 +1621,7 @@ begin
         on E: Exception do
             writeln(classname, 'destroy inherited ', E.Message);
 	end;
-
-    writeln(Classname, ' has been destroyed');
+    //writeln(Classname, ' has been destroyed');
 end;
 
 { RbClass }

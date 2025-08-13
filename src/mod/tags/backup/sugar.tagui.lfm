@@ -11,8 +11,8 @@ object TagsEditor: TTagsEditor
   ClientHeight = 208
   ClientWidth = 345
   TabOrder = 0
-  DesignLeft = 1005
-  DesignTop = 94
+  DesignLeft = 490
+  DesignTop = 315
   object pnlTags: TFlowPanel
     Left = 7
     Height = 128
@@ -52,8 +52,8 @@ object TagsEditor: TTagsEditor
       ItemHeight = 15
       Sorted = True
       TabOrder = 0
+      OnCloseUp = edtTagTextEditingDone
       OnEditingDone = edtTagTextEditingDone
-      OnSelect = edtTagTextEditingDone
     end
   end
   object pblCaption: TPanel

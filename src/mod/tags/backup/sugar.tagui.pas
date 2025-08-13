@@ -512,6 +512,8 @@ begin
     AutoHideTools := False;
     alwaysAddNewTags := True;
 
+    #Gucci,#Stan,#Beads,#Electro,#,#Single,#ET200
+
 end;
 
 destructor TTagsEditor.Destroy;

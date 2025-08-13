@@ -282,6 +282,14 @@ SOFTWARE."/>
         <Filename Value="mod\tags\frame.tagcontrol.pas"/>
         <UnitName Value="frame.TagControl"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.ulid.pas"/>
+        <UnitName Value="sugar.ulid"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.safejson.pas"/>
+        <UnitName Value="sugar.safeJson"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
