@@ -68,6 +68,8 @@ type
         constructor CreateFrom(const _jsonStr: string); virtual;
         constructor CreateSafeFrom(const _jsonStr: string); virtual;
 
+        function loadFrom(_jsonStr: string): boolean;
+
         destructor Destroy; override;
 
         // initializes all fields.
@@ -445,11 +447,23 @@ begin
 end;
 
 constructor TSafeJSONObject.CreateFrom(const _jsonStr: string);
+begin
+    Create;
+    loadFrom(_jsonStr)
+end;
+
+constructor TSafeJSONObject.CreateSafeFrom(const _jsonStr: string);
+begin
+    CreateFrom(_jsonStr);
+    mythreadSafe := true;
+end;
+
+function TSafeJSONObject.loadFrom(_jsonStr: string): boolean;
 var
     J: TJSONData = nil;
     Obj: TJSONObject = nil;
 begin
-    Create;
+    Result := false;
     try
         if Trim(_jsonStr) = '' then
             raise Exception.CreateFmt('%s.CreateFrom():: empty JSON', [ClassName]);
@@ -468,17 +482,13 @@ begin
                     [ClassName, Obj.Strings[__classID], classID]);
             assignFrom(Obj);
         finally
+            Result := true;
             unlockWrite;
         end;
     finally
         J.Free;
     end;
-end;
 
-constructor TSafeJSONObject.CreateSafeFrom(const _jsonStr: string);
-begin
-    CreateFrom(_jsonStr);
-    mythreadSafe := true;
 end;
 
 destructor TSafeJSONObject.Destroy;
