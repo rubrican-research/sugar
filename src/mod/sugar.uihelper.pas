@@ -136,7 +136,7 @@ type
        function move(constref _control: TControl; X: integer; Y: integer): TPoint;
 
     end;
-    TOnCheckDragOver = procedure (Sender, Target: TTreeNode;  var Accept: Boolean) of object;
+    TOnCheckDragOver = procedure (Sender, Target: TTreeNode;  var Accept: Boolean; out _attachMode: TNodeAttachMode) of object;
     {TTreeViewReorder}
     // Reorder items in a tree view by drag and drop
     TTreeViewReorder = class(TObject, IFPObserver)
@@ -887,6 +887,8 @@ end;
 
 procedure TTreeViewReorder.OnDragOver(Sender, Source: TObject; X, Y: Integer;
 	State: TDragState; var Accept: Boolean);
+ var
+     _attachMode: TNodeAttachMode;
 begin
     if assigned(myOriginalTreeViewDragOver) then
         myOriginalTreeViewDragOver(Sender, Source, X, Y, State, Accept);
@@ -908,9 +910,9 @@ begin
     if assigned(destNode) then begin
         if ptrInt(destNode) <> ptrInt(sourceNode) then  begin
             if assigned(OnCheckDragOver) then
-                OnCheckDragOver(sourceNode, destNode, Accept);
+                OnCheckDragOver(sourceNode, destNode, Accept, _attachMode);
                 if Accept then
-                    sourceNode.MoveTo(destNode, TNodeAttachMode.naInsert);
+                    sourceNode.MoveTo(destNode, _attachMode);
 		end;
 	end;
 
