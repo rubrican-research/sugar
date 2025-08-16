@@ -112,6 +112,7 @@ type
     public type
         TItemClass = class of ItemObj;
         TSafeJSONObjectCollectionsEnumerator = class(specialize TLockedEnumerator<ItemObj>);
+
     const
         __items = 'items';
     protected
