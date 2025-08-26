@@ -148,7 +148,10 @@ type
     THtmlPageGenerator = function: string;
     TWebpageFactory    = function: RbWebPage;
 
-function scriptObj(_jsPath: string=''): THtmlScript;
+    function scriptObj(_jsPath: string=''): THtmlScript;
+    function htmlPageify(_message: string): string; // Formats a message into an HTML Page;
+    function htmlTemplate: RbWebPage;
+
 
 implementation
 uses
@@ -159,6 +162,37 @@ begin
     Result := THTMLScript.Create;
     if not _jsPath.IsEmpty then
        Result.setSrc(_jsPath);
+end;
+
+function htmlPageify(_message: string): string;
+begin
+    with htmlTemplate() do begin
+        with document.Body do begin
+            div_(_message).addClass('container');
+            Result := page;
+	    end;
+        Free;
+	end;
+end;
+
+
+function htmlTemplate: RbWebPage;
+begin
+    Result := RBWebPage.Create;
+    with Result.document.Styles do begin
+        with select('html, body').style do begin
+            Height('100%');
+		end;
+        with select('body').style do begin
+            margin('0');
+            font_family('system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"');
+		end;
+        with select('.container').style do begin
+            max_width('900px');
+            margin('48px auto');
+            padding('0 16px');
+        end;
+	end;
 end;
 
 { RbWebPage }

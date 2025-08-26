@@ -2,7 +2,7 @@
 <CONFIG>
   <Package Version="5">
     <PathDelim Value="\"/>
-    <Name Value="fp_sugar"/>
+    <Name Value="fp_sugar_nogui"/>
     <Type Value="RunTimeOnly"/>
     <Author Value="Rubrican Research (https://github.com/rubrican-research)"/>
     <CompilerOptions>
@@ -47,10 +47,6 @@ SOFTWARE."/>
       <Item>
         <Filename Value="mod\sugar.utils.pas"/>
         <UnitName Value="sugar.utils"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.uihelper.pas"/>
-        <UnitName Value="sugar.uihelper"/>
       </Item>
       <Item>
         <Filename Value="mod\sugar.collections.pas"/>
@@ -209,40 +205,12 @@ SOFTWARE."/>
         <UnitName Value="webui"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.fmkvdisplay.pas"/>
-        <UnitName Value="sugar.fmkvdisplay"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.markdownhelper.pas"/>
         <UnitName Value="sugar.markdownhelper"/>
       </Item>
       <Item>
-        <Filename Value="mod\tags\sugar.tagui.pas"/>
-        <UnitName Value="sugar.tagUI"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.toast.pas"/>
-        <UnitName Value="sugar.toast"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.uistyles.pas"/>
-        <UnitName Value="sugar.uistyles"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.animateui.pas"/>
-        <UnitName Value="sugar.animateui"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.dragui.pas"/>
-        <UnitName Value="sugar.dragui"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.register.pas"/>
         <UnitName Value="sugar.register"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\sugar.repositionui.pas"/>
-        <UnitName Value="sugar.repositionui"/>
       </Item>
       <Item>
         <Filename Value="mod\git.api.pas"/>
@@ -281,14 +249,6 @@ SOFTWARE."/>
         <UnitName Value="sugar.securesalt"/>
       </Item>
       <Item>
-        <Filename Value="mod\sugar.framelist.pas"/>
-        <UnitName Value="sugar.framelist"/>
-      </Item>
-      <Item>
-        <Filename Value="mod\tags\frame.tagcontrol.pas"/>
-        <UnitName Value="frame.TagControl"/>
-      </Item>
-      <Item>
         <Filename Value="mod\sugar.ulid.pas"/>
         <UnitName Value="sugar.ulid"/>
       </Item>
@@ -299,10 +259,10 @@ SOFTWARE."/>
     </Files>
     <RequiredPkgs>
       <Item>
-        <PackageName Value="rhl_package"/>
+        <PackageName Value="LCLBase"/>
       </Item>
       <Item>
-        <PackageName Value="LCL"/>
+        <PackageName Value="rhl_package"/>
       </Item>
       <Item>
         <PackageName Value="MarkdownEngine"/>

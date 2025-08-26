@@ -21,13 +21,8 @@ type
         myLock: TMultiReadExclusiveWriteSynchronizer;
 		mythreadSafe: boolean;
 		procedure setthreadSafe(const _value: boolean);
-    protected
-        procedure lockRead; inline;
-        procedure unlockRead; inline;
-        procedure lockWrite; inline;
-        procedure unlockWrite; inline;
-        procedure assignFrom(const Src: TJSONObject); virtual;
-    protected
+
+    public
         // thread safe setters and getters
         function getStr(const _key: string): string;
         function setStr(const _key: string; const _value: TJSONStringType): TJSONStringType;
@@ -67,8 +62,7 @@ type
 
         constructor CreateFrom(const _jsonStr: string); virtual;
         constructor CreateSafeFrom(const _jsonStr: string); virtual;
-
-        function loadFrom(_jsonStr: string): boolean;
+        function loadFrom(_jsonStr: string): boolean; virtual;
 
         destructor Destroy; override;
 
@@ -77,9 +71,17 @@ type
         // This will be called in the constructor
         procedure initFields; virtual;
 
+    public
+        procedure lockRead; inline;
+        procedure unlockRead; inline;
+        procedure lockWrite; inline;
+        procedure unlockWrite; inline;
+        procedure assignFrom(const Src: TJSONObject); virtual;
+
         // Optional: expose explicit locking for multi-step operations
         property _Lock: TMultiReadExclusiveWriteSynchronizer read myLock;
         property threadSafe : boolean read mythreadSafe; // True if CreateSafe... constructors were called. _Lock used.
+
 
     end;
 
@@ -106,25 +108,27 @@ type
 
     { Thread-safe generic collection over TSTSBase descendants }
 
-	{ TSafeJSONObjectCollection }
+const
+    __items = 'items';
 
+type
+	{ TSafeJSONObjectCollection }
     generic TSafeJSONObjectCollection<ItemObj: TSafeJSONObject> = class
     public type
         TItemClass = class of ItemObj;
         TSafeJSONObjectCollectionsEnumerator = class(specialize TLockedEnumerator<ItemObj>);
 
-    const
-        __items = 'items';
+
     protected
         myJSONContainer : TSafeJSONObject;
         function GetItem(Index: integer): ItemObj;
         procedure SetItem(Index: integer; const AValue: ItemObj);
+
     public
-        constructor Create(constref _container: TSafeJSONObject);
+        constructor Create(constref _container: TSafeJSONObject); virtual;
         destructor Destroy; override;
-
+        procedure setItems(_items: TJSONArray);
         procedure initFields;
-
         function itemCount: integer;
         procedure AddItem(const AItem: ItemObj);
         function AddNewItem: ItemObj; virtual;
@@ -132,11 +136,16 @@ type
         procedure Delete(Index: integer);
         procedure Clear;
 
+        function indexOf(_item: ItemObj): integer;
+
         function formatJSON(Options : TFormatOptions = DefaultFormat; Indentsize : Integer = DefaultIndentSize) : TJSONStringType;
 
         // for..in with lock held throughout
         function GetEnumerator: TSafeJSONObjectCollectionsEnumerator; reintroduce; overload;
         // Alternative: safe snapshot if you prefer no held lock (then deep-clone items here).
+
+    public
+        property items[index: integer] : ItemObj read GetItem write SetItem;
     end;
 
 {
@@ -149,7 +158,7 @@ property order: integer read getOrder write setOrder;
 
 implementation
 
-uses sugar.logger;
+uses sugar.logger, sugar.jsonlib;
 { ===== TSafeJSONObject ===== }
 
 procedure TSafeJSONObject.setthreadSafe(const _value: boolean);
@@ -194,21 +203,15 @@ var
     key: string;
     S, D: TJSONData;
 begin
-    // Caller should hold WRITE lock.
-    for i := 0 to Pred(Count) do
-    begin
-        key := Names[i];
-        if SameText(key, __classID) then Continue;
-        if Src.IndexOfName(key) > -1 then
-        begin
-            D := Elements[key];
-            S := Src.Elements[key];
-            if (D.JSONType = jtNumber) and (S.JSONType = jtNumber) then
-                Elements[key] := S.Clone
-            else if D.ClassType = S.ClassType then
-                Elements[key] := S.Clone;
-        end;
-    end;
+    lockWrite; // Caller should hold WRITE lock.
+    try
+        copyJSONObject(src, self);
+        log('TSafeJSONObject.assignFrom()========================================') ;
+        log('src: %s', [src.formatJSON]);
+        log('self: %s', [self.formatJSON]);
+    finally
+        unlockWrite;
+	end;
 end;
 
 function TSafeJSONObject.getStr(const _key: string): string;
@@ -468,7 +471,9 @@ begin
     try
         if Trim(_jsonStr) = '' then
             raise Exception.CreateFmt('%s.CreateFrom():: empty JSON', [ClassName]);
-
+        log('=============================================================================================');
+        log('TSafeJSONObject.loadFrom():: "%s"',[_jsonStr]);
+        log('=============================================================================================');
         J := GetJSON(_jsonStr);
         if not (J is TJSONObject) then
             raise Exception.CreateFmt('%s.CreateFrom():: JSON must be object', [ClassName]);
@@ -481,7 +486,9 @@ begin
                 raise Exception.CreateFmt(
                     '%s.CreateFrom():: ClassName mismatch (got "%s", need "%s")',
                     [ClassName, Obj.Strings[__classID], classID]);
+
             assignFrom(Obj);
+
         finally
             Result := true;
             unlockWrite;
@@ -500,7 +507,7 @@ end;
 
 procedure TSafeJSONObject.initFields;
 begin
-    log('TSafeJSONObject.initFields');
+    log('%s.initFields', [classID]);
     lockWrite;
     try
         strings[__classID] := classID;
@@ -561,9 +568,15 @@ begin
 	inherited Destroy;
 end;
 
+procedure TSafeJSONObjectCollection.setItems(_items: TJSONArray);
+begin
+    myJSONContainer.setArray(__items, _items);
+end;
+
 procedure TSafeJSONObjectCollection.initFields;
 begin
-    myJSONContainer.setArray(__items, TJSONArray.Create);
+    if myJSONContainer.IndexOfName(__items) = -1 then
+        myJSONContainer.setArray(__items, TJSONArray.Create);
 end;
 
 function TSafeJSONObjectCollection.itemCount: integer;
@@ -597,6 +610,11 @@ begin
     myJSONContainer.getArray(__items).Clear;
 end;
 
+function TSafeJSONObjectCollection.indexOf(_item: ItemObj): integer;
+begin
+    Result := myJSONContainer.getArray(__items).IndexOf(_item);
+end;
+
 function TSafeJSONObjectCollection.formatJSON(Options: TFormatOptions;
 	Indentsize: Integer): TJSONStringType;
 begin
@@ -604,7 +622,20 @@ begin
 end;
 
 function TSafeJSONObjectCollection.GetItem(Index: integer): ItemObj;
+var
+	_tmp: TJSONData;
+	_arr: TJSONArray;
 begin
+     _tmp := myJSONContainer.getArray(__items).Items[Index];
+    if not (_tmp is ItemObj) then begin
+        _arr := myJSONContainer.getArray(__items);
+        _tmp := TItemClass.CreateSafeFrom(_tmp.FormatJSON());
+        _arr.Insert(index, _tmp);
+        _arr.Delete(succ(Index));
+	end;
+    Result := ItemObj(_tmp);
+    exit;
+
     if (Index < 0) or (Index >= myJSONContainer.getArray(__items).Count) then
         Result := nil
     else

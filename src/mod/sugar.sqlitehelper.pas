@@ -12,7 +12,7 @@ unit sugar.sqlitehelper;
 interface
 
 uses
-	 Classes, SysUtils, Controls, Forms, Dialogs,
+	 Classes, SysUtils, Forms, Dialogs,
      SQLDBLib, SQLDB, sqlite3dyn, SQLite3Conn, fpjson,
      fgl;
 
@@ -988,13 +988,13 @@ var
 begin
 	 if FileExists(getDBFileName()) then
 	 begin
-			 mr := MessageDlg('Question', 'Do you want to delete the existing DB file?',
-					 mtConfirmation, [mbYes, mbNo], 0);
-
-			 if mr = mrYes then
-					 _shouldInitDB := dropDB
-			 else
-					 _shouldInitDB := False;
+			 //mr := MessageDlg('Question', 'Do you want to delete the existing DB file?',
+				//	 mtConfirmation, [mbYes, mbNo], 0);
+    //
+			 //if mr = mrYes then
+				//	 _shouldInitDB := dropDB
+			 //else
+				//	 _shouldInitDB := False;
 	 end;
 
 	 if _shouldInitDB then

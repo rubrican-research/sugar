@@ -71,6 +71,8 @@ type
 	 {Loads a file, parses it and returns JSONData}
 	 function loadJSON(const _file: string): TJSONData;
 
+     function GetJSONStr(constref _j: TJSONData; const _free: boolean = true): string; // Frees the object
+
      procedure CopyJSONValue(constref _source, _dest: TJSONData; var Success: boolean);
      function copyJSONMembers(constref _target, _source: TJSONObject): TJSONObject;
      {Copies a JSON Object. Source -> Destination. Returns True if successful}
@@ -258,6 +260,12 @@ begin
            Free;
 		end;
     end;
+end;
+
+function GetJSONStr(constref _j: TJSONData; const _free: boolean): string;
+begin
+    Result := _j.FormatJSON();
+    if _free then _j.Free;
 end;
 
 procedure CopyJSONValue(constref _source, _dest: TJSONData; var Success: boolean);

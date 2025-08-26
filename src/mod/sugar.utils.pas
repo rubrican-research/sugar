@@ -310,7 +310,6 @@ begin
 end;
 
 function sanitizeFileName(_varName: string; _extension: string): string;
-
 var
     i: integer;
     function sanitize(_fName: string): string;
@@ -320,7 +319,7 @@ var
         Result:= '';
         for i := 1 to _fName.Length do
         begin
-            if not (_fName[i] in __ILLEGAL_CHARS) then
+            if (Ord(_fName[i]) > 32) and not (_fName[i] in __ILLEGAL_CHARS) then
                 Result := Result + _fName[i];
     	end;
     end;

@@ -5,14 +5,15 @@ unit sugar.consoleapp;
 interface
 
 uses
-    Classes, SysUtils;
+    Classes, SysUtils, SyncObjs;
+
 type
 {Starts a console application. Stays active until a terminate signal is received.}
 {SIGTERM, SIGINT, SIGQUIT, SIGKILL, SIGABRT}
 
-   { RbConsoleApplication }
+   { TSugarConsoleApp }
 
-    RbConsoleApplication = class(TObject)
+    TSugarConsoleApp = class(TObject)
     protected
         myRunning: boolean;
     public
@@ -25,84 +26,122 @@ type
         function start: integer;
 	end;
 
-    function application: RbConsoleApplication;
+    function application: TSugarConsoleApp;
 var
     myExitCode: Longint = -1;
 
 implementation
 uses
     {$IFDEF UNIX}
-    BaseUnix,
+    BaseUnix, Unix;
+    {$ELSE}
+    windows,
     {$ENDIF}
     sugar.utils, sugar.logger,  fpmimetypes;
 var
-    myApplication: RbConsoleApplication = nil;
+    myApplication: TSugarConsoleApp = nil;
+    myStopEvent: THandle = 0;
+    myTerminated : boolean = false;
 
-function application: RbConsoleApplication;
+function application: TSugarConsoleApp;
 begin
     if not Assigned(myApplication) then
-        myApplication := RbConsoleApplication.Create;
+        myApplication := TSugarConsoleApp.Create;
     Result:= myApplication;
 end;
 
-{ RbConsoleApplication : COMMON}
-function RbConsoleApplication.isRunning(): boolean;
+{ TSugarConsoleApp : COMMON}
+function TSugarConsoleApp.isRunning(): boolean;
 begin
     Result:= myRunning;
 end;
 
-function RbConsoleApplication.start: integer;
+function TSugarConsoleApp.start: integer;
 begin
     myRunning:= true;
     Result:= 1;
     try
-        preRun;
-        run;
-        postRun;
-    except
+        while not myTerminated do begin
+            preRun;
+            run;
+            postRun;
+		end;
+	except
         Result:= -1;
     end;
 end;
 
-{ RbConsoleApplication }
+{ TSugarConsoleApp }
 
 {$IFDEF WINDOWS}
 
-procedure RbConsoleApplication.preRun;
+procedure TSugarConsoleApp.preRun;
 begin
 
 end;
 
-procedure RbConsoleApplication.Run;
+function consoleEventWatcher(_ctrlType: DWORD): BOOL; stdcall;
+begin
+    case _ctrlType of
+        CTRL_C_EVENT, CTRL_BREAK_EVENT, CTRL_CLOSE_EVENT, CTRL_SHUTDOWN_EVENT:
+        begin
+            if myStopEvent <> 0 then
+                SetEvent(myStopEvent);
+            myTerminated := true;
+            Result := True;  // handled
+        end;
+        else
+            Result := False;
+    end;
+end;
+
+procedure TSugarConsoleApp.Run;
 var
-    c: string[64];
+    rc: DWORD;
 begin
-    while isRunning() do begin
-        readLn(c);
-        case lowercase(c) of
-            'quit': myRunning:=false;
-		end;
-	end;
+    // create manual-reset event, initially non-signaled
+    myStopEvent := CreateEvent(nil, True, False, nil);
+    if myStopEvent = 0 then
+        raise Exception.Create('TSugarConsoleApp.Run:: CreateEvent failed');
+
+    SetConsoleCtrlHandler(@consoleEventWatcher, True);
+    try
+        // main wait loop: block, but periodically pump queued synchronizations
+        repeat
+            rc := WaitForSingleObject(myStopEvent, 100); // 100ms pulse
+            CheckSynchronize(0);
+        until rc = WAIT_OBJECT_0;
+
+    finally
+        SetConsoleCtrlHandler(@consoleEventWatcher, False);
+        if myStopEvent <> 0 then
+            CloseHandle(myStopEvent);
+        myStopEvent := 0;
+    end;
 end;
 
-procedure RbConsoleApplication.postRun;
+procedure TSugarConsoleApp.postRun;
 begin
 
 end;
 
-procedure RbConsoleApplication.initiateShutdown;
+procedure TSugarConsoleApp.initiateShutdown;
 begin
-
+    myTerminated := true;
+    if myStopEvent <> 0 then
+        SetEvent(myStopEvent);
 end;
 
-procedure RbConsoleApplication.initiateRestart;
+procedure TSugarConsoleApp.initiateRestart;
 begin
-
+    myTerminated := false;
+    if myStopEvent <> 0 then
+        SetEvent(myStopEvent);
 end;
 
 {$ENDIF}
 
-{ RbConsoleApplication - UNIX}
+{ TSugarConsoleApp - UNIX}
 {$IFDEF UNIX}
 procedure DoSig(sig: cint); cdecl;
 begin
@@ -120,6 +159,9 @@ begin
           ExitCode   := 11;
 		end;
 	end;
+    myTerminated := sig <> SIGUSR1; // SIGUSR1 is for restart;
+    if Assigned(myStopEvent) then
+        RTLEventSetEvent(myStopEvent);
 end;
 
 procedure RbConsoleApplication.preRun;
@@ -131,6 +173,8 @@ procedure RbConsoleApplication.Run;
 var
     _sigerr: boolean;
 begin
+    myStopEvent := RTLEventCreate;
+    try
         _sigerr := fpSignal(SIGINT, SignalHandler(@DoSig)) = signalhandler(SIG_ERR);
         if _sigerr then
             WriteLn('Could not init signal handler for SIGINT');
@@ -155,7 +199,13 @@ begin
         if _sigerr then
             WriteLn('Could not init signal handler for SIGUSR1');
 
-        FpPause;
+        // Wait, but wake periodically to process queued synchronizations
+        while RTLEventWaitFor(myStopEvent, 100) = wrTimeout do
+            CheckSynchronize(0);
+    finally
+        RTLEventDestroy(myStopEvent);
+        myStopEvent := nil;
+    end;
 end;
 
 procedure RbConsoleApplication.postRun;

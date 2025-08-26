@@ -1,0 +1,27 @@
+{ This file was automatically created by Lazarus. Do not edit!
+  This source is only used to compile and install the package.
+ }
+
+unit fp_sugar_nogui;
+
+{$warn 5023 off : no warning about unused units}
+interface
+
+uses
+    sugar.utils, sugar.collections, sugar.logger, sugar.profiler, 
+    sugar.csshelper, sugar.textfiler, sugar.threadwriter, sugar.sqlitehelper, 
+    sugar.modelbase, sugar.ddldatatypes, sugar.pascalcodemodel, sugar.ormgen, 
+    sugar.ddlmodel, sugar.querybuilder, sugar.jsondb, sugar.httphelper, 
+    sugar.htmlbuilder, sugar.htmlbuilder.vue, sugar.htmlbuilder.alpinejs, 
+    sugar.templater, sugar.htmlfactory, sugar.jshelpers, sugar.jsonlib, 
+    sugar.webpage, sugar.vuejs, sugar.jsonbuilder, sugar.consoleapp, 
+    sugar.sort, nsort, sugar.markdown, sugar.htmlbuilder.htmx, 
+    sugar.threadloader, sugar.jsGoogleChart, sugar.jscharts, sugar.htmlpage, 
+    assets, bulma, semanticui, webui, sugar.markdownhelper, sugar.register, 
+    git.api, sugar.htmlbuilder.truthtable, sugar.url, sugar.inifiles, 
+    sugar.contactInfo, sugar.gender, sugar.languages, sugar.maps, 
+    sugar.securesalt, sugar.ulid, sugar.safeJson;
+
+implementation
+
+end.

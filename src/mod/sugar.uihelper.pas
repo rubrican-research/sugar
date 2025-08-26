@@ -4,7 +4,7 @@ unit sugar.uihelper;
 interface
 
 uses
-    Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids, Forms;
+    Classes, SysUtils, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Grids, Forms, Types ;
 
 type
     EUIValidatorResult = (uivUnknown, uivOK, uivError, uivMissing, uivDefaultApplied);
@@ -137,6 +137,7 @@ type
 
     end;
     TOnCheckDragOver = procedure (Sender, Target: TTreeNode;  var Accept: Boolean; out _attachMode: TNodeAttachMode) of object;
+    TOnNodeMoved = procedure (_sourceNode, _sourceParent, _destNode: TTreeNode; _attachMode: TNodeAttachMode) of object;
     {TTreeViewReorder}
     // Reorder items in a tree view by drag and drop
     TTreeViewReorder = class(TObject, IFPObserver)
@@ -144,6 +145,7 @@ type
 	    mydestNode: TTreeNode;
 		mydragging: boolean;
 		myOnCheckDragOver: TOnCheckDragOver;
+		myOnNodeMoved: TOnNodeMoved;
 		mysourceNode: TTreeNode;
         myTreeView: TTreeView;
         myOriginalTreeViewDragOver: TDragOverEvent;
@@ -152,6 +154,7 @@ type
 	    procedure SetdestNode(const _value: TTreeNode);
 	    procedure Setdragging(const _value: boolean);
 		procedure setOnCheckDragOver(const _value: TOnCheckDragOver);
+		procedure setOnNodeMoved(const _value: TOnNodeMoved);
 	    procedure SetsourceNode(const _value: TTreeNode);
     protected
 	   	procedure FPOObservedChanged(ASender: TObject;
@@ -172,6 +175,8 @@ type
         property destNode: TTreeNode read mydestNode write SetdestNode;
     public
          property OnCheckDragOver: TOnCheckDragOver read myOnCheckDragOver write setOnCheckDragOver;
+         property OnNodeMoved: TOnNodeMoved read myOnNodeMoved write setOnNodeMoved;
+
     end;
 
     // Sets the font color depending on the UIState
@@ -260,6 +265,10 @@ type
     function makeBitmap(_ctr: TControl): TBitmap;
 
     function isParent(_container: TControl; _control: TControl): Boolean;
+
+    function textPadding(constref _canvas: TCanvas): TSize;
+    function calcTextHeight(_canvas: TCanvas; const _s: string; _wrapWidth: Integer): Integer;
+
 
 implementation
 uses
@@ -867,6 +876,12 @@ begin
 	myOnCheckDragOver:=_value;
 end;
 
+procedure TTreeViewReorder.setOnNodeMoved(const _value: TOnNodeMoved);
+begin
+	if myOnNodeMoved=_value then Exit;
+	myOnNodeMoved:=_value;
+end;
+
 procedure TTreeViewReorder.SetsourceNode(const _value: TTreeNode);
 begin
 	if mysourceNode=_value then Exit;
@@ -889,6 +904,7 @@ procedure TTreeViewReorder.OnDragOver(Sender, Source: TObject; X, Y: Integer;
 	State: TDragState; var Accept: Boolean);
  var
      _attachMode: TNodeAttachMode;
+	 _sourceParent: TTreeNode;
 begin
     if assigned(myOriginalTreeViewDragOver) then
         myOriginalTreeViewDragOver(Sender, Source, X, Y, State, Accept);
@@ -911,8 +927,11 @@ begin
         if ptrInt(destNode) <> ptrInt(sourceNode) then  begin
             if assigned(OnCheckDragOver) then
                 OnCheckDragOver(sourceNode, destNode, Accept, _attachMode);
-                if Accept then
-                    sourceNode.MoveTo(destNode, _attachMode);
+            if Accept then begin
+                _sourceParent := sourceNode.Parent;
+                sourceNode.MoveTo(destNode, _attachMode);
+                if assigned(OnNodeMoved) then OnNodeMoved(sourceNode, _sourceParent, destNode, _attachMode);
+			end;
 		end;
 	end;
 
@@ -1454,6 +1473,49 @@ begin
 	end;
 end;
 
+function textPadding(constref _canvas: TCanvas): TSize;
+var
+    LineH: Integer;
+begin
+      Result := _canvas.TextExtent('Hg');    // current DPI + current font
+      Result.cy := Max(2, Result.cy div 6);  // ~16% of line height
+      Result.cx := Max(2, Result.cx div 6);  // ~16% of line width
+      // use PadY for vertical padding; for horizontal you can use LineH div 6 too
+end;
+
+function calcTextHeight(_canvas: TCanvas; const _s: string; _wrapWidth: Integer): Integer;
+var
+  _r :TRect;
+  _flags: Longint;
+begin
+{
+When you call DrawText() with the DT_CALCRECT flag, Windows/LCL does not paint anything.
+Instead, it just measures how much space the text would take and updates the rectangle
+you passed in (R).
+
+So:
+Flags := DT_WORDBREAK or DT_CALCRECT;
+DrawText(Canvas.Handle, PChar(S), Length(S), R, Flags);
+
+
+With DT_CALCRECT → no pixels are drawn, only R.Bottom/R.Right are adjusted.
+
+Without DT_CALCRECT → actual painting happens into the canvas.
+
+That’s why the height-calculation trick is safe inside OnPrepareCanvas:
+it doesn’t interfere with the grid’s own painting cycle.
+
+⚠️ Caveat for Lazarus: On GTK/Qt backends, the LCL implements DrawText itself
+(not always the WinAPI call). But it mimics the Windows behavior: if DT_CALCRECT is present,
+it only computes the bounding rect, not draw. So you won’t get phantom text painting.
+
+}
+  // Large bottom bound so DrawText can expand during DT_CALCRECT.
+    _r := Rect(0, 0, Max(0, _wrapWidth), 100000);
+    _flags := DT_WORDBREAK or DT_EDITCONTROL or DT_NOPREFIX or DT_CALCRECT;
+    DrawText(_canvas.Handle, PChar(_s), Length(_s), _r, _flags);
+    Result := _r.Bottom - _r.Top + textPadding(_canvas).cY;
+end;
 
 initialization
 ;
