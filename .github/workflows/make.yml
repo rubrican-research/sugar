@@ -9,7 +9,6 @@ on:
       - "**"
   pull_request:
     branches:
-      - master
       - main
 
 concurrency:
@@ -38,7 +37,7 @@ jobs:
         sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
         while read -r; do
             lazbuild --add-package-link "${REPLY}"
-        done < <(find "${PWD}" -type 'f' -name '*.lpk')
+        done < <(find "use" -type 'f' -name '*.lpk')
         while read -r; do
             lazbuild --build-all --recursive --no-write-project "${REPLY}"
-        done < <(find "${PWD}" -type 'f' -name '*.lpi')
+        done < <(find "src" -type 'f' -name '*.lpi')
