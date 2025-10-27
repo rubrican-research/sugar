@@ -1,0 +1,6 @@
+[submodule "use/fpc-markdown"]
+	path = use/fpc-markdown
+	url = git@github.com:mriscoc/fpc-markdown.git
+[submodule "use/rhl"]
+	path = use/rhl
+	url = git@github.com:maciejkaczkowski/rhl.git
