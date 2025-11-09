@@ -18,15 +18,34 @@
         <Filename Value="..\tests\markdown\memocurrentword.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="20" Y="31"/>
+        <TopLine Value="30"/>
+        <CursorPos X="78" Y="47"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="mod\sugar.uihelper.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1248"/>
+        <CursorPos Y="1248"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory HistoryIndex="1">
+      <Position>
+        <Filename Value="..\tests\markdown\memocurrentword.pas"/>
+        <Caret Line="31" Column="20"/>
+      </Position>
+      <Position>
+        <Filename Value="..\tests\markdown\memocurrentword.pas"/>
+        <Caret Line="52" Column="82" TopLine="24"/>
+      </Position>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode=""/>

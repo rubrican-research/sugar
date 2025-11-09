@@ -608,7 +608,13 @@ type
     private
         FVars_: RbVarList;
     public
-        function vars: RbVarList; overload;
+        function vars: RbVarList;
+
+    private
+        FConsts_: RbConstList;
+    public
+        function consts: RbConstList;
+
     private
         FProcs_: RbProcList;
     public
@@ -1560,6 +1566,11 @@ begin
     Result := FVars_;
 end;
 
+function RbClassMembers.consts: RbConstList;
+begin
+    Result := FConsts_;
+end;
+
 function RbClassMembers.procs: RbProcList;
 begin
     Result := FProcs_;
@@ -1591,6 +1602,7 @@ begin
     FVars_ := RbVarList.Create;
     FProcs_ := RbProcList.Create;
     FProps_ := RbPropList.Create;
+    FConsts_ := RbConstList.Create;
     ;
 end;
 
@@ -1603,18 +1615,28 @@ begin
         on E: Exception do
             writeln(classname, ' destroy FVars ', E.Message);
 	end;
+
+    try
+        FreeAndNil(FConsts_);
+	except
+        on E: Exception do
+            writeln(classname, ' destroy FConsts ', E.Message);
+	end;
+
     try
 	FreeAndNil(FProcs_);
 	except
         on E: Exception do
             writeln(classname, ' destroy FProcs ', E.Message);
 	end;
+
     try
     FreeAndNil(FProps_);
 	except
         on E: Exception do
             writeln(classname, ' destroy FProps ', E.Message);
 	end;
+
     try
     inherited Destroy;
 	except

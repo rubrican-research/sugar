@@ -23,7 +23,7 @@
     <Description Value="(Syntax) Sugar libraries for FPC/Lazarus to make coding in Object Pascal a lot faster and easier. This is work in progress. The package is working well. I rely on these for all my Lazarus dev work. Documentation is still to be done. Also, I would like to refactor some parts to iron out kinks in the developer experience. But overall, I find that I&apos;ve been very productive with these libraries."/>
     <License Value="MIT License
 
-Copyright (c) 2024 Stanley Stephen
+Copyright (c) 2025 Stanley Stephen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the &quot;Software&quot;), to deal
@@ -42,7 +42,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."/>
-    <Version Major="1"/>
+    <Version Major="1" Release="1"/>
     <Files>
       <Item>
         <Filename Value="mod\sugar.utils.pas"/>
@@ -296,19 +296,44 @@ SOFTWARE."/>
         <Filename Value="mod\sugar.safejson.pas"/>
         <UnitName Value="sugar.safeJson"/>
       </Item>
+      <Item>
+        <Filename Value="mod\sugar.uuidv5.pas"/>
+        <UnitName Value="sugar.uuidv5"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.securehash.pas"/>
+        <UnitName Value="sugar.securehash"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.hexconv.pas"/>
+        <UnitName Value="sugar.hexconv"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.viewmanager.pas"/>
+        <UnitName Value="sugar.viewmanager"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.undo.pas"/>
+        <UnitName Value="sugar.undo"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.pascalcodegen.pas"/>
+        <UnitName Value="sugar.pascalcodegen"/>
+      </Item>
+      <Item>
+        <Filename Value="mod\sugar.jsonschema.pas"/>
+        <UnitName Value="sugar.jsonschema"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
         <PackageName Value="rhl_package"/>
       </Item>
       <Item>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item>
       <Item>
         <PackageName Value="MarkdownEngine"/>
-      </Item>
-      <Item>
-        <PackageName Value="FCL"/>
       </Item>
     </RequiredPkgs>
     <UsageOptions>

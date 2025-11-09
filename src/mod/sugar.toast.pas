@@ -20,6 +20,7 @@ type
 		procedure FormClick(Sender: TObject);
 		procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
 		procedure motionTimerTimer(Sender: TObject);
+
     private
 		myfade: boolean;
 		myfadeTime: word;
@@ -35,13 +36,14 @@ type
         property fade: boolean read myfade write setfade;
         property fadeTime: word read myfadeTime write setfadeTime;
         property text: string read mytext write settext;
+
     public
         procedure toast(const _msg: string; _fadeTime: word = 1000);
         procedure toast(_frameClass: TCustomFrameClass; _fadeTime: word = 1000);
     end;
 
-    procedure toast(const _msg: string; _fadeTime: word = 500; _size: TToastSize = toastSmall);
-    procedure toast(_frameClass: TCustomFrameClass; _fadeTime: word = 500; _size: TToastSize = toastSmall);
+    procedure toast(const _msg: string; _fadeTime: word = 1000; _size: TToastSize = toastSmall);
+    procedure toast(_frameClass: TCustomFrameClass; _fadeTime: word = 1000; _size: TToastSize = toastSmall);
 
     function setToastPos(_t: TFormToast; _size: TToastSize): TFormToast;
 
@@ -85,8 +87,8 @@ var
 begin
     _f := Screen.ActiveForm;
     Result := _t;
-    _t.left := Screen.Width  - _t.Width ;
-    _t.top  := Screen.height - _t.Height - 60;
+    _t.left := _f.Width  - _t.Width ;
+    _t.top  := _f.height - _t.Height - 60;
 end;
 
 { TFormToast }
@@ -110,7 +112,10 @@ end;
 procedure TFormToast.motionTimerTimer(Sender: TObject);
 begin
     AlphaBlendValue := Max(0, AlphaBlendValue - 30);
-    if AlphaBlendValue = 0 then close;
+    if AlphaBlendValue = 0 then begin
+        motionTimer.Enabled:=false;
+        close;
+	end;
 end;
 
 procedure TFormToast.setfade(const _value: boolean);
@@ -143,24 +148,25 @@ var
     _lbl: TLabel;
 begin
     _pnl := TPanel.Create(Self);
-    _pnl.Align  :=alClient;
-    _pnl.color  :=clInfoBk;
-    _pnl.OnClick := @FormClick;
+    _pnl.Align  := alClient;
+    _pnl.color  := clNone;
+    _pnl.OnClick:= @FormClick;
 
     _lbl := TLabel.Create(Self);
     with _lbl do begin
         align := alClient;
         BorderSpacing.Around := 14;
-        Caption := _msg;
-        Layout  := tlCenter;
-        WordWrap :=True;
-        OnClick := _pnl.OnClick;
+        Caption  := _msg;
+        Alignment:= taCenter;
+        Layout   := tlCenter;
+        WordWrap := True;
+        OnClick  := _pnl.OnClick;
 	end;
 
     _pnl.InsertControl(_lbl);
     InsertControl(_pnl);
-
-    fadeTimer.Enabled:= _fadeTime > 0;
+    fadeTimer.Interval := _fadeTime;
+    fadeTimer.Enabled  := _fadeTime > 0;
     Visible := True;
 end;
 
@@ -172,7 +178,7 @@ begin
     _f.align := alClient;
     _f.OnClick := @FormClick;
     insertControl(_f);
-    fadeTimer.Enabled:= _fadeTime > 0;;
+    fadeTimer.Enabled := _fadeTime > 0;
     Visible := True;
 end;
 

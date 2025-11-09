@@ -14,18 +14,22 @@ uses
     SysUtils, Classes, {$IFDEF MSWINDOWS} JwaWinCrypt, {$ELSE} BaseUnix, {$ENDIF}
     base64;
 
+const
+    __saltSize = 32;
+
 {Crypto functions}
 function GenerateSecureSalt(LengthInBytes: integer): TBytes; overload;
-function BytesToHex(const Bytes: TBytes): string;
-function BytesToBase64(const Bytes: TBytes): string;
-function BytesToBase64URLSafe(const Bytes: TBytes; StripPadding: boolean = True): string;
-
 {Convenience functions}
-function genSecureSalt(LengthInBytes: integer = 48): string; overload;
+function genSecureSaltB64(LengthInBytes: integer = __saltSize): string; overload;
+function genSecureSaltHex(LengthInBytes: integer = __saltSize): string; overload;
 {URLSafe}
-function genSafeSecureSalt(LengthInBytes: integer = 48): string; overload;
+function genSafeSecureSaltB64(LengthInBytes: integer = __saltSize): string; overload;
+
 
 implementation
+uses
+    sugar.hexconv;
+
 
 function GenerateSecureSalt(LengthInBytes: integer): TBytes;
     {$IFDEF MSWINDOWS}
@@ -63,58 +67,25 @@ begin
     {$ENDIF}
 end;
 
-function BytesToHex(const Bytes: TBytes): string;
-var
-    i: integer;
-begin
-    Result := '';
-    for i := 0 to High(Bytes) do
-        Result := Result + IntToHex(Bytes[i], 2);
-end;
 
-function BytesToBase64(const Bytes: TBytes): string;
-var
-    Stream: TMemoryStream;
-    Base64Stream: TStringStream;
-    Encoder: TBase64EncodingStream;
-begin
-    Base64Stream := TStringStream.Create('');
-    try
-        Encoder := TBase64EncodingStream.Create(Base64Stream);
-        try
-            Encoder.Write(Bytes[0], Length(Bytes));
-        finally
-            Encoder.Free;
-        end;
-        Result := Base64Stream.DataString;
-    finally
-        Base64Stream.Free;
-    end;
-end;
 
-function BytesToBase64URLSafe(const Bytes: TBytes; StripPadding: boolean = True): string;
-var
-    Base64: string;
-begin
-    Base64 := BytesToBase64(Bytes);
-    Base64 := StringReplace(Base64, '+', '-', [rfReplaceAll]);
-    Base64 := StringReplace(Base64, '/', '_', [rfReplaceAll]);
-
-    if StripPadding then
-        while Base64.EndsWith('=') do
-            Delete(Base64, Length(Base64), 1);
-
-    Result := Base64;
-end;
-
-function genSecureSalt(LengthInBytes: integer): string;
+function genSecureSaltB64(LengthInBytes: integer): string;
 begin
     Result := BytesToBase64(GenerateSecureSalt(LengthInBytes));
 end;
 
-function genSafeSecureSalt(LengthInBytes: integer): string;
+function genSecureSaltHex(LengthInBytes: integer): string;
+var
+    _salt: TBytes;
+begin
+    _salt := GenerateSecureSalt(LengthInBytes);
+    Result := BytesToHex(_salt);
+end;
+
+function genSafeSecureSaltB64(LengthInBytes: integer): string;
 begin
     Result := BytesToBase64URLSafe(GenerateSecureSalt(LengthInBytes));
 end;
+
 
 end.

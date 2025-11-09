@@ -23,7 +23,8 @@ uses
     sugar.repositionui, git.api, sugar.htmlbuilder.truthtable, sugar.url, 
     sugar.inifiles, sugar.contactInfo, sugar.gender, sugar.languages, 
     sugar.maps, sugar.securesalt, sugar.framelist, frame.TagControl, 
-    sugar.ulid, sugar.safeJson;
+    sugar.ulid, sugar.safeJson, sugar.uuidv5, sugar.securehash, sugar.hexconv, 
+    sugar.viewmanager, sugar.undo, sugar.pascalcodegen, sugar.jsonschema;
 
 implementation
 

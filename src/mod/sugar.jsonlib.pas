@@ -70,6 +70,7 @@ type
 	 function parseJSON(const _json: string): TJSONData;
 	 {Loads a file, parses it and returns JSONData}
 	 function loadJSON(const _file: string): TJSONData;
+     function saveJSON(_file: string; _json: TJSONData): boolean;
 
      function GetJSONStr(constref _j: TJSONData; const _free: boolean = true): string; // Frees the object
 
@@ -89,6 +90,8 @@ type
      function makeMemberName: string;
      function newJSONRandomObj(_addObj: boolean = true): TJSONObject;
      function newJSONRandomArray(_addObj: boolean = true): TJSONArray;
+
+     function IsEqual(constref _json1, _json2: TJSONData): boolean;
 
 
 
@@ -261,6 +264,21 @@ begin
 		end;
     end;
 end;
+
+function saveJSON(_file: string; _json: TJSONData): boolean;
+var
+    FS: TStringStream;
+begin
+    FS := TStringStream.Create('', TEncoding.UTF8);
+    try
+        _json.CompressedJSON:=false;
+        _json.DumpJSON(FS);
+        Result:= saveFileContent(_file, fs.DataString) <> 0;
+    finally
+        FS.Free;
+    end;
+end;
+
 
 function GetJSONStr(constref _j: TJSONData; const _free: boolean): string;
 begin
@@ -544,6 +562,22 @@ begin
             4:  {array}  if _addObj then Result.add(newJSONRandomArray(false));
 		end;
 	end;
+end;
+
+function IsEqual(constref _json1, _json2: TJSONData): boolean;
+var
+        _sj1, _sj2: TMemoryStream;
+begin
+    _sj1 := TMemoryStream.Create;
+    _sj2 := TMemoryStream.Create;
+    try
+        _json1.DumpJSON(_sj1);   // compact UTF-8
+        _json2.DumpJSON(_sj2);
+        if _sj1.Size <> _sj2.Size then exit(False);
+    Result := CompareMem(_sj1.Memory, _sj2.Memory, _sj1.Size);
+  finally
+    _sj1.Free; _sj2.Free;
+  end;
 end;
 
 function makeMemberName: string;

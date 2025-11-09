@@ -269,6 +269,11 @@ type
     function textPadding(constref _canvas: TCanvas): TSize;
     function calcTextHeight(_canvas: TCanvas; const _s: string; _wrapWidth: Integer): Integer;
 
+    {Resizes the grid row to create text-wrapping effect.
+     Call this in TStringGrid.OnPrepareCanvas.
+     This is most efficiet if it is called once per row, (not for every column)}
+    function gridRowTextWarp(constref sg: TStringGrid; const aCol, aRow: integer; _padding: integer = 12): integer; // returns the row height that was set;
+
 
 implementation
 uses
@@ -925,12 +930,15 @@ begin
     destNode   := TreeView.GetNodeAt(X,Y);
     if assigned(destNode) then begin
         if ptrInt(destNode) <> ptrInt(sourceNode) then  begin
+
             if assigned(OnCheckDragOver) then
                 OnCheckDragOver(sourceNode, destNode, Accept, _attachMode);
+
             if Accept then begin
-                _sourceParent := sourceNode.Parent;
+                _sourceParent := sourceNode.Parent;  // parent before it was moved
                 sourceNode.MoveTo(destNode, _attachMode);
-                if assigned(OnNodeMoved) then OnNodeMoved(sourceNode, _sourceParent, destNode, _attachMode);
+                if assigned(OnNodeMoved) then
+                    OnNodeMoved(sourceNode, _sourceParent, destNode, _attachMode);
 			end;
 		end;
 	end;
@@ -992,9 +1000,9 @@ begin
     	uiDefault:   begin
             _c.Font.Color   := clDefault;
             if _c is TLabel then
-                _c.color        := clNone
+                _c.color := clNone
             else
-                _c.color        := clDefault;
+                _c.color := clDefault;
 		end;
 
 		uiHighlight: begin
@@ -1217,9 +1225,7 @@ begin
             _rows.add(_term, clone(sg.rows[_r]));
 		end;
 
-
         _sorted := sortList(_rows.getNames(DELIM), DELIM);
-
 
         case _order of
             soAscending:  begin
@@ -1249,13 +1255,11 @@ procedure resizeGridCols(constref _grid: TStringGrid; _arrWidths: array of byte
 	);
 const
   __GRID_BUFFER = 4;
-
 var
     _colCount: byte;
 	_col: TGridColumn;
 	_width, _i: Integer;
 begin
-
     _colCount := Min(Length(_arrWidths), _grid.ColCount); // To loop over only the colums that are available.
     _width := _grid.Width - __GRID_BUFFER - GetSystemMetrics(SM_CXVSCROLL); // to prevent the scroll bar from showing;
     for _i := 0 to pred(_colCount) do begin
@@ -1515,6 +1519,21 @@ it only computes the bounding rect, not draw. So you won’t get phantom text pa
     _flags := DT_WORDBREAK or DT_EDITCONTROL or DT_NOPREFIX or DT_CALCRECT;
     DrawText(_canvas.Handle, PChar(_s), Length(_s), _r, _flags);
     Result := _r.Bottom - _r.Top + textPadding(_canvas).cY;
+end;
+
+function gridRowTextWarp(constref sg: TStringGrid; const aCol, aRow: integer; _padding: integer): integer;
+var
+	_textStyle: TTextStyle;
+	_cellText: String;
+begin
+    _textStyle := sg.Canvas.TextStyle;
+    _cellText  := sg.Cells[aCol, aRow];
+    if _cellText = '' then _cellText := 'Hg';// to simulate default row height
+    _textStyle.SingleLine := false;
+    _textStyle.Wordbreak  := true;
+    sg.Canvas.TextStyle := _textStyle;
+    Result := _padding + calcTextHeight(sg.Canvas,  _celltext, sg.ColWidths[ACol]);
+    sg.RowHeights[aRow] := Result;
 end;
 
 initialization

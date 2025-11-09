@@ -7,10 +7,9 @@ object FormToast: TFormToast
   BorderStyle = bsNone
   Caption = 'sugar.toast'
   FormStyle = fsSystemStayOnTop
+  Position = poDefaultSizeOnly
   OnClick = FormClick
   OnClose = FormClose
-  Position = poDefaultSizeOnly
-  LCLVersion = '3.6.0.0'
   object fadeTimer: TTimer
     Enabled = False
     OnTimer = fadeTimerTimer

@@ -27,6 +27,7 @@ type
     protected type
         RunMethodType = (rmtMethod, rmtProc);
     protected
+        myLock: TMultiReadExclusiveWriteSynchronizer;
         myRunMethod: RunMethodType;
         myLoaderProc: LoaderProc;
         myLoadedCallbackProc: LoadedProgressProc;
@@ -37,9 +38,13 @@ type
         procedure DoCallbackAfterLoad;
         procedure DoOnTerminate(Sender: TObject);
 
+        procedure lockRead;
+        procedure unlockRead;
+
     public
        constructor Create(CreateSuspended: Boolean;
            const StackSize: SizeUInt= DefaultStackSize);
+       destructor Destroy; override;
 
        constructor InitializeProc(_loader: LoaderProc; _callbackAfterLoad: LoadedProgressProc); overload;
        constructor InitializeMethod(_loader: LoaderMethod; _callbackAfterLoad: LoadedCallbackMethod); overload;
@@ -56,8 +61,15 @@ constructor TThreadLoader.Create(CreateSuspended: Boolean;
 	const StackSize: SizeUInt);
 begin
     inherited;
+    myLock := TMultiReadExclusiveWriteSynchronizer.Create;
     FreeOnTerminate:= true;
     OnTerminate:= @DoOnTerminate;
+end;
+
+destructor TThreadLoader.Destroy;
+begin
+    myLock.Free;
+	inherited Destroy;
 end;
 
 constructor TThreadLoader.InitializeProc(_loader: LoaderProc;
@@ -113,17 +125,31 @@ begin
     Synchronize(@DoCallbackAfterLoad);
 end;
 
+procedure TThreadLoader.lockRead;
+begin
+    myLock.Beginread;
+end;
+
+procedure TThreadLoader.unlockRead;
+begin
+    myLock.Endread;
+end;
+
 
 function TThreadLoader.data: DataObj;
 begin
+    lockRead;
     Result:= nil;
     if dataReady then
-        Result:= myData;
+        Result := myData;
+    unlockRead;
 end;
 
 function TThreadLoader.dataReady: boolean;
 begin
-    Result:= Terminated;
+    lockRead;
+    Result := Terminated;
+    unlockRead;
 end;
 
 end.

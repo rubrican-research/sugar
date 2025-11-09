@@ -7,7 +7,45 @@ interface
 uses
     Classes, SysUtils, fpJSON, jsonparser;
 
+const
+    EXT_JSON = '.json';
+
 type
+
+	{ TSafeJSONArray }
+
+    TSafeJSONArray = class(TJSONArray)
+    private
+        myLock: TMultiReadExclusiveWriteSynchronizer;
+		mythreadSafe: boolean;
+        procedure setthreadSafe(const _value: boolean);
+
+    public
+        constructor Create; virtual;
+        constructor CreateSafe; virtual;
+
+        constructor CreateFrom(const _jsonStr: string); virtual;
+        constructor CreateSafeFrom(const _jsonStr: string); virtual;
+        function loadFrom(_jsonStr: string): boolean; virtual;
+
+        destructor Destroy; override;
+
+        // initializes all fields.
+        // override this in children.
+        // This will be called in the constructor
+        procedure initFields; virtual;
+
+    public
+        procedure lockRead; inline;
+        procedure unlockRead; inline;
+        procedure lockWrite; inline;
+        procedure unlockWrite; inline;
+        procedure assignFrom(const Src: TJSONArray); virtual;
+
+        // Optional: expose explicit locking for multi-step operations
+        property _Lock: TMultiReadExclusiveWriteSynchronizer read myLock;
+        property threadSafe : boolean read mythreadSafe; // True if CreateSafe... constructors were called. _Lock used.
+	end;
 
     { Thread-safe base with RW lock }
 
@@ -20,6 +58,8 @@ type
     private
         myLock: TMultiReadExclusiveWriteSynchronizer;
 		mythreadSafe: boolean;
+        myChanges : set of Byte; // assuming that we won't have a class with more than 255 members
+
 		procedure setthreadSafe(const _value: boolean);
 
     public
@@ -48,11 +88,18 @@ type
 		function getLargeInt(const _key: string): TJSONLargeInt;
 		function setLargeInt(const _key: string; const _value: TJSONLargeInt): TJSONLargeInt;
 
+        // LIMITATION: Array member changes are not safe and
+        // changes to members are not detected.
 		function getArray(const _key: string): TJSONArray;
 		function setArray(const _key: string; constref _value: TJSONArray): TJSONArray;
 
         function getObject(const _key: string): TSafeJSONObject;
 		function setObject(const _key: string; constref _value: TSafeJSONObject): TSafeJSONObject;
+
+        procedure setChanged(_key: string);
+        function hasChanged: boolean;
+        function changedFields: TStringArray;
+        procedure clearChanges;
 
     public
         class function classID: string; virtual;
@@ -159,6 +206,110 @@ property order: integer read getOrder write setOrder;
 implementation
 
 uses sugar.logger, sugar.jsonlib;
+
+{ TSafeJSONArray }
+
+procedure TSafeJSONArray.setthreadSafe(const _value: boolean);
+begin
+    mythreadSafe := _value;
+end;
+
+constructor TSafeJSONArray.Create;
+begin
+    inherited Create;
+    myLock := TMultiReadExclusiveWriteSynchronizer.Create;
+    mythreadSafe := false;
+    initFields;
+end;
+
+constructor TSafeJSONArray.CreateSafe;
+begin
+    Create;
+    mythreadSafe := true;
+end;
+
+constructor TSafeJSONArray.CreateFrom(const _jsonStr: string);
+begin
+    Create;
+    loadFrom(_jsonStr)
+end;
+
+constructor TSafeJSONArray.CreateSafeFrom(const _jsonStr: string);
+begin
+    CreateFrom(_jsonStr);
+    mythreadSafe := true;
+end;
+
+function TSafeJSONArray.loadFrom(_jsonStr: string): boolean;
+var
+    J: TJSONData = nil;
+    _arr: TJSONArray = nil;
+begin
+    Result := false;
+    try
+        if Trim(_jsonStr) = '' then
+            raise Exception.CreateFmt('%s.CreateFrom():: empty JSON', [ClassName]);
+        //log('=============================================================================================');
+        //log('TSafeJSONObject.loadFrom():: "%s"',[_jsonStr]);
+        //log('=============================================================================================');
+        J := GetJSON(_jsonStr);
+        if not (J is TJSONArray) then
+            raise Exception.CreateFmt('%s.CreateFrom():: JSON must be an array', [ClassName]);
+
+        _arr := TJSONArray(J);
+        assignFrom(_arr); // you can override this for custom assignment
+        Result := true;
+
+    finally
+        J.Free;
+    end;
+end;
+
+destructor TSafeJSONArray.Destroy;
+begin
+    FreeAndNil(myLock);
+	inherited Destroy;
+end;
+
+procedure TSafeJSONArray.initFields;
+begin
+
+end;
+
+procedure TSafeJSONArray.lockRead;
+begin
+    if threadSafe then
+        myLock.BeginRead;
+end;
+
+procedure TSafeJSONArray.unlockRead;
+begin
+    if threadSafe then
+        myLock.EndRead;
+end;
+
+procedure TSafeJSONArray.lockWrite;
+begin
+     if threadSafe then
+        myLock.BeginWrite;
+end;
+
+procedure TSafeJSONArray.unlockWrite;
+begin
+     if threadSafe then
+         myLock.EndWrite;
+end;
+
+procedure TSafeJSONArray.assignFrom(const Src: TJSONArray);
+begin
+     lockWrite; // Caller should hold WRITE lock.
+     try
+         copyJSONArray(src, self);
+     finally
+         unlockWrite;
+ 	 end;
+end;
+
 { ===== TSafeJSONObject ===== }
 
 procedure TSafeJSONObject.setthreadSafe(const _value: boolean);
@@ -182,7 +333,8 @@ end;
 procedure TSafeJSONObject.lockWrite; inline;
 begin
     if threadSafe then
-        myLock.BeginWrite;
+        if not myLock.BeginWrite then
+            raise Exception.Create('TSafeJSONObject could not lock for writing');
 end;
 
 procedure TSafeJSONObject.unlockWrite; inline;
@@ -198,17 +350,15 @@ end;
 
 
 procedure TSafeJSONObject.assignFrom(const Src: TJSONObject);
-var
-    i: integer;
-    key: string;
-    S, D: TJSONData;
 begin
+    if (Src.IndexOfName(__classID) = -1) or  (Src.Strings[__classID] <> classID) then
+        raise Exception.CreateFmt(
+            '%s.CreateFrom():: ClassName mismatch (got "%s", need "%s")',
+            [ClassName, Src.Strings[__classID], classID]);
+
     lockWrite; // Caller should hold WRITE lock.
     try
         copyJSONObject(src, self);
-        log('TSafeJSONObject.assignFrom()========================================') ;
-        log('src: %s', [src.formatJSON]);
-        log('self: %s', [self.formatJSON]);
     finally
         unlockWrite;
 	end;
@@ -231,6 +381,7 @@ begin
     try
         strings[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -241,6 +392,7 @@ begin
     lockRead;
     try
         Result := Booleans[_key];
+        setChanged(_key);
 	finally
         unLockRead;
 	end;
@@ -253,6 +405,7 @@ begin
     try
         Booleans[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -275,6 +428,7 @@ begin
     try
         Floats[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -298,6 +452,7 @@ begin
     try
         UnicodeStrings[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -320,6 +475,7 @@ begin
     try
         Int64s[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -342,6 +498,7 @@ begin
     try
         QWords[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -364,6 +521,7 @@ begin
     try
         Integers[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -386,6 +544,7 @@ begin
     try
         LargeInts[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -408,6 +567,7 @@ begin
     try
         Arrays[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
 	end;
@@ -430,15 +590,61 @@ begin
     try
         Objects[_key] := _value;
         Result := _value;
+        setChanged(_key);
 	finally
         unLockWrite;
+	end;
+end;
+
+procedure TSafeJSONObject.setChanged(_key: string);
+begin
+    Include(myChanges, IndexOfName(_key));
+end;
+
+function TSafeJSONObject.hasChanged: boolean;
+begin
+    lockRead;
+    try
+        Result := not (myChanges = []);
+	finally
+        unlockRead;
+	end;
+end;
+
+function TSafeJSONObject.changedFields: TStringArray;
+var
+    _count, _fIndex : byte;
+
+begin
+    lockRead;
+    try
+	    Result := [];
+	    _count := 0;
+	    SetLength(Result, Count);
+	    for _fIndex in myChanges do begin
+	        Result[_count] := Names[_fIndex];
+	        inc(_count);
+		end;
+	    SetLength(Result, _count);
+	finally
+        unlockRead;
+	end;
+end;
+
+procedure TSafeJSONObject.clearChanges;
+begin
+    lockWrite;
+    try
+        myChanges := [];
+	finally
+        unlockWrite;
 	end;
 end;
 
 constructor TSafeJSONObject.Create;
 begin
     inherited Create;
-    log('TSafeJSONObject:::  %s.Create', [ClassName]);
+    //log('TSafeJSONObject:::  %s.Create', [ClassName]);
     myLock := TMultiReadExclusiveWriteSynchronizer.Create;
     mythreadSafe := false;
     initFields;
@@ -471,28 +677,16 @@ begin
     try
         if Trim(_jsonStr) = '' then
             raise Exception.CreateFmt('%s.CreateFrom():: empty JSON', [ClassName]);
-        log('=============================================================================================');
-        log('TSafeJSONObject.loadFrom():: "%s"',[_jsonStr]);
-        log('=============================================================================================');
+        //log('=============================================================================================');
+        //log('TSafeJSONObject.loadFrom():: "%s"',[_jsonStr]);
+        //log('=============================================================================================');
         J := GetJSON(_jsonStr);
         if not (J is TJSONObject) then
             raise Exception.CreateFmt('%s.CreateFrom():: JSON must be object', [ClassName]);
-
         Obj := TJSONObject(J);
-        lockWrite;
-        try
-            if (Obj.IndexOfName(__classID) = -1) or
-                (Obj.Strings[__classID] <> classID) then
-                raise Exception.CreateFmt(
-                    '%s.CreateFrom():: ClassName mismatch (got "%s", need "%s")',
-                    [ClassName, Obj.Strings[__classID], classID]);
+        assignFrom(Obj); // you can override this for custom assignment
+        Result := true;
 
-            assignFrom(Obj);
-
-        finally
-            Result := true;
-            unlockWrite;
-        end;
     finally
         J.Free;
     end;
@@ -507,13 +701,9 @@ end;
 
 procedure TSafeJSONObject.initFields;
 begin
-    log('%s.initFields', [classID]);
-    lockWrite;
-    try
-        strings[__classID] := classID;
-	finally
-        unlockWrite
-	end;
+    //log('%s.initFields', [classID]);
+    myChanges := [];
+    setStr(__classID, classID);
 end;
 
 { ===== TLockedEnumerator<ItemObj> ===== }
@@ -591,7 +781,7 @@ end;
 
 function TSafeJSONObjectCollection.AddNewItem: ItemObj;
 begin
-    Result := TItemClass.Create;
+    Result := TItemClass.CreateSafe;
     myJSONContainer.getArray(__items).Add(Result);
 end;
 

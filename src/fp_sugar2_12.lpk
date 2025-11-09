@@ -13,7 +13,7 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="42">
+    <Files Count="43">
       <Item1>
         <Filename Value="mod\nsort.pas"/>
         <UnitName Value="nsort"/>
@@ -182,6 +182,10 @@
         <Filename Value="mod\sugar.fmkvdisplay.pas"/>
         <UnitName Value="sugar.fmkvdisplay"/>
       </Item42>
+      <Item43>
+        <Filename Value="mod\sugar.undo.pas"/>
+        <UnitName Value="sugar.undo"/>
+      </Item43>
     </Files>
     <RequiredPkgs Count="4">
       <Item1>

@@ -18,7 +18,7 @@ uses
     sugar.textfiler, sugar.threadwriter, sugar.uihelper, sugar.utils, 
     sugar.vuejs, sugar.webpage, sugar.htmlpage, assets, bulma, semanticui, 
     webui, sugar.jsGoogleChart, sugar.jscharts, sugar.threadloader, 
-    sugar.fmkvdisplay, LazarusPackageIntf;
+    sugar.fmkvdisplay, sugar.undo, LazarusPackageIntf;
 
 implementation
 

@@ -1,10 +1,10 @@
-object DBModule: TDBModule
+object SQLiteDBModule: TSQLiteDBModule
   OnCreate = DataModuleCreate
   OldCreateOrder = False
-  Height = 378
+  Height = 407
   HorizontalOffset = 363
   VerticalOffset = 351
-  Width = 353
+  Width = 576
   object libloader: TSQLDBLibraryLoader
     Enabled = False
     ConnectionType = 'SQLite3'

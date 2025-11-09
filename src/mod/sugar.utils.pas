@@ -27,8 +27,12 @@ function appendPath(_paths: array of string; _delim: string = DirectorySeparator
 function appendURL(_paths: array of string): string;
 function sanitizeFileName(_varName: string; _extension: string = '.txt'): string;
 
-function getFileContent(const _filename: string; _touch: boolean = false): string;
-function saveFileContent(const _filename: string; _content: string): integer;
+//function getFileContent(const AFileName: string; _touch: boolean = false; AEncoding: TEncoding=nil): string;
+//function saveFileContent(const AFileName: string; const AContent: unicodestring; AEncoding: TEncoding = nil; const WriteBOM: Boolean = False): SizeInt;
+
+function getFileContent(const FileName: string; _touch: boolean = false; Encoding: TEncoding=nil): string;
+function saveFileContent(const FileName, Text: string; Encoding: TEncoding = nil): SizeInt;
+
 procedure touch(const _fileName: string); // Creates an empty file
 
 {returns the mime type for this file}
@@ -54,9 +58,8 @@ function getPChar(const _text: string): PChar; {allocates memory, returns pChar}
 {Hashing}
 {algorithm: rhlPBKDF2}
 {parameters: password, salt, number of iterations, total size of hash}
-function genHash(p, s: ansistring; i: integer = 13; size: integer = 196): ansistring;
-function genHashUTF8(p, s: ansistring; i: integer = 13;
-    size: integer = 196): RawByteString;
+function genHash(p, s: ansistring; i: integer = 13; size: integer = 32): ansistring;
+function genHashUTF8(p, s: ansistring; i: integer = 13; size: integer = 32): string;
 
 {Key generation}
 const
@@ -128,6 +131,8 @@ function isoTime(_time:TDateTime): string;
 
 function date(_isoDate: string): TDateTime; overload;
 function time(_isoTime: string): TDateTime; overload;
+function asMilliSeconds(_time: TDateTime): QWord;
+function fromMilliSeconds(_ms: QWord): TDateTime;
 
 {somehow autodetect if it is date time, date or time. ...}
 function readHtmlDateTime(_htmlDate: string): TDateTime;
@@ -232,7 +237,7 @@ function GetFileVersion(const aExeFile: String): String;
 function GetApplicationVersionTitle(const aExeFile: String): String;
 
 
-function loremIpsum(_len: shortint = 0): string;
+function loremIpsum(_len: Integer = 0): string;
 
 function samestring(s1, s2: string): boolean;
 function yesno(const _val: boolean): string;
@@ -241,8 +246,12 @@ function sanitzeFileName(_varName: string; _extension: string): string;
 
 
 function genUUID(const _nobrace: boolean = true): string;
-
 function isValidURI(const _uri: string): boolean;
+// Weak ETAG implementation.
+// Returns W/"<size>-<epochseconds>"
+function genFileETag(const _path: string): string;
+
+function SecureEquals(const A, B: RawByteString): Boolean; inline;
 
 implementation
 uses
@@ -251,7 +260,7 @@ uses
      elfreader, {needed for reading ELF executables}
      machoreader, {needed for reading MACH-O executables}
      fpmimetypes, variants, strutils, jsonparser, FileUtil,
-     LazFileUtils, jsonscanner, rhlCore, rhlTiger2, RegExpr,
+     LazFileUtils, jsonscanner, rhlSHA256, rhlCore, rhlTiger2, RegExpr,
      math, base64, LazStringUtils, DateUtils, sugar.logger, sugar.threadwriter, LazUTF8;
 
 	{nsort, MarkdownUtils,}
@@ -336,39 +345,116 @@ begin
     Result := Result + sanitize(_extension);
 end;
 
-function getFileContent(const _filename: string; _touch: boolean): string;
+//function getFileContent(const AFileName: string; _touch: boolean; AEncoding: TEncoding): string;
+//var
+//    fs: TFileStream;
+//    ss: TStringStream;
+//begin
+//    Result := '';
+//    if not FileExists(AFilename) then begin
+//        if _touch then begin
+//            SaveFileContent(AFileName, '');
+//		end;
+//        exit;
+//	end;
+//
+//    if AEncoding = nil then AEncoding := TEncoding.UTF8;
+//    fs := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+//    try
+//        ss := TStringStream.Create('', AEncoding);
+//        try
+//            ss.CopyFrom(fs, 0);
+//            Result := ss.DataString;
+//        finally
+//            ss.Free;
+//        end;
+//    finally
+//        fs.Free;
+//    end;
+//end;
+
+function getFileContent(const FileName: string; _touch: boolean; Encoding: TEncoding): string;
+var
+    Bytes: TBytes;
+    FS: TFileStream;
+
 begin
     Result := '';
-    if FileExists(_filename) then
-        with TStringList.Create do
-        begin
-            LoadFromFile(_filename, TEncoding.UTF8);
-            Result := Text;
-            Free;
-        end
-    else if _touch then
-    begin
-        saveFileContent(_filename, '');
-	end;
+    if not FileExists(FileName) then begin
+        if _touch then begin
+            SaveFileContent(FileName, '');
+  	    end;
+        exit;
+    end;
+
+    if Encoding = nil then
+        Encoding := TEncoding.UTF8;
+    FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    try
+        SetLength(Bytes, FS.Size);
+        FS.ReadBuffer(Bytes[0], Length(Bytes));
+        Result := Encoding.GetString(Bytes);
+    finally
+        FS.Free;
+    end;
 end;
 
-function saveFileContent(const _filename: string; _content: string): integer;
+
+function saveFileContent(const FileName, Text: string; Encoding: TEncoding
+	): SizeInt;
+var
+    FS: TFileStream;
+    Bytes: TBytes;
 begin
-    Result:= 0;
-    {$IFDEF windows}
-    with TStringList.Create do
-    begin
-        try
-            Text:= _content;
-            SaveToFile(_filename, TEncoding.UTF8);
-		finally
-		    Free;
-        end;
+    if Encoding = nil then
+        Encoding := TEncoding.UTF8;
+    Bytes := Encoding.GetBytes(Text);
+    FS := TFileStream.Create(FileName, fmCreate);
+    try
+        FS.WriteBuffer(Bytes[0], Length(Bytes));
+        Result := Length(Bytes);
+    finally
+        FS.Free;
     end;
-    {$ELSE}
-    TThreadFileWriter.put(_filename, _content);
-    {$ENDIF}
 end;
+
+//function saveFileContent(const AFileName: string;
+//	const AContent: unicodestring; AEncoding: TEncoding; const WriteBOM: Boolean
+//	): SizeInt;
+//const
+//    CHUNK = 4096;
+//var
+//    fs: TFileStream;
+//    bytes, preamble: TBytes;
+//    offset, count, total: SizeInt;
+//begin
+//    if AEncoding = nil then
+//        AEncoding := TEncoding.UTF8;
+//
+//    if WriteBOM then
+//        preamble := AEncoding.GetPreamble;
+//
+//    fs := TFileStream.Create(AFileName, fmCreate);
+//    try
+//        // write BOM if requested
+//        if Length(preamble) > 0 then
+//        begin
+//            fs.WriteBuffer(preamble[0], Length(preamble));
+//            Inc(total, Length(preamble));
+//        end;
+//
+//        // materialize bytes *once*
+//        bytes := AEncoding.GetBytes(AContent);
+//        Result := Length(bytes);  // number of bytes to be written
+//        if Result > 0 then
+//          fs.WriteBuffer(bytes[0], Result);
+//
+//    finally
+//        fs.Free;
+//    end;
+//    //TThreadFileWriter.put(_filename, _content);
+//end;
+
 
 procedure touch(const _fileName: string);
 begin
@@ -560,13 +646,12 @@ end;
 
 function genHash(p, s: ansistring; i: integer; size: integer): ansistring;
 begin
-    //Result:= p;
-    Result := rhlPBKDF2(p, s, i, size, TrhlTiger2);
+    Result := rhlPBKDF2(p, s, i, size, TrhlSHA256);
 end;
 
-function genHashUTF8(p, s: ansistring; i: integer; size: integer): RawByteString;
+function genHashUTF8(p, s: ansistring; i: integer; size: integer): string;
 begin
-    Result := AnsiToUtf8(genHash(p, s, i, size));
+    Result := UTF8Encode(genHash(p, s, i, size));
 end;
 
 {
@@ -910,10 +995,19 @@ begin
 end;
 
 function htmlTime(_time: TDateTime): string;
+var
+	h, m, s, ms: word;
 begin
     case myHtmlTimeMode of
-        useLocalTime:      Result := FormatDateTime('HH:nn:ss', _time);    {Need to include timezone parsing}
-        useUniversalTime:  Result := FormatDateTime('HH:nn:ss', LocalTimeToUniversal(_time));
+        useLocalTime:      begin
+            DecodeTime(_time, h, m, s, ms);
+            Result := Format('%.2d:%.2d:%.2d',[h,m,s]);  // FormatDateTime('HH:nn:ss', _time);    {Need to include timezone parsing}
+		end;
+		useUniversalTime:  begin
+            //Result := FormatDateTime('HH:nn:ss GMT', LocalTimeToUniversal(_time));
+            DecodeTime(LocalTimeToUniversal(_time), h, m, s, ms);
+            Result := Format('%.2d:%.2d:%.2d GMT',[h,m,s]);
+        end;
     end;
 end;
 
@@ -981,6 +1075,16 @@ begin
 
     if not TryEncodeTime(h, n, s, ms, Result) then
         Result:= EncodeTime(0,0,0,0);
+end;
+
+function asMilliSeconds(_time: TDateTime): QWord;
+begin
+    Result := Round(_time * 24 * 60 * 60 * 1000);
+end;
+
+function fromMilliSeconds(_ms: QWord): TDateTime;
+begin
+    Result := _ms / MSecsPerDay;  // MSecsPerDay = 86400000
 end;
 
 
@@ -1573,7 +1677,7 @@ begin
     end;
 end;
 
-function loremIpsum(_len: shortint): string;
+function loremIpsum(_len: Integer): string;
 const
     S = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Huius ego nunc auctoritatem sequens idem faciam. Duo Reges: constructio interrete. Primum Theophrasti, Strato, physicum se voluit; Bork Prave, nequiter, turpiter cenabat; Istic sum, inquit.'+ sLineBreak +
     ''+ sLineBreak +
@@ -1690,6 +1794,38 @@ begin
         Result := False;
     end;
 end;
+
+function dateTimeToUnixSeconds(const DT: TDateTime): Int64;
+begin
+  Result := DateTimeToUnix(DT, False{InputIsUTC}); // since we pass UTC below
+end;
+
+function genFileETag(const _path: string): string;
+var
+  dtLocal, dtUTC: TDateTime;
+  size64 : Int64;
+  unixSec: Int64;
+begin
+  Result := '';
+  if not FileExists(_path) then Exit;
+  if not FileAge(_path, dtLocal) then Exit;
+
+  dtUTC  := LocalTimeToUniversal(dtLocal);
+  unixSec:= DateTimeToUnixSeconds(dtUTC);
+  size64 := FileSizeUTF8(_path);
+  Result := Format('W/"%d-%d"', [size64, unixSec]);
+end;
+
+function SecureEquals(const A, B: RawByteString): Boolean; inline;
+var
+  i: SizeInt; diff: Byte = 0;
+begin
+  if Length(A) <> Length(B) then exit(False);
+  for i := 1 to Length(A) do
+    diff := diff or (Byte(A[i]) xor Byte(B[i]));
+  Result := diff = 0;
+end;
+
 
 initialization
     randomize;
